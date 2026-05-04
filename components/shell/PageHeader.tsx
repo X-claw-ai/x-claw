@@ -1,0 +1,57 @@
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+
+export default function PageHeader({
+  eyebrow,
+  title,
+  description,
+  actions,
+  breadcrumbs,
+}: {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+  breadcrumbs?: { href?: string; label: string }[];
+}) {
+  return (
+    <header className="border-b border-white/5">
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        {breadcrumbs && (
+          <nav className="text-xs text-zinc-500 flex items-center gap-1 mb-3">
+            {breadcrumbs.map((b, i) => (
+              <span key={`${b.label}-${i}`} className="flex items-center gap-1">
+                {b.href ? (
+                  <Link href={b.href} className="hover:text-zinc-300">
+                    {b.label}
+                  </Link>
+                ) : (
+                  <span>{b.label}</span>
+                )}
+                {i < breadcrumbs.length - 1 && (
+                  <ChevronRight className="h-3 w-3" />
+                )}
+              </span>
+            ))}
+          </nav>
+        )}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            {eyebrow && (
+              <div className="text-[11px] uppercase tracking-widest text-claw-500">
+                {eyebrow}
+              </div>
+            )}
+            <h1 className="mt-1 text-3xl md:text-4xl font-semibold tracking-tight">
+              {title}
+            </h1>
+            {description && (
+              <p className="mt-2 text-zinc-400 max-w-2xl">{description}</p>
+            )}
+          </div>
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
+        </div>
+      </div>
+    </header>
+  );
+}
