@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.8,
       maxTokens: 2000,
+      model: "fast", // X posts are quick generations — use grok-4-fast-reasoning
     });
     const parsed = parseResponse(llm.content);
     return NextResponse.json({

@@ -77,6 +77,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.4,
       maxTokens: 1200,
+      model: "fast", // Wallet brief is short — use grok-4-fast-reasoning
     });
     let parsed: SummaryShape | null = null;
     try {

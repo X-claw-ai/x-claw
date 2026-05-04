@@ -54,6 +54,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.4,
       maxTokens: 1000,
+      model: "fast", // Monitor actions are short — use grok-4-fast-reasoning
     });
     let txt = llm.content.trim();
     if (txt.startsWith("```")) txt = txt.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "");

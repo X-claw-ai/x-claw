@@ -6,18 +6,34 @@ import type { LLMRequest, LLMResponse } from "./types";
 // xAI provides an OpenAI-compatible /v1/chat/completions endpoint. Get an
 // API key at https://console.x.ai (set XAI_API_KEY in .env).
 //
-// Default model: configurable via XAI_MODEL. We default to the lowest-cost
-// fast Grok model so iteration is cheap; bump to a larger model in prod.
+// Default model: latest flagship Grok ("grok-4-latest"). Override per call
+// via the `model` field on LLMRequest, or globally via the XAI_MODEL env var.
+// For lighter / cheaper calls (analyze, monitor, x-post, wallet brief) use
+// "grok-4-fast-reasoning" — set that via XAI_MODEL_FAST.
 // ─────────────────────────────────────────────────────────────────────────
 
 const BASE = process.env.XAI_BASE_URL || "https://api.x.ai/v1";
-const DEFAULT_MODEL = process.env.XAI_MODEL || "grok-2-latest";
+const DEFAULT_MODEL = process.env.XAI_MODEL || "grok-4-latest";
+const FAST_MODEL = process.env.XAI_MODEL_FAST || "grok-4-fast-reasoning";
+
+/**
+ * Resolve the right Grok model for a given LLMRequest.
+ * - If req.model is explicitly set, use it.
+ * - If req.model === "fast", use FAST_MODEL.
+ * - Otherwise, use DEFAULT_MODEL.
+ */
+export function resolveXaiModel(reqModel?: string): string {
+  if (!reqModel) return DEFAULT_MODEL;
+  if (reqModel === "fast") return FAST_MODEL;
+  if (reqModel === "default") return DEFAULT_MODEL;
+  return reqModel;
+}
 
 export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   const apiKey = process.env.XAI_API_KEY;
   if (!apiKey) throw new Error("XAI_API_KEY is not configured");
 
-  const model = req.model || DEFAULT_MODEL;
+  const model = resolveXaiModel(req.model);
 
   const body: Record<string, unknown> = {
     model,
