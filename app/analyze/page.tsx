@@ -16,9 +16,9 @@ export default function AnalyzePage({
       <PageHeader
         eyebrow="Analyze"
         title="Launch readiness analysis"
-        description="X CLAW scores the detected meme across 10 criteria and surfaces the best angle, audience, timing, and key risks."
+        description="KOKi scores the detected meme across 10 criteria and surfaces the best angle, audience, timing, and key risks."
         breadcrumbs={[
-          { href: "/", label: "X CLAW" },
+          { href: "/", label: "KOKi" },
           { href: "/dashboard", label: "Radar" },
           { label: "Analyze" },
         ]}

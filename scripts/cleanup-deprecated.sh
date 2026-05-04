@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# X CLAW — remove deprecated multi-vertical files after the
+# KOKi.ai — remove deprecated multi-vertical files after the
 # single-product memecoin launch agent rewrite.
 #
 # Run from the repo root:

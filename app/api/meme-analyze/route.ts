@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       provider: "mock",
-      model: "x-claw-stub",
+      model: "koki-stub",
       analysis: localStubAnalysis(meme),
       note:
         "No LLM provider configured. Showing local stub analysis. Set XAI_API_KEY for Grok.",
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         ok: true,
         provider: "mock",
-        model: "x-claw-stub",
+        model: "koki-stub",
         analysis: localStubAnalysis(meme),
         fallbackReason: `LLM (${llm.provider}) returned non-JSON: ${(parseErr as Error).message}`,
       });
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       provider: "mock",
-      model: "x-claw-stub",
+      model: "koki-stub",
       analysis: localStubAnalysis(meme),
       fallbackReason: err instanceof Error ? err.message : String(err),
     });

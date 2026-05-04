@@ -1,6 +1,6 @@
-# X CLAW Launch Day Checklist
+# KOKi.ai Launch Day Checklist
 
-A copy-paste runbook from this repo → live `xclaw.vercel.app` → real $XCLAW token on Pump.fun → public announcement on X.
+A copy-paste runbook from this repo → live `koki.vercel.app` → real $KOKI token on Pump.fun → public announcement on X.
 
 > **Time estimate:** 60–90 minutes. Add 30 min buffer for the first try.
 >
@@ -11,7 +11,7 @@ A copy-paste runbook from this repo → live `xclaw.vercel.app` → real $XCLAW 
 ## Phase 0 — Local sanity check (5 min)
 
 ```bash
-cd x-claw
+cd koki
 npm install
 cp .env.example .env.local
 ```
@@ -46,13 +46,13 @@ If anything fails locally, fix before deploying. Common issues:
 
 ## Phase 1 — Mainnet test launch with throwaway metadata (10 min)
 
-This catches bugs **before** the real $XCLAW launch.
+This catches bugs **before** the real $KOKI launch.
 
 1. Go to `/launch`.
 2. Enter throwaway concept:
-   - **Idea:** "Test launch for X CLAW agent flow"
-   - **Token name:** `X Claw Test`
-   - **Ticker:** `CLWTST`
+   - **Idea:** "Test launch for KOKi.ai agent flow"
+   - **Token name:** `KOKi Test`
+   - **Ticker:** `KOKTST`
    - **Logo:** any small PNG (or skip for placeholder)
 3. Generate launch kit → review (don't read carefully).
 4. Connect Phantom (mainnet wallet, 0.05+ SOL).
@@ -64,7 +64,7 @@ This catches bugs **before** the real $XCLAW launch.
    - Solscan shows tx as `Success`.
    - The Pump.fun link opens to a real token page.
    - `/launches/<mint>` shows token info and top holders.
-9. ✅ If all the above worked, you're ready for the real $XCLAW launch.
+9. ✅ If all the above worked, you're ready for the real $KOKI launch.
 
 If the tx fails:
 
@@ -88,11 +88,11 @@ Push:
 ```bash
 git init
 git add .
-git commit -m "X CLAW: The Grok-native Meme Coin Launch Agent"
+git commit -m "KOKi.ai: The Grok-native Meme Coin Launch Agent"
 
-gh repo create x-claw --public --source . --push --description "The Grok-native Meme Coin Launch Agent. Attention · Community · Intelligence · Execution."
+gh repo create koki --public --source . --push --description "The Grok-native Meme Coin Launch Agent. Attention · Community · Intelligence · Execution."
 # OR manually create on github.com then:
-# git remote add origin git@github.com:<you>/x-claw.git
+# git remote add origin git@github.com:<you>/koki.git
 # git push -u origin main
 ```
 
@@ -105,7 +105,7 @@ After push:
 
 ## Phase 3 — Vercel deploy (15 min)
 
-1. https://vercel.com/new → **Import Git Repository** → `x-claw`.
+1. https://vercel.com/new → **Import Git Repository** → `koki`.
 2. Framework: Next.js (auto-detected).
 3. **Environment Variables** (paste from `.env.local`):
    - `XAI_API_KEY`
@@ -121,22 +121,22 @@ After push:
 
 ---
 
-## Phase 4 — Real $XCLAW token launch (5 min)
+## Phase 4 — Real $KOKI token launch (5 min)
 
-The meta moment. Launch $XCLAW *with* X CLAW.
+The meta moment. Launch $KOKI *with* KOKi.ai.
 
 1. Open `https://<your-vercel-url>.vercel.app/launch`.
 2. Concept input:
-   - **Idea:** "X CLAW = the Grok-native meme coin launch agent. Launching $XCLAW from inside its own agent."
-   - **Token name:** `X CLAW`
-   - **Ticker:** `XCLAW`
-   - **Theme:** "cyber-claw mascot, neon-on-dark"
+   - **Idea:** "KOKi.ai = the Grok-native meme coin launch agent. Launching $KOKI from inside its own agent."
+   - **Token name:** `KOKi.ai`
+   - **Ticker:** `KOKI`
+   - **Theme:** "shiba paw / KOKi mascot, orange-on-dark"
    - **Audience:** "X-native crypto and meme coin builders"
    - **Launch style:** Fair launch
    - **Website:** your Vercel URL
-   - **Twitter:** the X CLAW X handle
+   - **Twitter:** the KOKi.ai X handle
    - **Telegram:** if applicable
-   - **Logo:** the X CLAW logo (PNG, ≥ 256px square, ≤ 1MB)
+   - **Logo:** the KOKi.ai logo (PNG, ≥ 256px square, ≤ 1MB)
 3. Generate kit → review carefully (this one matters).
 4. Edit description if needed.
 5. Connect wallet → Sign & Launch.
@@ -152,24 +152,24 @@ The meta moment. Launch $XCLAW *with* X CLAW.
 ### Pinned tweet template
 
 ```
-X CLAW is live.
+KOKi.ai is live.
 
 The Grok-native Meme Coin Launch Agent.
 
 X attention · community momentum · on-chain intelligence
 → autonomous launch execution.
 
-Just launched $XCLAW using X CLAW itself.
+Just launched $KOKI using KOKi.ai itself.
 → pump.fun/coin/<MINT>
 → <your-vercel-url>
-→ github.com/<you>/x-claw  (open source · MIT)
+→ github.com/<you>/koki  (open source · MIT)
 
 From meme idea to Pump.fun launch.
 ```
 
 ### Follow-up thread
 
-Open the live `/launch` flow → don't actually launch, just use the kit's tweets as a thread, OR run the X Post Generator (built into `/launches/<mint>`) on `$XCLAW` itself.
+Open the live `/launch` flow → don't actually launch, just use the kit's tweets as a thread, OR run the X Post Generator (built into `/launches/<mint>`) on `$KOKI` itself.
 
 ### Where to post
 
@@ -188,7 +188,7 @@ Use `/launches/<mint>`:
 - Creator wallet activity.
 - Generate post-launch X content (the X Post Generator is pre-filled with your token).
 
-Track issues at `https://github.com/<you>/x-claw/issues`.
+Track issues at `https://github.com/<you>/koki/issues`.
 
 ---
 

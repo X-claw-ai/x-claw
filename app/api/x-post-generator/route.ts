@@ -6,7 +6,7 @@ import { buildXPostMessages, type XPostRequest } from "@/lib/llm/promptXPosts";
 // POST /api/x-post-generator
 //
 // Generates ready-to-post X content (tweets + optional thread) via the
-// X CLAW LLM router (Grok primary). Falls back to a clearly-labeled local
+// KOKi LLM router (Grok primary). Falls back to a clearly-labeled local
 // stub when no provider is configured.
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       provider: "mock",
-      model: "x-claw-stub",
+      model: "koki-stub",
       ...localStub(request),
       note:
         "No LLM provider configured. Set XAI_API_KEY for real Grok output.",
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       provider: "mock",
-      model: "x-claw-stub",
+      model: "koki-stub",
       fallbackReason: reason,
       ...localStub(request),
     });
@@ -134,7 +134,7 @@ function localStub(req: XPostRequest): ResponseShape {
       hook: `A short builder thread on ${t} — auto-generated stub until XAI_API_KEY is set.`,
       body: [
         `Why ${t} matters: it's a workflow, not a vibe.`,
-        `What X CLAW does about it: agents prepare, you confirm, workflows execute.`,
+        `What KOKi does about it: agents prepare, you confirm, workflows execute.`,
       ],
       conclusion: `Once Grok is wired into /api/x-post-generator, this thread becomes real.`,
     },

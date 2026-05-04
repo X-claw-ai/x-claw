@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 X CLAW contributors
+Copyright (c) 2026 KOKi.ai contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,12 @@ SOFTWARE.
 ──────────────────────────────────────────────────────────────────────────────
 ADDITIONAL DISCLAIMERS
 
-X CLAW is an independent open-source project. It is NOT affiliated with,
+KOKi.ai is an independent open-source project. It is NOT affiliated with,
 endorsed by, or in partnership with xAI, X, Grok, Pump.fun, PumpPortal,
 Solana Foundation, or any third-party platform. References to these names
 describe ecosystem compatibility only.
 
-X CLAW agents prepare drafts and unsigned transactions. The final user (with
+KOKi.ai agents prepare drafts and unsigned transactions. The final user (with
 their wallet) is the only signer and decision maker for every on-chain action.
 The maintainers and contributors of this project disclaim all responsibility
 for losses arising from use of this software, including but not limited to:

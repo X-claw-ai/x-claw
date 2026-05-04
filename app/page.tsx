@@ -4,13 +4,13 @@ import EnginesSection from "@/components/landing/EnginesSection";
 import SafetySection from "@/components/landing/SafetySection";
 import FinalCTA from "@/components/landing/FinalCTA";
 
-// X CLAW — single-product memecoin launch agent.
+// KOKi — single-product memecoin launch agent.
 //
 // Core flow:
 //   Detect → Analyze → Generate → Launch
 //
 // Real-time Meme Radar feeds the existing Pump Launch Agent. The user lands
-// on a meme card, clicks Generate Launch Kit (or Launch with X CLAW), and
+// on a meme card, clicks Generate Launch Kit (or Launch with KOKi), and
 // the wizard pre-fills with that meme's concept block.
 //
 // Sections:

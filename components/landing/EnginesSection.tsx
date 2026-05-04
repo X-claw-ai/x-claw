@@ -82,7 +82,7 @@ export default function EnginesSection() {
     <section className="border-t border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-3xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400">
             Four engines · one agent
           </div>
           <h2 className="mt-3 text-display text-4xl md:text-5xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
@@ -109,7 +109,7 @@ export default function EnginesSection() {
                   <span className="text-[11px] font-mono text-zinc-500 tracking-[0.18em]">
                     PHASE {e.num}
                   </span>
-                  <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-claw-400 group-hover:border-claw-500/40 transition-colors">
+                  <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-koki-400 group-hover:border-koki-500/40 transition-colors">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
@@ -124,12 +124,12 @@ export default function EnginesSection() {
                 <ul className="mt-6 space-y-1.5 text-sm text-zinc-300">
                   {e.capabilities.map((c) => (
                     <li key={c} className="flex gap-2.5 items-start">
-                      <span className="text-claw-400 leading-6">•</span>
+                      <span className="text-koki-400 leading-6">•</span>
                       <span>{c}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-8 inline-flex items-center gap-1.5 text-sm text-claw-400 font-medium group-hover:gap-2 transition-all">
+                <div className="mt-8 inline-flex items-center gap-1.5 text-sm text-koki-400 font-medium group-hover:gap-2 transition-all">
                   {e.cta}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>

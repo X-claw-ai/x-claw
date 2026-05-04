@@ -1,4 +1,4 @@
-// Shared TypeScript types for X CLAW.
+// Shared TypeScript types for KOKi.
 
 export type Chain = "solana" | "base" | "ethereum";
 

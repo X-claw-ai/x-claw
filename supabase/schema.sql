@@ -1,4 +1,4 @@
--- X CLAW — Supabase / Postgres schema draft (MVP)
+-- KOKi.ai — Supabase / Postgres schema draft (MVP)
 -- ───────────────────────────────────────────────────────────────────────────
 -- Hard rules baked into the schema:
 --   • No private key column, anywhere.

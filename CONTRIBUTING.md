@@ -1,6 +1,6 @@
-# Contributing to X CLAW
+# Contributing to KOKi.ai
 
-Thanks for considering a contribution. X CLAW is an open Agent OS for the X era — every X account being able to have its own AI workforce only happens if many people build modules together.
+Thanks for considering a contribution. KOKi.ai is an open Agent OS for the X era — every X account being able to have its own AI workforce only happens if many people build modules together.
 
 ## TL;DR
 
@@ -58,7 +58,7 @@ PRs that violate these will be rejected even if technically clever.
 
 ```bash
 git clone <your-fork>
-cd x-claw
+cd koki
 npm install
 cp .env.example .env.local
 # fill in keys you have (XAI_API_KEY recommended, Anthropic/OpenAI as fallback)

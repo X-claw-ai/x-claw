@@ -104,13 +104,13 @@ export default function WalletTrackingAgent({
     <div className="mx-auto max-w-5xl px-6 py-10 space-y-6">
       <div className="card p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Eye className="h-5 w-5 text-claw-500" />
+          <Eye className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">Wallet Tracking Agent</h2>
           <Badge tone="live">Live · On-chain</Badge>
         </div>
         <p className="text-sm text-zinc-400 max-w-2xl">
           Pull a public Solana wallet's on-chain footprint and let Grok turn
-          the raw data into an X-native intelligence brief. Read-only — X CLAW
+          the raw data into an X-native intelligence brief. Read-only — KOKi
           never asks for private keys.
         </p>
 
@@ -195,7 +195,7 @@ function ReportView({
       <div className="card p-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <WalletIcon className="h-4 w-4 text-claw-500" />
+            <WalletIcon className="h-4 w-4 text-koki-500" />
             <span className="font-mono">{shortAddr(report.address)}</span>
           </div>
           <div className="flex gap-2">
@@ -208,7 +208,7 @@ function ReportView({
               href={solscan}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-claw-400 hover:text-claw-500"
+              className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
             >
               Solscan <ExternalLink className="h-3 w-3" />
             </a>
@@ -224,7 +224,7 @@ function ReportView({
 
       {summary && (summary.headline || summary.summary || summary.highlights) && (
         <div className="card p-5">
-          <div className="text-[10px] uppercase tracking-widest text-claw-500">
+          <div className="text-[10px] uppercase tracking-widest text-koki-500">
             Intelligence brief
           </div>
           {summary.headline && (
@@ -241,7 +241,7 @@ function ReportView({
             <ul className="mt-3 space-y-1 text-sm text-zinc-300">
               {summary.highlights.map((h) => (
                 <li key={h} className="flex gap-2">
-                  <span className="text-claw-500">•</span>
+                  <span className="text-koki-500">•</span>
                   {h}
                 </li>
               ))}
@@ -275,7 +275,7 @@ function ReportView({
                     href={`https://solscan.io/token/${t.mint}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-xs text-zinc-300 hover:text-claw-400 truncate max-w-[60%]"
+                    className="font-mono text-xs text-zinc-300 hover:text-koki-400 truncate max-w-[60%]"
                   >
                     {t.mint}
                   </a>
@@ -305,7 +305,7 @@ function ReportView({
                     href={`https://solscan.io/tx/${tx.signature}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-xs text-zinc-300 hover:text-claw-400 truncate max-w-[55%]"
+                    className="font-mono text-xs text-zinc-300 hover:text-koki-400 truncate max-w-[55%]"
                   >
                     {tx.signature}
                   </a>
@@ -335,10 +335,10 @@ function XPostCard({ text }: { text: string }) {
   }
   const intent = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
   return (
-    <div className="mt-5 card p-4 border-claw-500/30">
+    <div className="mt-5 card p-4 border-koki-500/30">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <Twitter className="h-4 w-4 text-claw-500" />
+          <Twitter className="h-4 w-4 text-koki-500" />
           Ready-to-post on X
         </div>
         <div className="flex gap-2">
@@ -352,7 +352,7 @@ function XPostCard({ text }: { text: string }) {
             href={intent}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-claw-400 hover:text-claw-500"
+            className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
           >
             Open in X <ExternalLink className="h-3 w-3" />
           </a>

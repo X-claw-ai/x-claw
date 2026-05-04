@@ -83,7 +83,7 @@ export default function LaunchesTable() {
                 <Link
                   href={l.pumpUrl}
                   target="_blank"
-                  className="inline-flex items-center gap-1 text-xs text-claw-400 hover:text-claw-500"
+                  className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
                 >
                   Pump
                   <ExternalLink className="h-3 w-3" />

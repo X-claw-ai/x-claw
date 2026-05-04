@@ -6,20 +6,20 @@ export default function Hero() {
     <section className="relative">
       <div className="mx-auto max-w-6xl px-6 pt-24 pb-28 md:pt-32 md:pb-32">
         <div className="pill mb-7 animate-fade-in">
-          <span className="h-1.5 w-1.5 rounded-full bg-claw-500" />
-          $XCLAW · Grok-native meme coin agent
+          <span className="h-1.5 w-1.5 rounded-full bg-koki-500" />
+          $KOKI · Grok-native meme coin agent
         </div>
 
         <h1 className="text-display text-5xl md:text-7xl lg:text-[5.5rem] font-semibold tracking-extra-tight text-white max-w-5xl leading-[1.02] text-balance animate-fade-in-up">
           The Grok-native
           <br />
-          <span className="bg-gradient-to-r from-claw-300 via-claw-500 to-sea-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-koki-300 via-koki-500 to-sea-400 bg-clip-text text-transparent">
             Meme Coin Launch Agent
           </span>
         </h1>
 
         <p className="mt-7 text-zinc-400 text-lg md:text-xl leading-relaxed max-w-2xl text-balance">
-          X CLAW detects real-time memes on X and turns them into autonomous
+          KOKi detects real-time memes on X and turns them into autonomous
           Pump.fun launches.
         </p>
 
@@ -38,8 +38,8 @@ export default function Hero() {
         </div>
 
         <div className="mt-8 inline-flex items-center gap-2 text-xs text-zinc-500">
-          <ShieldCheck className="h-3.5 w-3.5 text-claw-400" />
-          Solana mainnet · Phantom / Solflare · X CLAW never holds your keys.
+          <ShieldCheck className="h-3.5 w-3.5 text-koki-400" />
+          Solana mainnet · Phantom / Solflare · KOKi never holds your keys.
         </div>
 
         <div className="hairline mt-20 max-w-4xl" />

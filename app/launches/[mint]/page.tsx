@@ -16,7 +16,7 @@ export default function LaunchByMintPage({
         title="Post-launch monitor"
         description="Live on-chain monitoring + Grok-recommended next actions. Supply, top holders, creator wallet activity, and ready-to-post content all in one view."
         breadcrumbs={[
-          { href: "/", label: "X CLAW" },
+          { href: "/", label: "KOKi" },
           { href: "/launches", label: "Launches" },
           { label: shortMint(mint) },
         ]}

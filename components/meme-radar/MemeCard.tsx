@@ -16,14 +16,14 @@ export default function MemeCard({ meme, compact = false }: Props) {
     <div className="card card-hover p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="h-9 w-9 rounded-md bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400 shrink-0">
+          <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400 shrink-0">
             <Radar className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <div className="text-base font-semibold text-zinc-100 truncate">
               {meme.name}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-claw-500">
+            <div className="text-[10px] uppercase tracking-widest text-koki-500">
               ${meme.ticker}
             </div>
           </div>
@@ -63,14 +63,14 @@ export default function MemeCard({ meme, compact = false }: Props) {
       <div className="mt-auto flex flex-col sm:flex-row gap-2 pt-2">
         <Link
           href={`/analyze?meme=${meme.id}`}
-          className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-claw-500/40 transition flex-1"
+          className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-koki-500/40 transition flex-1"
         >
           <Sparkles className="h-3.5 w-3.5" />
           Analyze
         </Link>
         <Link
           href={`/launch?meme=${meme.id}&go=1`}
-          className="inline-flex items-center justify-center gap-1.5 rounded-md bg-claw-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-claw-400 transition flex-1"
+          className="inline-flex items-center justify-center gap-1.5 rounded-md bg-koki-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400 transition flex-1"
         >
           <Rocket className="h-3.5 w-3.5" />
           Launch
@@ -92,7 +92,7 @@ function ScorePill({
 }) {
   const tone =
     value >= 90
-      ? "text-claw-400 border-claw-500/40 bg-claw-500/5"
+      ? "text-koki-400 border-koki-500/40 bg-koki-500/5"
       : value >= 80
       ? "text-zinc-100 border-white/10 bg-white/[0.03]"
       : value >= 70
@@ -101,7 +101,7 @@ function ScorePill({
   return (
     <div
       className={`rounded-md border px-2 py-1.5 ${tone} ${
-        headline ? "ring-1 ring-claw-500/20" : ""
+        headline ? "ring-1 ring-koki-500/20" : ""
       }`}
     >
       <div className="text-[9px] uppercase tracking-widest opacity-70">

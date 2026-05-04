@@ -180,12 +180,12 @@ export default function PumpLaunchWizard() {
         if (data.fallbackReason) setFallbackReason(data.fallbackReason);
       } else {
         setKit(generateMockLaunchKit(c));
-        setProviderMeta({ provider: "mock", model: "x-claw-mock-generator" });
+        setProviderMeta({ provider: "mock", model: "koki-mock-generator" });
         setFallbackReason(data.error || "API returned unexpected response");
       }
     } catch (err) {
       setKit(generateMockLaunchKit(concept));
-      setProviderMeta({ provider: "mock", model: "x-claw-mock-generator" });
+      setProviderMeta({ provider: "mock", model: "koki-mock-generator" });
       setFallbackReason(err instanceof Error ? err.message : "Network error");
     } finally {
       setGenerating(false);
@@ -399,7 +399,7 @@ function ConceptStep({
   return (
     <div className="card p-6 space-y-6">
       <div className="flex items-center gap-2">
-        <Rocket className="h-5 w-5 text-claw-500" />
+        <Rocket className="h-5 w-5 text-koki-500" />
         <h2 className="text-lg font-semibold">Create Concept</h2>
       </div>
       <p className="text-sm text-zinc-400">
@@ -418,14 +418,14 @@ function ConceptStep({
           <Input
             value={concept.tokenName}
             onChange={(e) => setField("tokenName", e.target.value)}
-            placeholder="ClawCoin"
+            placeholder="KOKi"
           />
         </Field>
         <Field label="Ticker" hint="3–6 chars, A-Z and numbers">
           <Input
             value={concept.ticker}
             onChange={(e) => setField("ticker", e.target.value.toUpperCase())}
-            placeholder="CLAW"
+            placeholder="KOKI"
             maxLength={6}
           />
         </Field>
@@ -442,7 +442,7 @@ function ConceptStep({
           <Input
             value={concept.theme}
             onChange={(e) => setField("theme", e.target.value)}
-            placeholder="Cyber-claw mascot"
+            placeholder="Shiba paw / KOKi mascot"
           />
         </Field>
         <Field label="Target audience">
@@ -488,7 +488,7 @@ function ConceptStep({
           <input
             type="file"
             accept="image/*"
-            className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-md file:border-0 file:bg-claw-500 file:px-3 file:py-1.5 file:text-ink-950 file:font-semibold hover:file:bg-claw-400"
+            className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-md file:border-0 file:bg-koki-500 file:px-3 file:py-1.5 file:text-ink-950 file:font-semibold hover:file:bg-koki-400"
             onChange={(e) => onLogoChange(e.target.files?.[0] ?? null)}
           />
           {concept.logoDataUrl && (
@@ -531,7 +531,7 @@ function GeneratingStep({ generating }: { generating: boolean }) {
   ];
   return (
     <div className="card p-8 text-center space-y-4">
-      <div className="mx-auto h-12 w-12 rounded-full bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400">
+      <div className="mx-auto h-12 w-12 rounded-full bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400">
         {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
       </div>
       <h2 className="text-lg font-semibold">Generating Launch Kit</h2>
@@ -693,7 +693,7 @@ function ReviewStep({
           <ul className="text-sm text-zinc-300 space-y-1">
             {kit.dailyChecklist.map((c) => (
               <li key={c} className="flex gap-2">
-                <span className="text-claw-500">▢</span>
+                <span className="text-koki-500">▢</span>
                 {c}
               </li>
             ))}
@@ -702,7 +702,7 @@ function ReviewStep({
       </div>
 
       <div className="card p-4 flex items-start gap-3 text-sm">
-        <ShieldCheck className="h-4 w-4 text-claw-500 mt-0.5" />
+        <ShieldCheck className="h-4 w-4 text-koki-500 mt-0.5" />
         <p className="text-zinc-300">
           Compliance check: no guaranteed-profit, guaranteed-viral, or partnership claims detected. Edit any field before continuing.
         </p>
@@ -772,12 +772,12 @@ function WalletStep({
   return (
     <div className="card p-6 space-y-5">
       <div className="flex items-center gap-2">
-        <Wallet className="h-5 w-5 text-claw-500" />
+        <Wallet className="h-5 w-5 text-koki-500" />
         <h2 className="text-lg font-semibold">Connect Wallet</h2>
         {connected && <Badge tone="live">Connected</Badge>}
       </div>
       <p className="text-sm text-zinc-400 max-w-xl">
-        X CLAW does not store private keys and does not ask for seed phrases. Your wallet (Phantom or Solflare) is the only signer. Pump.fun runs on Solana <span className="text-amber-300 font-semibold">mainnet</span>.
+        KOKi does not store private keys and does not ask for seed phrases. Your wallet (Phantom or Solflare) is the only signer. Pump.fun runs on Solana <span className="text-amber-300 font-semibold">mainnet</span>.
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -826,7 +826,7 @@ function SignStep({
   return (
     <div className="card p-6 space-y-5">
       <div className="flex items-center gap-2 flex-wrap">
-        <ShieldCheck className="h-5 w-5 text-claw-500" />
+        <ShieldCheck className="h-5 w-5 text-koki-500" />
         <h2 className="text-lg font-semibold">Sign & Launch</h2>
         <Badge tone="live">Mainnet · Real SOL</Badge>
       </div>
@@ -917,7 +917,7 @@ function LaunchProgress({ phase, error }: { phase: LaunchPhase; error: string | 
           <div
             key={s.p}
             className={`flex items-center gap-2 text-sm ${
-              done ? "text-claw-400" : active ? "text-zinc-100" : "text-zinc-500"
+              done ? "text-koki-400" : active ? "text-zinc-100" : "text-zinc-500"
             }`}
           >
             {done ? (
@@ -986,7 +986,7 @@ function DashboardStep({
     <div className="space-y-6">
       <div className="card p-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <CheckCircle2 className="h-5 w-5 text-claw-500" />
+          <CheckCircle2 className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">Launched on Pump.fun</h2>
           <Badge tone="live">Mainnet · Live</Badge>
           <ProviderBadge meta={providerMeta} />
@@ -1006,7 +1006,7 @@ function DashboardStep({
         <div className="mt-4 flex items-center gap-2 flex-wrap">
           <a
             href={`/launches/${result.mintPubkey}`}
-            className="inline-flex items-center gap-2 rounded-md bg-claw-500 text-ink-950 px-3.5 py-2 text-sm font-semibold hover:bg-claw-400"
+            className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-ink-950 px-3.5 py-2 text-sm font-semibold hover:bg-koki-400"
           >
             Open monitoring dashboard
           </a>
@@ -1014,7 +1014,7 @@ function DashboardStep({
             href={result.pumpUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3.5 py-2 text-sm font-semibold hover:border-claw-500/40"
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3.5 py-2 text-sm font-semibold hover:border-koki-500/40"
           >
             View on Pump.fun
             <ExternalLink className="h-4 w-4" />
@@ -1023,7 +1023,7 @@ function DashboardStep({
             href={solscan}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3.5 py-2 text-sm font-semibold hover:border-claw-500/40"
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3.5 py-2 text-sm font-semibold hover:border-koki-500/40"
           >
             View tx on Solscan
             <ExternalLink className="h-4 w-4" />
@@ -1042,7 +1042,7 @@ function DashboardStep({
         <ul className="text-sm text-zinc-300 space-y-1">
           {kit.dailyChecklist.map((c) => (
             <li key={c} className="flex gap-2">
-              <span className="text-claw-500">▢</span>
+              <span className="text-koki-500">▢</span>
               {c}
             </li>
           ))}
@@ -1051,7 +1051,7 @@ function DashboardStep({
 
       <div className="card p-4 text-xs text-zinc-500">
         Launch saved to your local launch history. Head to{" "}
-        <a href="/launches" className="text-claw-400 hover:underline">/launches</a>{" "}
+        <a href="/launches" className="text-koki-400 hover:underline">/launches</a>{" "}
         to revisit.
       </div>
     </div>
@@ -1068,13 +1068,13 @@ function DashboardStep({
 function RadarSourceBanner({ meme }: { meme: RadarMeme }) {
   const meta = READINESS_META[meme.launchReadiness];
   return (
-    <div className="card p-4 border-claw-500/30 flex items-start gap-3">
-      <div className="h-9 w-9 rounded-md bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400 shrink-0">
+    <div className="card p-4 border-koki-500/30 flex items-start gap-3">
+      <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400 shrink-0">
         <Radar className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-widest text-claw-500">
+          <span className="text-[10px] uppercase tracking-widest text-koki-500">
             Radar signal
           </span>
           <span className="text-sm font-semibold text-zinc-100">

@@ -7,7 +7,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     deprecated: true,
-    note: "X CLAW retired the multi-vertical catalog. Use /api/meme-radar.",
+    note: "KOKi retired the multi-vertical catalog. Use /api/meme-radar.",
     templates: [],
   });
 }

@@ -1,6 +1,6 @@
 import type { Msg } from "./types";
 
-const SYSTEM_PROMPT = `You are the Wallet Tracking Agent inside X CLAW.
+const SYSTEM_PROMPT = `You are the Wallet Tracking Agent inside KOKi.
 Your job: turn a raw Solana wallet snapshot into a short, X-native intelligence brief.
 
 # Hard rules

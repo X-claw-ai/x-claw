@@ -4,7 +4,7 @@ import type { LLMRequest, LLMResponse } from "./types";
 // Anthropic Claude adapter (FALLBACK)
 //
 // Used only when XAI_API_KEY is absent or xAI calls fail. This keeps
-// X CLAW operational while we wait for / debug Grok access.
+// KOKi operational while we wait for / debug Grok access.
 //
 // Note: Anthropic separates `system` from `messages`, unlike OpenAI.
 // ─────────────────────────────────────────────────────────────────────────

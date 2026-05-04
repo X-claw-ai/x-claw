@@ -9,7 +9,7 @@ import type { RadarMeme } from "@/lib/memeRadar";
 // before the user enters the Generate flow.
 // ─────────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the Analyze step of the X CLAW Grok-native Meme Coin Launch Agent.
+const SYSTEM_PROMPT = `You are the Analyze step of the KOKi Grok-native Meme Coin Launch Agent.
 
 Job: assess whether a detected meme is a viable memecoin launch opportunity, score launch readiness, and explain why concisely.
 

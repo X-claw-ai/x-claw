@@ -88,7 +88,7 @@ export default function TokenInfoBlock({ mint }: { mint: string }) {
     <div className="space-y-4">
       <div className="card p-5">
         <div className="flex items-center gap-2">
-          <Coins className="h-4 w-4 text-claw-500" />
+          <Coins className="h-4 w-4 text-koki-500" />
           <div className="text-sm font-semibold">Token supply</div>
         </div>
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -125,7 +125,7 @@ export default function TokenInfoBlock({ mint }: { mint: string }) {
                   href={`https://solscan.io/account/${h.address}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-mono text-xs text-zinc-300 hover:text-claw-400 truncate flex-1"
+                  className="font-mono text-xs text-zinc-300 hover:text-koki-400 truncate flex-1"
                 >
                   {h.address}
                 </a>
@@ -155,7 +155,7 @@ function Stat({
 }) {
   const ring =
     tone === "good"
-      ? "ring-claw-500/20"
+      ? "ring-koki-500/20"
       : tone === "warn"
       ? "ring-amber-300/20"
       : "ring-white/5";

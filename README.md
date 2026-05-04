@@ -1,15 +1,15 @@
-# X CLAW
+# KOKi.ai
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **The Grok-native Meme Coin Launch Agent.**
-X CLAW detects real-time memes on X and turns them into autonomous Pump.fun launches.
+KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches.
 
 > Real-time X memes → autonomous token launches.
 
-Token ticker: `$XCLAW`
+Token ticker: `$KOKI`
 
-X CLAW is an independent open-source project. It is not affiliated with xAI, X, Grok, Pump.fun, PumpPortal, or Solana Foundation. Nothing in this app is financial advice.
+KOKi.ai is an independent open-source project. It is not affiliated with xAI, X, Grok, Pump.fun, PumpPortal, or Solana Foundation. Nothing in this app is financial advice.
 
 ---
 
@@ -24,7 +24,7 @@ Detect  →  Analyze  →  Generate  →  Launch  →  Monitor
 | **01 Detect** | Real-time Meme Radar scans X for trending memes, viral keywords, fast-growing narratives. | `/dashboard` |
 | **02 Analyze** | 10-criteria launch readiness scoring (viral, clarity, X engagement, ticker strength, on-chain, timing, saturation, brand/legal). | `/analyze?meme=<id>` |
 | **03 Generate** | Full AI launch kit: token identity, Pump.fun metadata, 10 launch tweets + 5 viral hooks + 5 thread ideas + 20 raid replies + 5 DM templates + founder/product/discord/community announcements + raid mission + FAQ + 7-day plan + checklist. | `/launch` (wizard step 0–2) |
-| **04 Launch** | Direct Pump.fun execution. Real Solana mainnet, real wallet signature. X CLAW never holds keys. | `/launch` (wizard step 3–5) |
+| **04 Launch** | Direct Pump.fun execution. Real Solana mainnet, real wallet signature. KOKi.ai never holds keys. | `/launch` (wizard step 3–5) |
 | **05 Monitor** | Post-launch dashboard: supply, top-10 holders, creator wallet activity, Grok-recommended next actions, risk signals. | `/launches/[mint]` |
 
 ## Live integrations
@@ -89,7 +89,7 @@ See [ROADMAP.md](./ROADMAP.md) for the public roadmap and [ARCHITECTURE.md](./AR
 ## Getting started
 
 ```bash
-cd x-claw
+cd koki
 npm install
 cp .env.example .env.local
 # Edit .env.local:

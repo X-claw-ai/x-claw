@@ -3,7 +3,7 @@
 //
 // PumpPortal exposes a non-custodial endpoint that returns an UNSIGNED
 // Solana transaction. The client wallet then signs and submits it. This
-// matches the X CLAW security model:
+// matches the KOKi security model:
 //   Agent prepares → User approves → Wallet signs → Action executes.
 //
 // Endpoint:

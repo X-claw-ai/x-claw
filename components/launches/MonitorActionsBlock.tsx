@@ -66,7 +66,7 @@ export default function MonitorActionsBlock(props: Props) {
   if (loading) {
     return (
       <div className="card p-6 text-sm text-zinc-400 flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin text-claw-400" />
+        <Loader2 className="h-4 w-4 animate-spin text-koki-400" />
         Generating suggested next actions…
       </div>
     );
@@ -85,7 +85,7 @@ export default function MonitorActionsBlock(props: Props) {
     <div className="space-y-4">
       <div className="card p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="h-4 w-4 text-claw-400" />
+          <Zap className="h-4 w-4 text-koki-400" />
           <div className="text-sm font-semibold text-white">Suggested next actions</div>
           {data.provider === "xai" ? (
             <Badge tone="live">Grok · {data.model}</Badge>

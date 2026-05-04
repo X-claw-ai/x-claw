@@ -24,7 +24,7 @@ export default function MemeRadarSection({
       {showHeader && (
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full border border-claw-500/25 bg-claw-500/[0.06] flex items-center justify-center text-claw-400">
+            <div className="h-10 w-10 rounded-full border border-koki-500/25 bg-koki-500/[0.06] flex items-center justify-center text-koki-400">
               <Radar className="h-4 w-4" />
             </div>
             <div>
@@ -58,9 +58,9 @@ export default function MemeRadarSection({
 function EmptyState() {
   return (
     <div className="surface p-12 md:p-16 text-center">
-      <div className="mx-auto h-12 w-12 rounded-full border border-claw-500/25 bg-claw-500/[0.06] flex items-center justify-center text-claw-400 mb-6 relative">
+      <div className="mx-auto h-12 w-12 rounded-full border border-koki-500/25 bg-koki-500/[0.06] flex items-center justify-center text-koki-400 mb-6 relative">
         <Radar className="h-5 w-5" />
-        <span className="absolute inset-0 rounded-full border border-claw-500/30 animate-ping" />
+        <span className="absolute inset-0 rounded-full border border-koki-500/30 animate-ping" />
       </div>
       <div className="text-display text-2xl md:text-3xl font-semibold tracking-extra-tight text-white text-balance max-w-md mx-auto">
         Real-time trends are connecting.

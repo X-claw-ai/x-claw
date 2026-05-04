@@ -5,14 +5,14 @@ import Footer from "@/components/shell/Footer";
 import { XClawWalletProvider } from "@/components/solana/WalletContext";
 
 export const metadata: Metadata = {
-  title: "X CLAW — The Grok-native Meme Coin Launch Agent",
+  title: "KOKi.ai — The Grok-native Meme Coin Launch Agent",
   description:
-    "X CLAW detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch.",
-  metadataBase: new URL("https://xclaw.local"),
+    "KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch → Monitor.",
+  metadataBase: new URL("https://koki.ai"),
   openGraph: {
-    title: "X CLAW — The Grok-native Meme Coin Launch Agent",
+    title: "KOKi.ai — The Grok-native Meme Coin Launch Agent",
     description:
-      "Real-time X memes → autonomous token launches.",
+      "Real-time X memes → autonomous Pump.fun launches.",
     type: "website",
   },
 };

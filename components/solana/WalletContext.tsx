@@ -13,7 +13,7 @@ import { RPC_URL } from "@/lib/solana/connection";
 // Wallet provider boundary. Wraps the entire app so any client component
 // can call useWallet() / useConnection().
 //
-// X CLAW supports Phantom and Solflare on Solana. We deliberately do NOT
+// KOKi supports Phantom and Solflare on Solana. We deliberately do NOT
 // add custodial / browser-keypair wallets — the user's wallet is the only
 // signer.
 export function XClawWalletProvider({ children }: { children: React.ReactNode }) {

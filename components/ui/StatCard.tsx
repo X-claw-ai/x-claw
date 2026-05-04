@@ -13,7 +13,7 @@ export function StatCard({
 }) {
   const ring =
     tone === "good"
-      ? "ring-claw-500/20"
+      ? "ring-koki-500/20"
       : tone === "warn"
       ? "ring-amber-300/20"
       : "ring-white/5";

@@ -46,8 +46,8 @@ export async function POST(req: Request) {
 
   const input: ConceptInput = {
     idea: body.idea ?? "",
-    tokenName: body.tokenName ?? "ClawCoin",
-    ticker: (body.ticker ?? "CLAW").toUpperCase(),
+    tokenName: body.tokenName ?? "KOKi",
+    ticker: (body.ticker ?? "KOKI").toUpperCase(),
     chain: body.chain ?? "solana",
     theme: body.theme ?? "",
     audience: body.audience ?? "",
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       ok: true,
       mock: true,
       provider: "mock",
-      model: "x-claw-mock-generator",
+      model: "koki-mock-generator",
       kit,
       note:
         "No LLM provider configured. Set XAI_API_KEY (recommended) to enable Grok.",
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
         ok: true,
         mock: true,
         provider: "mock",
-        model: "x-claw-mock-generator",
+        model: "koki-mock-generator",
         fallbackReason: `LLM (${llm.provider}/${llm.model}) returned unparseable JSON: ${reason}`,
         kit: generateMockLaunchKit(input),
       });
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
       ok: true,
       mock: true,
       provider: "mock",
-      model: "x-claw-mock-generator",
+      model: "koki-mock-generator",
       fallbackReason: reason,
       kit: generateMockLaunchKit(input),
     });

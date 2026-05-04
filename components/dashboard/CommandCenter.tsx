@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/Badge";
 import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
 import MemeRadarSection from "@/components/meme-radar/MemeRadarSection";
 
-// Four-section command center mirroring the X CLAW agent loop.
+// Four-section command center mirroring the KOKi agent loop.
 export default function CommandCenter() {
   const [launches, setLaunches] = useState<SavedLaunch[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -174,7 +174,7 @@ function Section({
           PHASE {index}
         </span>
         <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-full border border-white/10 flex items-center justify-center text-claw-400">
+          <div className="h-7 w-7 rounded-full border border-white/10 flex items-center justify-center text-koki-400">
             <Icon className="h-3.5 w-3.5" />
           </div>
           <span className="text-xl font-semibold text-white tracking-tight">
@@ -212,7 +212,7 @@ function Tile({
     >
       <div className="flex items-start justify-between gap-2">
         {Icon ? (
-          <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-claw-400">
+          <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-koki-400">
             <Icon className="h-4 w-4" />
           </div>
         ) : (
@@ -224,7 +224,7 @@ function Tile({
         {title}
       </div>
       <p className="mt-1.5 text-sm text-zinc-400 leading-relaxed">{body}</p>
-      <div className="mt-5 inline-flex items-center gap-1.5 text-sm text-claw-400 font-medium group-hover:gap-2 transition-all">
+      <div className="mt-5 inline-flex items-center gap-1.5 text-sm text-koki-400 font-medium group-hover:gap-2 transition-all">
         {cta}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </div>
@@ -245,7 +245,7 @@ function Stat({
 }) {
   const accent =
     tone === "good"
-      ? "text-claw-400"
+      ? "text-koki-400"
       : tone === "info"
       ? "text-sea-400"
       : "text-white";

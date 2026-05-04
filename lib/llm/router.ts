@@ -4,7 +4,7 @@ import { callAnthropic } from "./anthropic";
 import { callOpenAI } from "./openai";
 
 // ─────────────────────────────────────────────────────────────────────────
-// X CLAW LLM router
+// KOKi LLM router
 //
 // Provider order is FIXED for product positioning reasons:
 //   1. xAI Grok (primary)         — what "Grok-first" means in practice

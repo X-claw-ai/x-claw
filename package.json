@@ -1,8 +1,8 @@
 {
-  "name": "x-claw",
+  "name": "koki",
   "version": "0.1.0",
   "private": true,
-  "description": "X CLAW — Grok-native Agent OS for the X Era. First live module: Pump Launch Agent.",
+  "description": "KOKi.ai — Grok-native Agent OS for the X Era. First live module: Pump Launch Agent.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

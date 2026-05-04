@@ -32,7 +32,7 @@ export default function SafetySection() {
     <section className="border-t border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-3xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400">
             Safety model
           </div>
           <h2 className="mt-3 text-display text-4xl md:text-5xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
@@ -40,7 +40,7 @@ export default function SafetySection() {
           </h2>
           <p className="mt-5 text-zinc-400 text-lg leading-relaxed text-balance">
             Memecoin launches go wrong when an agent silently controls funds.
-            X CLAW is built so that never happens. The agent is powerful
+            KOKi is built so that never happens. The agent is powerful
             because it prepares — not because it holds keys.
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function SafetySection() {
             return (
               <div key={p.title} className="card">
                 <div className="flex items-center justify-between">
-                  <div className="h-10 w-10 rounded-full border border-claw-500/30 bg-claw-500/[0.06] flex items-center justify-center text-claw-400">
+                  <div className="h-10 w-10 rounded-full border border-koki-500/30 bg-koki-500/[0.06] flex items-center justify-center text-koki-400">
                     <Icon className="h-4 w-4" />
                   </div>
                   <span className="text-[11px] font-mono text-zinc-600 tracking-[0.18em]">
@@ -70,8 +70,8 @@ export default function SafetySection() {
         </div>
 
         <div className="mt-10 surface p-6 text-sm text-zinc-300 leading-relaxed">
-          <span className="text-claw-400 font-semibold">Hard rules:</span>{" "}
-          X CLAW does not store private keys. Does not ask for seed phrases.
+          <span className="text-koki-400 font-semibold">Hard rules:</span>{" "}
+          KOKi does not store private keys. Does not ask for seed phrases.
           Does not move funds without your explicit signature. Does not claim
           a partnership with xAI, X, Grok, Pump.fun, or Solana. Memecoin
           launches involve risk; you are the final decision maker.

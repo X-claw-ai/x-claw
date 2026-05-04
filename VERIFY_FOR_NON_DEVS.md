@@ -1,6 +1,6 @@
-# X CLAW — 비개발자용 검증 가이드 (30분, 터미널 안 씀)
+# KOKi.ai — 비개발자용 검증 가이드 (30분, 터미널 안 씀)
 
-X CLAW가 진짜 동작하는지 직접 눈으로 보고 싶으신 분을 위한 단계별 가이드.
+KOKi.ai가 진짜 동작하는지 직접 눈으로 보고 싶으신 분을 위한 단계별 가이드.
 **터미널 / 코드 / git 명령어 전혀 필요 없음.** 모든 게 웹 브라우저에서 끝납니다.
 
 준비물:
@@ -25,9 +25,9 @@ X CLAW가 진짜 동작하는지 직접 눈으로 보고 싶으신 분을 위한
 
 ## 1단계: 코드 다운로드 (1분)
 
-이 대화창에서 받은 `x-claw.zip` 파일을 컴퓨터에 다운로드.
+이 대화창에서 받은 `koki.zip` 파일을 컴퓨터에 다운로드.
 
-받은 zip을 더블클릭해서 압축 해제. `x-claw/` 폴더가 나옵니다 (안에 138개 파일).
+받은 zip을 더블클릭해서 압축 해제. `koki/` 폴더가 나옵니다 (안에 138개 파일).
 
 ✅ 체크: 폴더 안에 `package.json`, `README.md`, `app/`, `components/` 같은 게 보이면 OK.
 
@@ -44,7 +44,7 @@ https://github.com/signup 에서 이메일로 가입. 이메일 인증까지 끝
 로그인 후:
 
 1. 우측 상단 `+` 아이콘 → **New repository** 클릭
-2. **Repository name**: `x-claw`
+2. **Repository name**: `koki`
 3. **Public** 선택 (오픈소스이니까)
 4. **다른 옵션은 모두 빈 채로** (README, .gitignore, license 추가 안 함 — 우리 zip에 이미 있음)
 5. 맨 아래 **Create repository** 클릭
@@ -54,10 +54,10 @@ https://github.com/signup 에서 이메일로 가입. 이메일 인증까지 끝
 repo가 만들어지면 빈 페이지가 보입니다. 거기에:
 
 1. 페이지 중앙의 **uploading an existing file** 링크 클릭
-   (또는 `https://github.com/<당신아이디>/x-claw/upload/main` 으로 직접 가도 됨)
-2. **압축 해제한 `x-claw/` 폴더 안의 모든 항목**을 드래그해서 업로드 영역에 떨어뜨림
+   (또는 `https://github.com/<당신아이디>/koki/upload/main` 으로 직접 가도 됨)
+2. **압축 해제한 `koki/` 폴더 안의 모든 항목**을 드래그해서 업로드 영역에 떨어뜨림
    - 폴더 자체를 통째로 드래그해도 GitHub이 안에 있는 파일 다 인식함
-   - **주의**: `x-claw/` 폴더 자체가 아니라 그 **안의 내용**을 올려야 함 (그래서 repo 루트에 `package.json` 보이게)
+   - **주의**: `koki/` 폴더 자체가 아니라 그 **안의 내용**을 올려야 함 (그래서 repo 루트에 `package.json` 보이게)
 3. 파일 다 올라가면 페이지 아래로 스크롤
 4. **Commit changes** 버튼 클릭 (메시지 박스는 건드릴 필요 없음)
 
@@ -76,7 +76,7 @@ https://vercel.com/signup 으로 이동.
 ### 3-2. 새 프로젝트 만들기
 
 1. Vercel 대시보드 좌측 위 **Add New...** → **Project**
-2. **Import Git Repository** 섹션에서 방금 만든 `x-claw` repo 옆 **Import** 클릭
+2. **Import Git Repository** 섹션에서 방금 만든 `koki` repo 옆 **Import** 클릭
 3. **Configure Project** 화면이 뜸:
    - **Framework Preset**: Next.js (자동 감지됨, 그대로)
    - **Root Directory**: `./` (그대로)
@@ -100,7 +100,7 @@ Vercel이 자동으로:
 - 배포
 
 화면에 빌드 로그가 흐릅니다. 끝까지 다 통과하면:
-- **🎉 Congratulations!** 페이지가 뜨고 `https://x-claw-xxx.vercel.app` 같은 주소가 나옵니다.
+- **🎉 Congratulations!** 페이지가 뜨고 `https://koki-xxx.vercel.app` 같은 주소가 나옵니다.
 
 ❌ **만약 빌드 실패하면**: 빨간 글씨로 에러가 표시됩니다. 그 에러 메시지 그대로 저한테 보여주시면 바로 패치합니다.
 
@@ -110,7 +110,7 @@ Vercel이 자동으로:
 
 ## 4단계: 브라우저로 확인 (5분)
 
-Vercel이 준 주소(`https://x-claw-xxx.vercel.app`)로 이동해서 페이지마다 클릭해보세요.
+Vercel이 준 주소(`https://koki-xxx.vercel.app`)로 이동해서 페이지마다 클릭해보세요.
 
 ### 체크리스트
 
@@ -152,7 +152,7 @@ Vercel이 준 주소(`https://x-claw-xxx.vercel.app`)로 이동해서 페이지�
 ## TL;DR
 
 1. zip 다운로드 → 압축 해제
-2. github.com → 새 repo `x-claw` → 파일 드래그 업로드 → Commit
+2. github.com → 새 repo `koki` → 파일 드래그 업로드 → Commit
 3. vercel.com → Import → 환경변수 (XAI_API_KEY 권장) → Deploy
 4. 받은 vercel.app 주소에서 메인 페이지 + Dashboard + Meme Radar 동작 확인
 

@@ -52,7 +52,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <Rocket className="h-5 w-5 text-claw-500" />
+              <Rocket className="h-5 w-5 text-koki-500" />
               <h1 className="text-xl font-semibold">{tokenName}</h1>
               <span className="text-sm text-zinc-400">· {ticker}</span>
               {isMock && <Badge tone="mock">Mock</Badge>}
@@ -78,7 +78,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               href={pumpUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md bg-claw-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-claw-400"
+              className="inline-flex items-center gap-1 rounded-md bg-koki-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400"
             >
               Pump.fun <ExternalLink className="h-3 w-3" />
             </a>
@@ -86,7 +86,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               href={solscanToken}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-claw-500/40"
+              className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
             >
               Solscan token <ExternalLink className="h-3 w-3" />
             </a>
@@ -95,7 +95,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
                 href={solscanTx}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-claw-500/40"
+                className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
               >
                 Launch tx <ExternalLink className="h-3 w-3" />
               </a>
@@ -139,7 +139,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
       {record?.mintPubkey && (
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4 text-claw-500" />
+            <Activity className="h-4 w-4 text-koki-500" />
             <div className="text-sm font-semibold">
               Creator wallet activity
             </div>
@@ -157,7 +157,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
       {!record && hydrated && (
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4 text-claw-500" />
+            <Activity className="h-4 w-4 text-koki-500" />
             <div className="text-sm font-semibold">Wallet tracker</div>
           </div>
           <p className="text-xs text-zinc-500 mb-4">
@@ -176,7 +176,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
       />
       <div className="card p-5">
         <div className="flex items-center gap-2 mb-3 text-sm">
-          <Twitter className="h-4 w-4 text-claw-500" />
+          <Twitter className="h-4 w-4 text-koki-500" />
           <span className="font-semibold">X Post Generator (post-launch)</span>
         </div>
         <p className="text-xs text-zinc-500 mb-4">
@@ -212,7 +212,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         </div>
         <Link
           href="/launch"
-          className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-claw-500/40"
+          className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
         >
           Open launch wizard
         </Link>
@@ -257,7 +257,7 @@ function PhaseHeader({
 }) {
   return (
     <div className="flex items-center gap-3 border-t border-white/5 pt-8">
-      <div className="h-9 w-9 rounded-md bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400">
+      <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400">
         <Icon className="h-4 w-4" />
       </div>
       <div className="text-[10px] uppercase tracking-widest text-zinc-500">

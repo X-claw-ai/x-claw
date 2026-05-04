@@ -38,7 +38,7 @@ export default function PageHeader({
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             {eyebrow && (
-              <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400">
                 {eyebrow}
               </div>
             )}

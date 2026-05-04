@@ -1,9 +1,9 @@
 // LEGACY STUB
 //
-// X CLAW used to be framed as a multi-vertical Agent OS. We retired that
+// KOKi.ai used to be framed as a multi-vertical Agent OS. We retired that
 // framing in favor of a single, focused product:
 //
-//   X CLAW = the Grok-native AI agent that launches your memecoin on Pump.fun.
+//   KOKi.ai = the Grok-native AI agent that launches your memecoin on Pump.fun.
 //
 // This file is kept as an empty stub so any lingering imports keep compiling.
 // New code should not import from here.

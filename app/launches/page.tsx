@@ -11,7 +11,7 @@ export default function LaunchHistoryPage() {
         title="Launch History"
         description="Real launches you've run with the Pump Launch Agent. Stored locally per browser; Supabase persistence wires in next."
         breadcrumbs={[
-          { href: "/", label: "X CLAW" },
+          { href: "/", label: "KOKi" },
           { label: "Launches" },
         ]}
         actions={

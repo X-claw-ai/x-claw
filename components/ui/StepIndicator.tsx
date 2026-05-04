@@ -19,7 +19,7 @@ export function StepIndicator({
             className={cn(
               "flex items-center gap-2 rounded-md px-3 py-2 border whitespace-nowrap",
               active
-                ? "border-claw-500/50 bg-claw-500/10 text-claw-400"
+                ? "border-koki-500/50 bg-koki-500/10 text-koki-400"
                 : done
                 ? "border-white/10 bg-white/5 text-zinc-300"
                 : "border-white/10 bg-transparent text-zinc-500"
@@ -29,7 +29,7 @@ export function StepIndicator({
               className={cn(
                 "h-5 w-5 rounded-full inline-flex items-center justify-center text-[10px] font-bold",
                 active
-                  ? "bg-claw-500 text-ink-950"
+                  ? "bg-koki-500 text-ink-950"
                   : done
                   ? "bg-white/10 text-zinc-200"
                   : "bg-white/5 text-zinc-500"

@@ -44,7 +44,7 @@ export function PhaseProgress({
                 className={cn(
                   "px-3 py-2.5 text-center transition-colors",
                   active
-                    ? "bg-claw-500/[0.08] border-b-2 border-claw-500"
+                    ? "bg-koki-500/[0.08] border-b-2 border-koki-500"
                     : done
                     ? "bg-ink-950"
                     : "bg-ink-950 hover:bg-ink-900"
@@ -53,7 +53,7 @@ export function PhaseProgress({
                 <div
                   className={cn(
                     "text-[10px] font-mono tracking-[0.18em]",
-                    active ? "text-claw-400" : done ? "text-zinc-400" : "text-zinc-600"
+                    active ? "text-koki-400" : done ? "text-zinc-400" : "text-zinc-600"
                   )}
                 >
                   {m.num}

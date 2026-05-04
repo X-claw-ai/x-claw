@@ -4,17 +4,17 @@ import type { ConceptInput, LaunchKit } from "./types";
 // last-resort fallback when no LLM provider is configured. Real launch
 // kits come from /api/generate-launch-kit hitting Grok via the LLM router.
 export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
-  const name = input.tokenName || "ClawCoin";
-  const ticker = (input.ticker || "CLAW")
+  const name = input.tokenName || "KOKi";
+  const ticker = (input.ticker || "KOKI")
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")
     .slice(0, 6);
-  const theme = input.theme || "cyber-claw mascot";
+  const theme = input.theme || "shiba paw / KOKi mascot";
   const audience = input.audience || "X-native crypto builders";
 
   const shortDescription = `${name} is a ${theme} community token built for ${audience}.`;
   const longDescription = [
-    `${name} (${ticker}) is an X-native community token prepared with the X CLAW Pump Launch Agent.`,
+    `${name} (${ticker}) is an X-native community token prepared with the KOKi Pump Launch Agent.`,
     `The project narrative leans on the ${theme} concept and is positioned for ${audience}.`,
     `All launch materials in this kit are drafts — final wording, art, and timing are decided by the project owner.`,
   ].join(" ");
@@ -59,7 +59,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
     const variants = [
       `${ticker} community here — checking out your post.`,
       `The ${name} workflow could help on this.`,
-      `Builders running ${ticker} on the X CLAW agent layer.`,
+      `Builders running ${ticker} on the KOKi agent layer.`,
       `Respect the build. ${name} is on a similar path.`,
       `${ticker} dropped its launch kit — review-first, no surprises.`,
     ];
@@ -77,7 +77,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
   const founderAnnouncement = [
     `Today I'm announcing ${name} ($${ticker}) — an X-native community token.`,
     `Why ${name}: ${memeThesis}`,
-    `The launch kit, the metadata, and every line of copy were prepared by the X CLAW agent and reviewed by our team. No silent automation, no surprise transactions.`,
+    `The launch kit, the metadata, and every line of copy were prepared by the KOKi agent and reviewed by our team. No silent automation, no surprise transactions.`,
     `Read the thesis, audit the on-chain footprint, decide for yourself.`,
   ].join("\n\n");
 
@@ -85,7 +85,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
     `${name} is now live on Pump.fun.`,
     `Ticker: $${ticker}`,
     `Concept: ${shortDescription}`,
-    `Where to verify: Pump.fun, Solscan, the X CLAW launch monitor.`,
+    `Where to verify: Pump.fun, Solscan, the KOKi launch monitor.`,
     `Where to find us: X, Telegram, Discord (links pinned).`,
   ].join("\n");
 
@@ -104,7 +104,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
   const discordAnnouncement = [
     `**${name} ($${ticker}) — heads-up for the build channel.**`,
     ``,
-    `We're preparing the launch with the X CLAW agent. Status:`,
+    `We're preparing the launch with the KOKi agent. Status:`,
     `- Concept locked`,
     `- Launch kit drafted`,
     `- Pump.fun metadata staged`,
@@ -136,7 +136,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
   const faq = [
     {
       q: `What is ${name}?`,
-      a: `${shortDescription} The launch was prepared by the X CLAW agent and approved by the team.`,
+      a: `${shortDescription} The launch was prepared by the KOKi agent and approved by the team.`,
     },
     {
       q: `Why $${ticker}?`,
@@ -161,7 +161,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
   } · ${input.twitterUrl || "—"} · ${input.telegramUrl || "—"}.`;
 
   const cmcDescription = [
-    `${name} (${ticker}) is a community-driven token launched via the X CLAW Pump Launch Agent.`,
+    `${name} (${ticker}) is a community-driven token launched via the KOKi Pump Launch Agent.`,
     `It is positioned around the ${theme} concept and targets ${audience}.`,
     `${name} uses an explicit, user-approved launch flow: the agent prepares materials, the team reviews, the wallet signs, and only then does the launch execute.`,
   ].join(" ");
@@ -256,7 +256,7 @@ export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
       website: input.websiteUrl,
       image: input.logoDataUrl ?? "",
     },
-    xBio: `${name} · ${ticker} — ${theme}. X-native launch via X CLAW. Not financial advice.`,
+    xBio: `${name} · ${ticker} — ${theme}. X-native launch via KOKi. Not financial advice.`,
     launchTweets,
     viralHooks,
     threadIdeas,

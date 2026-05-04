@@ -1,6 +1,6 @@
 # Security Policy
 
-X CLAW handles wallet flows and on-chain actions, so security reports are taken seriously and triaged fast.
+KOKi.ai handles wallet flows and on-chain actions, so security reports are taken seriously and triaged fast.
 
 ## Core principles enforced in code
 
@@ -16,7 +16,7 @@ These are baked in across the codebase. If you see a violation, please report it
 
 Please **do not** open a public GitHub issue for security problems.
 
-Email: **security@xclaw.invalid** (replace with the project's real address before going public)
+Email: **security@koki.invalid** (replace with the project's real address before going public)
 
 Include:
 

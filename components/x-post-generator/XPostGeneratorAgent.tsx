@@ -87,7 +87,7 @@ export default function XPostGeneratorAgent({
     <div className="mx-auto max-w-5xl px-6 py-10 space-y-6">
       <div className="card p-6 space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <Twitter className="h-5 w-5 text-claw-500" />
+          <Twitter className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">X Post Generator</h2>
           <Badge tone="live">Live · Creator Agents</Badge>
         </div>
@@ -142,7 +142,7 @@ export default function XPostGeneratorAgent({
                 type="checkbox"
                 checked={includeThread}
                 onChange={(e) => setIncludeThread(e.target.checked)}
-                className="accent-claw-500"
+                className="accent-koki-500"
               />
               Generate a 5–8 part thread (hook → body → conclusion)
             </label>
@@ -208,7 +208,7 @@ export default function XPostGeneratorAgent({
           {data.thread && (
             <div className="card p-5 space-y-4">
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <Sparkles className="h-4 w-4 text-claw-500" />
+                <Sparkles className="h-4 w-4 text-koki-500" />
                 Thread
               </div>
               <ThreadTweet label="Hook · 1" text={data.thread.hook} />
@@ -234,7 +234,7 @@ export default function XPostGeneratorAgent({
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-md bg-claw-500 text-ink-950 px-3.5 py-2 text-xs font-semibold hover:bg-claw-400"
+                  className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-ink-950 px-3.5 py-2 text-xs font-semibold hover:bg-koki-400"
                 >
                   Open whole thread in X compose
                   <ExternalLink className="h-3 w-3" />
@@ -277,7 +277,7 @@ function PostCard({ index, text }: { index: number; text: string }) {
             href={intent}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-claw-400 hover:text-claw-500"
+            className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
           >
             Open in X <ExternalLink className="h-3 w-3" />
           </a>

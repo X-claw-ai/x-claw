@@ -11,7 +11,7 @@ export default function FinalCTA() {
           <span className="text-zinc-500">Live on Pump.fun.</span>
         </h2>
         <p className="mt-6 text-zinc-400 text-lg max-w-xl mx-auto">
-          $XCLAW · Grok-native · X-native · open source on GitHub.
+          $KOKI · Grok-native · X-native · open source on GitHub.
         </p>
         <div className="mt-10 flex justify-center gap-3 flex-wrap">
           <Link href="/launch" className="btn btn-primary !py-3.5 !px-6 !text-base">

@@ -11,7 +11,7 @@ export default function LaunchPage() {
         title="Launch your memecoin"
         description="Drop your meme idea (or arrive from the radar). Grok drafts the launch kit. You review, sign once, and the agent launches it on Pump.fun. Your wallet is the only signer."
         breadcrumbs={[
-          { href: "/", label: "X CLAW" },
+          { href: "/", label: "KOKi" },
           { label: "Launch" },
         ]}
       />

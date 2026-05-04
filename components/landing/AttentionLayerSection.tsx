@@ -6,17 +6,17 @@ export default function AttentionLayerSection() {
     <section className="border-t border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-4xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400 flex items-center gap-2">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400 flex items-center gap-2">
             <Radar className="h-3 w-3" />
             Attention layer
           </div>
           <h2 className="mt-3 text-display text-4xl md:text-6xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
             Most launch tools wait for an idea.
             <br />
-            <span className="text-zinc-500">X CLAW watches first.</span>
+            <span className="text-zinc-500">KOKi watches first.</span>
           </h2>
           <p className="mt-6 text-zinc-400 text-lg leading-relaxed max-w-2xl text-balance">
-            X CLAW analyzes X-native meme signals, community momentum, and
+            KOKi analyzes X-native meme signals, community momentum, and
             on-chain relevance before generating a launch kit and preparing
             Pump.fun execution. You start at the top of the funnel — not from
             a blank form.

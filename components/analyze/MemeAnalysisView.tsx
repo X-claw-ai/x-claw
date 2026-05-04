@@ -76,7 +76,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
   if (loading) {
     return (
       <div className="card p-12 text-center">
-        <Loader2 className="h-5 w-5 animate-spin mx-auto text-claw-400" />
+        <Loader2 className="h-5 w-5 animate-spin mx-auto text-koki-400" />
         <div className="mt-4 text-sm text-zinc-400">
           Analyzing {meme?.name ?? memeId}…
         </div>
@@ -108,7 +108,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
       <div className="card p-6">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400 mb-2">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400 mb-2">
               Analyze · Phase 02
             </div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -147,11 +147,11 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
 
       {/* Why + Risks */}
       <div className="grid lg:grid-cols-2 gap-4">
-        <Block icon={TrendingUp} title="Why it has potential" iconClass="text-claw-400">
+        <Block icon={TrendingUp} title="Why it has potential" iconClass="text-koki-400">
           <ul className="space-y-2 text-sm text-zinc-300">
             {a.whyItHasPotential.map((b) => (
               <li key={b} className="flex gap-2.5">
-                <span className="text-claw-400">•</span>
+                <span className="text-koki-400">•</span>
                 <span>{b}</span>
               </li>
             ))}
@@ -179,7 +179,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
       {/* Criteria scoring grid */}
       <div className="card p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-4 w-4 text-claw-400" />
+          <Sparkles className="h-4 w-4 text-koki-400" />
           <div className="text-sm font-semibold text-white">Scoring criteria</div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -247,7 +247,7 @@ function KV({
   return (
     <div className="card p-5">
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-claw-400" />
+        <Icon className="h-4 w-4 text-koki-400" />
         <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
           {label}
         </div>
@@ -263,7 +263,7 @@ function Score({ label, value }: { label: string; value: number }) {
   const good = isRisk ? value < 40 : value >= 75;
   const mid = isRisk ? value < 60 : value >= 60;
   const tone = good
-    ? "text-claw-400 border-claw-500/30"
+    ? "text-koki-400 border-koki-500/30"
     : mid
     ? "text-zinc-200 border-white/10"
     : "text-amber-300 border-amber-400/25";
@@ -277,7 +277,7 @@ function Score({ label, value }: { label: string; value: number }) {
       </div>
       <div className="mt-2 h-1 rounded bg-white/[0.04] overflow-hidden">
         <div
-          className={`h-full ${good ? "bg-claw-500/70" : mid ? "bg-zinc-400/60" : "bg-amber-400/60"}`}
+          className={`h-full ${good ? "bg-koki-500/70" : mid ? "bg-zinc-400/60" : "bg-amber-400/60"}`}
           style={{ width: `${Math.max(2, Math.min(100, value))}%` }}
         />
       </div>
