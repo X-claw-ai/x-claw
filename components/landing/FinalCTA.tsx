@@ -1,24 +1,25 @@
 import Link from "next/link";
-import { Rocket, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function FinalCTA() {
   return (
     <section className="border-t border-white/5">
-      <div className="mx-auto max-w-7xl px-6 py-20 text-center">
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight max-w-3xl mx-auto leading-tight">
-          One signature. One memecoin. Live on Pump.fun.
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32 text-center">
+        <h2 className="text-display text-4xl md:text-6xl font-semibold tracking-extra-tight text-white max-w-3xl mx-auto leading-[1.05] text-balance">
+          One signature. One memecoin.
+          <br />
+          <span className="text-zinc-500">Live on Pump.fun.</span>
         </h2>
-        <p className="mt-4 text-zinc-400 max-w-xl mx-auto">
+        <p className="mt-6 text-zinc-400 text-lg max-w-xl mx-auto">
           $XCLAW · Grok-native · X-native · open source on GitHub.
         </p>
-        <div className="mt-8 flex justify-center">
-          <Link
-            href="/launch"
-            className="inline-flex items-center gap-2 rounded-md bg-claw-500 text-ink-950 px-6 py-3 text-base font-semibold hover:bg-claw-400 transition shadow-[0_8px_30px_-12px_rgba(52,232,158,0.6)]"
-          >
-            <Rocket className="h-5 w-5" />
+        <div className="mt-10 flex justify-center gap-3 flex-wrap">
+          <Link href="/launch" className="btn btn-primary !py-3.5 !px-6 !text-base">
             Launch a Memecoin
             <ArrowRight className="h-5 w-5" />
+          </Link>
+          <Link href="/dashboard" className="btn btn-secondary !py-3.5 !px-6 !text-base">
+            Open the Radar
           </Link>
         </div>
       </div>

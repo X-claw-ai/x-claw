@@ -1,38 +1,38 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "ghost" | "outline" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const styles: Record<Variant, string> = {
-  primary:
-    "bg-claw-500 text-ink-950 hover:bg-claw-400 shadow-[0_8px_30px_-12px_rgba(52,232,158,0.6)]",
-  ghost: "bg-white/5 text-zinc-100 hover:bg-white/10",
-  outline:
-    "border border-white/10 text-zinc-100 hover:border-claw-500/40 hover:text-white",
-  danger: "bg-red-500/90 text-white hover:bg-red-500",
+  primary: "btn btn-primary",
+  secondary: "btn btn-secondary",
+  ghost: "btn btn-ghost",
+  danger:
+    "btn bg-red-500/90 hover:bg-red-500 text-white shadow-[0_1px_0_rgba(255,255,255,0.18)_inset,_0_6px_16px_-6px_rgba(239,68,68,0.45)]",
 };
 
 interface BaseProps {
   variant?: Variant;
   className?: string;
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
 }
 
+const sizes: Record<NonNullable<BaseProps["size"]>, string> = {
+  sm: "!py-1.5 !px-3 !text-xs",
+  md: "",
+  lg: "!py-3 !px-5 !text-base",
+};
+
 export function Button({
   variant = "primary",
+  size = "md",
   className,
   children,
   ...rest
 }: BaseProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition",
-        styles[variant],
-        className
-      )}
-      {...rest}
-    >
+    <button className={cn(styles[variant], sizes[size], className)} {...rest}>
       {children}
     </button>
   );
@@ -41,18 +41,12 @@ export function Button({
 export function ButtonLink({
   href,
   variant = "primary",
+  size = "md",
   className,
   children,
 }: BaseProps & { href: string }) {
   return (
-    <Link
-      href={href}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition",
-        styles[variant],
-        className
-      )}
-    >
+    <Link href={href} className={cn(styles[variant], sizes[size], className)}>
       {children}
     </Link>
   );

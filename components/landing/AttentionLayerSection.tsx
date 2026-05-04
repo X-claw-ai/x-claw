@@ -1,46 +1,35 @@
 import Link from "next/link";
 import { ArrowRight, Radar } from "lucide-react";
-import MemeRadarSection from "@/components/meme-radar/MemeRadarSection";
 
 export default function AttentionLayerSection() {
   return (
     <section className="border-t border-white/5">
-      <div className="mx-auto max-w-7xl px-6 py-20">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
-          <div className="lg:col-span-5">
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-claw-500">
-              <Radar className="h-3.5 w-3.5" />
-              Attention layer
-            </div>
-            <h2 className="mt-2 text-3xl md:text-4xl font-semibold tracking-tight leading-tight">
-              Most launch tools wait for users to bring an idea. X CLAW
-              watches the attention layer first.
-            </h2>
-            <p className="mt-4 text-zinc-400 leading-relaxed">
-              X CLAW analyzes X-native meme signals, community momentum, and
-              on-chain relevance before generating a launch kit and preparing
-              Pump.fun execution. You start from the top of the funnel, not
-              from a blank form.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-md bg-claw-500 text-ink-950 px-4 py-2 text-sm font-semibold hover:bg-claw-400 transition"
-              >
-                <Radar className="h-4 w-4" />
-                Open the Meme Radar
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="mt-6 text-xs text-zinc-500 leading-relaxed">
-              Today the radar runs on a curated mock feed so the flow is
-              demoable without API keys. Real X / xAI / on-chain signals plug
-              in via the same RadarMeme shape later.
-            </div>
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+        <div className="max-w-4xl">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400 flex items-center gap-2">
+            <Radar className="h-3 w-3" />
+            Attention layer
           </div>
+          <h2 className="mt-3 text-display text-4xl md:text-6xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
+            Most launch tools wait for an idea.
+            <br />
+            <span className="text-zinc-500">X CLAW watches first.</span>
+          </h2>
+          <p className="mt-6 text-zinc-400 text-lg leading-relaxed max-w-2xl text-balance">
+            X CLAW analyzes X-native meme signals, community momentum, and
+            on-chain relevance before generating a launch kit and preparing
+            Pump.fun execution. You start at the top of the funnel — not from
+            a blank form.
+          </p>
 
-          <div className="lg:col-span-7">
-            <MemeRadarSection showHeader={false} compact />
+          <div className="mt-10">
+            <Link href="/dashboard" className="btn btn-primary !py-3 !px-5">
+              Open the Meme Radar
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <span className="ml-4 text-xs text-zinc-500">
+              Real-time trends connect once X API is wired.
+            </span>
           </div>
         </div>
       </div>

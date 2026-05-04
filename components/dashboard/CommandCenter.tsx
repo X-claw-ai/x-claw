@@ -16,12 +16,7 @@ import { Badge } from "@/components/ui/Badge";
 import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
 import MemeRadarSection from "@/components/meme-radar/MemeRadarSection";
 
-// Four-section command center matching the X CLAW agent loop:
-//   Attention → Community → Intelligence → Execution
-//
-// Each section surfaces (1) what the agent does for that phase and
-// (2) where to act on it right now.
-
+// Four-section command center mirroring the X CLAW agent loop.
 export default function CommandCenter() {
   const [launches, setLaunches] = useState<SavedLaunch[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -35,49 +30,42 @@ export default function CommandCenter() {
   const lastLaunch = liveLaunches[0];
 
   return (
-    <div className="space-y-6">
-      {/* Real-time Meme Radar — the new first surface of X CLAW.
-          Detect trending memes on X before they peak, then push them
-          straight into the existing Pump Launch Agent. */}
-      <section className="mx-auto max-w-7xl px-6">
+    <div className="space-y-12">
+      {/* Real-time Meme Radar */}
+      <section className="mx-auto max-w-6xl px-6">
         <MemeRadarSection />
       </section>
 
-      {/* Top stats — quick agent state at a glance */}
-      <section className="mx-auto max-w-7xl px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Stat label="Engines online" value="4 / 4" tone="good" />
-        <Stat
-          label="Real launches"
-          value={hydrated ? String(liveLaunches.length) : "…"}
-        />
-        <Stat
-          label="Last launch"
-          value={
-            hydrated && lastLaunch
-              ? `${lastLaunch.ticker} · ${shortAddr(lastLaunch.mintPubkey || "")}`
-              : "—"
-          }
-        />
-        <Stat label="Provider" value="Grok-first" tone="good" />
+      {/* Top stats */}
+      <section className="mx-auto max-w-6xl px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/5">
+          <Stat label="Engines" value="4" sub="Online" tone="good" />
+          <Stat
+            label="Real launches"
+            value={hydrated ? String(liveLaunches.length) : "—"}
+            sub={lastLaunch ? `Last: ${lastLaunch.ticker}` : "None yet"}
+          />
+          <Stat
+            label="Provider"
+            value="Grok"
+            sub="xAI · primary"
+          />
+          <Stat label="Network" value="Solana" sub="Mainnet" tone="info" />
+        </div>
       </section>
 
-      {/* 1. Attention */}
-      <Section
-        index="01"
-        name="Attention Signals"
-        tag="X-native ideas, hooks, viral angles"
-        icon={Sparkles}
-      >
+      {/* Phase sections */}
+      <Section index="01" name="Attention" tag="X-native ideas, hooks, viral angles" icon={Sparkles}>
         <div className="grid sm:grid-cols-2 gap-4">
           <Tile
             title="Generate a meme launch idea"
-            body="Type a vibe or theme — the agent drafts concept, ticker, mascot direction, and hooks."
+            body="Type a vibe, theme, or community. The agent drafts concept, ticker, mascot direction, and hooks."
             href="/launch"
             cta="Open launch wizard"
           />
           <Tile
             title="Draft 10 X launch posts"
-            body="Built into every launch kit. Reuse the prompt for any topic — 5–10 posts, optional thread."
+            body="Built into every launch kit. Compliance-aware prompts — no guaranteed-anything language."
             href="/launch"
             cta="Start a kit"
             icon={Twitter}
@@ -85,24 +73,17 @@ export default function CommandCenter() {
         </div>
       </Section>
 
-      {/* 2. Community */}
-      <Section
-        index="02"
-        name="Community Momentum"
-        tag="Raid replies, TG, DMs, campaign plan"
-        icon={Users2}
-      >
+      <Section index="02" name="Community" tag="Raid replies, TG, DMs, campaign plan" icon={Users2}>
         <div className="grid sm:grid-cols-2 gap-4">
           <Tile
             title="20 raid replies + 5 influencer DMs"
-            body="Auto-included with every launch kit. Compliance-aware prompts — no guaranteed-anything language."
+            body="Auto-included with every launch kit. Drafts only — your team confirms before posting."
             href="/launch"
             cta="Open launch wizard"
-            icon={Users2}
           />
           <Tile
             title="Telegram announcement + 7-day plan"
-            body="Ready-to-paste TG copy and a daily checklist. Drafts only — your team confirms before posting."
+            body="Ready-to-paste TG copy and a daily checklist."
             href="/launch"
             cta="Draft community"
             icon={Send}
@@ -110,10 +91,9 @@ export default function CommandCenter() {
         </div>
       </Section>
 
-      {/* 3. On-chain Intelligence */}
       <Section
         index="03"
-        name="On-chain Intelligence"
+        name="Intelligence"
         tag="Wallets, holders, liquidity, volume"
         icon={LineChart}
       >
@@ -141,17 +121,16 @@ export default function CommandCenter() {
         </div>
       </Section>
 
-      {/* 4. Launch Execution */}
       <Section
         index="04"
-        name="Launch Execution"
+        name="Execution"
         tag="Direct Pump.fun launch + monitoring"
         icon={Rocket}
       >
         <div className="grid sm:grid-cols-2 gap-4">
           <Tile
             title="New memecoin launch"
-            body="Concept → kit → review → wallet → sign → live. One signature. Real Solana mainnet."
+            body="Concept → kit → review → wallet → sign → live. One signature. Solana mainnet."
             href="/launch"
             cta="Launch a memecoin"
             highlight
@@ -189,16 +168,20 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="h-9 w-9 rounded-md bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400">
-          <Icon className="h-4 w-4" />
+    <section className="mx-auto max-w-6xl px-6">
+      <div className="flex items-baseline gap-4 mb-6">
+        <span className="text-[11px] font-mono text-zinc-600 tracking-[0.18em]">
+          PHASE {index}
+        </span>
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-full border border-white/10 flex items-center justify-center text-claw-400">
+            <Icon className="h-3.5 w-3.5" />
+          </div>
+          <span className="text-xl font-semibold text-white tracking-tight">
+            {name}
+          </span>
         </div>
-        <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-          Phase {index}
-        </div>
-        <div className="text-base font-semibold text-zinc-100">{name}</div>
-        <div className="text-xs text-zinc-500">— {tag}</div>
+        <span className="text-sm text-zinc-500 hidden sm:inline">— {tag}</span>
       </div>
       {children}
     </section>
@@ -223,13 +206,13 @@ function Tile({
   return (
     <Link
       href={href}
-      className={`card card-hover p-5 flex flex-col ${
-        highlight ? "border-claw-500/40 shadow-neon" : ""
+      className={`card card-hover group flex flex-col ${
+        highlight ? "card-emph" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         {Icon ? (
-          <div className="h-9 w-9 rounded-md bg-glow-cyan/10 border border-glow-cyan/30 flex items-center justify-center text-glow-cyan">
+          <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-claw-400">
             <Icon className="h-4 w-4" />
           </div>
         ) : (
@@ -237,10 +220,13 @@ function Tile({
         )}
         {highlight && <Badge tone="live">Primary</Badge>}
       </div>
-      <div className="mt-3 text-base font-semibold text-zinc-100">{title}</div>
-      <p className="mt-1 text-sm text-zinc-400 leading-relaxed">{body}</p>
-      <div className="mt-4 inline-flex items-center gap-1 text-xs text-claw-400">
-        {cta} <ArrowUpRight className="h-3 w-3" />
+      <div className="mt-4 text-base font-semibold text-white tracking-tight">
+        {title}
+      </div>
+      <p className="mt-1.5 text-sm text-zinc-400 leading-relaxed">{body}</p>
+      <div className="mt-5 inline-flex items-center gap-1.5 text-sm text-claw-400 font-medium group-hover:gap-2 transition-all">
+        {cta}
+        <ArrowUpRight className="h-3.5 w-3.5" />
       </div>
     </Link>
   );
@@ -249,19 +235,29 @@ function Tile({
 function Stat({
   label,
   value,
+  sub,
   tone = "neutral",
 }: {
   label: string;
   value: string;
-  tone?: "neutral" | "good";
+  sub?: string;
+  tone?: "neutral" | "good" | "info";
 }) {
-  const ring = tone === "good" ? "ring-claw-500/20" : "ring-white/5";
+  const accent =
+    tone === "good"
+      ? "text-claw-400"
+      : tone === "info"
+      ? "text-sea-400"
+      : "text-white";
   return (
-    <div className={`card p-5 ring-1 ${ring}`}>
-      <div className="text-[11px] uppercase tracking-widest text-zinc-500">
+    <div className="bg-ink-950 p-5 md:p-6">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
         {label}
       </div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight">{value}</div>
+      <div className={`mt-2.5 text-2xl md:text-3xl font-semibold tabular-nums tracking-extra-tight ${accent}`}>
+        {value}
+      </div>
+      {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
     </div>
   );
 }

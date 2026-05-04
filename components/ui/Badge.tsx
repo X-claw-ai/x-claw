@@ -6,20 +6,21 @@ export function Badge({
   className,
 }: {
   children: React.ReactNode;
-  tone?: "neutral" | "live" | "soon" | "mock" | "danger";
+  tone?: "neutral" | "live" | "soon" | "mock" | "danger" | "info";
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    neutral: "bg-white/5 text-zinc-300 border-white/10",
-    live: "bg-claw-500/10 text-claw-400 border-claw-500/30",
-    soon: "bg-glow-violet/10 text-glow-violet border-glow-violet/30",
-    mock: "bg-amber-400/10 text-amber-300 border-amber-300/30",
-    danger: "bg-red-500/10 text-red-300 border-red-500/30",
+    neutral: "border-white/10 text-zinc-300 bg-white/[0.02]",
+    live: "border-claw-500/35 text-claw-300 bg-claw-500/10",
+    soon: "border-plum-500/30 text-plum-400 bg-plum-500/10",
+    mock: "border-amber-400/25 text-amber-300 bg-amber-400/[0.06]",
+    danger: "border-red-500/30 text-red-300 bg-red-500/10",
+    info: "border-sea-500/30 text-sea-400 bg-sea-500/10",
   };
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-widest font-medium",
+        "inline-flex items-center gap-1 rounded-full border px-2 h-[22px] text-[11px] uppercase tracking-[0.04em] font-medium leading-none",
         tones[tone],
         className
       )}

@@ -16,13 +16,13 @@ export default function PageHeader({
 }) {
   return (
     <header className="border-b border-white/5">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
         {breadcrumbs && (
-          <nav className="text-xs text-zinc-500 flex items-center gap-1 mb-3">
+          <nav className="text-xs text-zinc-500 flex items-center gap-1 mb-4">
             {breadcrumbs.map((b, i) => (
               <span key={`${b.label}-${i}`} className="flex items-center gap-1">
                 {b.href ? (
-                  <Link href={b.href} className="hover:text-zinc-300">
+                  <Link href={b.href} className="hover:text-zinc-300 transition-colors">
                     {b.label}
                   </Link>
                 ) : (
@@ -35,18 +35,20 @@ export default function PageHeader({
             ))}
           </nav>
         )}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             {eyebrow && (
-              <div className="text-[11px] uppercase tracking-widest text-claw-500">
+              <div className="text-[11px] uppercase tracking-[0.18em] text-claw-400">
                 {eyebrow}
               </div>
             )}
-            <h1 className="mt-1 text-3xl md:text-4xl font-semibold tracking-tight">
+            <h1 className="mt-2 text-display text-3xl md:text-5xl font-semibold tracking-extra-tight text-white text-balance">
               {title}
             </h1>
             {description && (
-              <p className="mt-2 text-zinc-400 max-w-2xl">{description}</p>
+              <p className="mt-3 text-zinc-400 text-base md:text-lg max-w-2xl leading-relaxed">
+                {description}
+              </p>
             )}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}

@@ -47,126 +47,14 @@ export interface RadarMeme {
   sampleTweetCount: number;
 }
 
-const NOW = new Date().toISOString();
-
-export const RADAR_MEMES: RadarMeme[] = [
-  {
-    id: "shibatoshi",
-    name: "Shibatoshi",
-    ticker: "SHIBATOSHI",
-    shortDescription:
-      "Shiba meets Satoshi — dog-coin nostalgia fused with Bitcoin maxi imagery, climbing X timelines.",
-    scores: {
-      trend: 94,
-      xAttention: 96,
-      communityMomentum: 91,
-      memeCoinFit: 95,
-      onchainRelevance: 88,
-      launchTiming: 92,
-    },
-    launchReadiness: "high",
-    concept: {
-      idea:
-        "Shibatoshi — Shiba + Satoshi meme narrative blending dog-coin OG energy with Bitcoin maxi imagery on X.",
-      tokenName: "Shibatoshi",
-      ticker: "SHIBATOSHI",
-      chain: "solana",
-      theme: "Shiba + Satoshi mythos · neon Bitcoin overlays · dog-coin OG aesthetics",
-      audience: "Dog-coin OGs, Bitcoin maxis, X-native meme traders",
-      launchStyle: "fair-launch",
-    },
-    source: "X · last 24h",
-    detectedAt: NOW,
-    sampleTweetCount: 2840,
-  },
-  {
-    id: "grok-cat",
-    name: "Grok Cat",
-    ticker: "GROKCAT",
-    shortDescription:
-      "AI-cat archetype climbing X timelines. Grok-native energy, cat memes for the AI era.",
-    scores: {
-      trend: 88,
-      xAttention: 92,
-      communityMomentum: 85,
-      memeCoinFit: 90,
-      onchainRelevance: 81,
-      launchTiming: 84,
-    },
-    launchReadiness: "medium",
-    concept: {
-      idea:
-        "Grok Cat — an AI cat meme born on X, riding the Grok-native AI cat archetype.",
-      tokenName: "Grok Cat",
-      ticker: "GROKCAT",
-      chain: "solana",
-      theme: "AI cat character · cyber/grok aesthetics · neon-on-dark",
-      audience: "AI-curious crypto natives, Grok power users, cat-meme traders",
-      launchStyle: "hype-raid",
-    },
-    source: "X · last 24h",
-    detectedAt: NOW,
-    sampleTweetCount: 1420,
-  },
-  {
-    id: "based-frog",
-    name: "Based Frog",
-    ticker: "BFROG",
-    shortDescription:
-      "Classic frog meme reborn for the on-chain culture wars on X.",
-    scores: {
-      trend: 82,
-      xAttention: 84,
-      communityMomentum: 86,
-      memeCoinFit: 88,
-      onchainRelevance: 80,
-      launchTiming: 78,
-    },
-    launchReadiness: "medium",
-    concept: {
-      idea:
-        "Based Frog — the classic frog meme reborn for on-chain culture wars on X.",
-      tokenName: "Based Frog",
-      ticker: "BFROG",
-      chain: "solana",
-      theme: "Classic frog meme reframed · on-chain culture overlay",
-      audience: "Frog meme veterans, on-chain culture posters, /biz/-crypto crossover",
-      launchStyle: "community-led",
-    },
-    source: "X · last 24h",
-    detectedAt: NOW,
-    sampleTweetCount: 980,
-  },
-  {
-    id: "npc-whale",
-    name: "NPC Whale",
-    ticker: "NPCWHALE",
-    shortDescription:
-      "Whale-watching culture collides with the NPC meme. Early signal, watch closely.",
-    scores: {
-      trend: 79,
-      xAttention: 81,
-      communityMomentum: 76,
-      memeCoinFit: 84,
-      onchainRelevance: 83,
-      launchTiming: 70,
-    },
-    launchReadiness: "watch",
-    concept: {
-      idea:
-        "NPC Whale — whale-watching culture collides with NPC meme satire on X.",
-      tokenName: "NPC Whale",
-      ticker: "NPCWHALE",
-      chain: "solana",
-      theme: "Whale + NPC satire · pixel-art overlay · whale-alerts inspired",
-      audience: "On-chain whale-watchers, NPC meme posters, alert-bot subscribers",
-      launchStyle: "stealth",
-    },
-    source: "X · last 24h",
-    detectedAt: NOW,
-    sampleTweetCount: 540,
-  },
-];
+// Real-time radar feed. Empty until the X API + Grok trend search + on-chain
+// indexer pipeline is wired in via /api/meme-radar. The UI shows a clean
+// "Real-time trends are connecting" empty state when this is [].
+//
+// To re-enable a curated demo feed for marketing screenshots, drop a few
+// RadarMeme entries back here — but the live product should ship empty so
+// nothing on screen pretends to be a real trend it isn't.
+export const RADAR_MEMES: RadarMeme[] = [];
 
 export function getRadarMeme(id: string): RadarMeme | undefined {
   return RADAR_MEMES.find((m) => m.id === id);

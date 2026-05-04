@@ -24,34 +24,59 @@ export default function MemeRadarSection({
       {showHeader && (
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-md bg-claw-500/10 border border-claw-500/30 flex items-center justify-center text-claw-400">
-              <Radar className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-full border border-claw-500/25 bg-claw-500/[0.06] flex items-center justify-center text-claw-400">
+              <Radar className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <div className="text-base font-semibold text-zinc-100">
+                <div className="text-base font-semibold text-white tracking-tight">
                   Real-time Meme Radar
                 </div>
-                <Badge tone="live">Live</Badge>
-                <Badge tone="mock">Mock data</Badge>
+                <Badge tone="soon">Connecting</Badge>
               </div>
-              <p className="text-xs text-zinc-500 mt-1">
-                Detect → Analyze → Generate → Launch. Pick any signal below
-                to prefill the launch wizard.
+              <p className="text-sm text-zinc-500 mt-1">
+                Detect → Analyze → Generate → Launch
               </p>
             </div>
-          </div>
-          <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-            Detected {memes.length} memes
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-        {memes.map((m) => (
-          <MemeCard key={m.id} meme={m} compact={compact} />
-        ))}
-      </div>
+      {memes.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {memes.map((m) => (
+            <MemeCard key={m.id} meme={m} compact={compact} />
+          ))}
+        </div>
+      )}
     </section>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="surface p-12 md:p-16 text-center">
+      <div className="mx-auto h-12 w-12 rounded-full border border-claw-500/25 bg-claw-500/[0.06] flex items-center justify-center text-claw-400 mb-6 relative">
+        <Radar className="h-5 w-5" />
+        <span className="absolute inset-0 rounded-full border border-claw-500/30 animate-ping" />
+      </div>
+      <div className="text-display text-2xl md:text-3xl font-semibold tracking-extra-tight text-white text-balance max-w-md mx-auto">
+        Real-time trends are connecting.
+      </div>
+      <p className="mt-3 text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+        Once X API + Grok trend search + on-chain indexers are wired in,
+        live trending memes appear here ready to be turned into launches.
+      </p>
+      <div className="mt-7 flex items-center justify-center gap-2 flex-wrap">
+        <Badge tone="info">Pipeline · X API</Badge>
+        <Badge tone="info">Pipeline · Grok search</Badge>
+        <Badge tone="info">Pipeline · On-chain</Badge>
+      </div>
+      <p className="mt-7 text-xs text-zinc-600">
+        In the meantime, you can launch from your own idea via the Launch wizard.
+      </p>
+    </div>
   );
 }
