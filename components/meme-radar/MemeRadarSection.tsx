@@ -29,10 +29,15 @@ export default function MemeRadarSection({
                 <div className="text-[18px] font-black text-ink-1000 tracking-tight">
                   Real-time Meme Radar
                 </div>
-                <Badge tone="mock">MOCK</Badge>
+                {memes.length === 0 ? (
+                  <Badge tone="soon">Pipeline</Badge>
+                ) : (
+                  <Badge tone="live">Live</Badge>
+                )}
               </div>
               <p className="text-[12px] text-ink-1000/65 mt-1 font-bold">
-                Detect → Analyze → Generate → Launch → Monitor · {RADAR_MEMES.length} signals
+                Detect → Analyze → Generate → Launch → Monitor ·{" "}
+                {memes.length === 0 ? "no signals yet" : `${memes.length} signals`}
               </p>
             </div>
           </div>
