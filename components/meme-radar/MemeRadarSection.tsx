@@ -32,10 +32,10 @@ export default function MemeRadarSection({
                 <div className="text-base font-semibold text-white tracking-tight">
                   Real-time Meme Radar
                 </div>
-                <Badge tone="soon">Connecting</Badge>
+                <Badge tone="mock">MOCK</Badge>
               </div>
               <p className="text-sm text-zinc-500 mt-1">
-                Detect → Analyze → Generate → Launch
+                Detect → Analyze → Generate → Launch → Monitor · {RADAR_MEMES.length} signals
               </p>
             </div>
           </div>

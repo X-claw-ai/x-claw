@@ -24,12 +24,23 @@ export interface ConceptInput {
   logoDataUrl?: string | null;
 }
 
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
 export interface LaunchKit {
+  // ── Token identity ─────────────────────────────────────────────────
   tokenName: string;
   ticker: string;
   shortDescription: string;
   longDescription: string;
+  memeThesis: string;        // why the meme works as a coin
+  tagline: string;           // single-line punch
   mascotConcept: string;
+  imagePrompt: string;       // image-gen prompt for the logo
+
+  // ── Pump.fun metadata ──────────────────────────────────────────────
   pumpMetadata: {
     name: string;
     symbol: string;
@@ -39,13 +50,29 @@ export interface LaunchKit {
     website: string;
     image: string;
   };
+
+  // ── X marketing content ────────────────────────────────────────────
   xBio: string;
-  launchTweets: string[];
-  raidReplies: string[];
-  influencerDmTemplates: string[];
+  launchTweets: string[];                   // 10
+  viralHooks: string[];                     // 5
+  threadIdeas: string[];                    // 5
+  raidReplies: string[];                    // 20
+  influencerDmTemplates: string[];          // 5
+  founderAnnouncement: string;
+  productAnnouncement: string;
+
+  // ── Community content ──────────────────────────────────────────────
   telegramAnnouncement: string;
+  discordAnnouncement: string;
+  communityOnboarding: string;
+  raidMission: string;
+  faq: FaqItem[];                           // 5-7 Q/A
+
+  // ── Discovery copy ─────────────────────────────────────────────────
   dexscreenerCopy: string;
   cmcDescription: string;
+
+  // ── Plan + checklist ───────────────────────────────────────────────
   sevenDayPlan: { day: number; title: string; bullets: string[] }[];
   dailyChecklist: string[];
 }

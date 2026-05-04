@@ -16,37 +16,31 @@ X CLAW is an independent open-source project. It is not affiliated with xAI, X, 
 ## The agent loop
 
 ```
-Detect  →  Analyze  →  Generate  →  Launch
+Detect  →  Analyze  →  Generate  →  Launch  →  Monitor
 ```
 
-Most launch tools wait for users to bring an idea. X CLAW watches the **attention layer** first — the X timeline where memes are actually born — and then turns the strongest signals into autonomous Pump.fun launches.
+| Phase | What the agent does | Where in the app |
+|---|---|---|
+| **01 Detect** | Real-time Meme Radar scans X for trending memes, viral keywords, fast-growing narratives. | `/dashboard` |
+| **02 Analyze** | 10-criteria launch readiness scoring (viral, clarity, X engagement, ticker strength, on-chain, timing, saturation, brand/legal). | `/analyze?meme=<id>` |
+| **03 Generate** | Full AI launch kit: token identity, Pump.fun metadata, 10 launch tweets + 5 viral hooks + 5 thread ideas + 20 raid replies + 5 DM templates + founder/product/discord/community announcements + raid mission + FAQ + 7-day plan + checklist. | `/launch` (wizard step 0–2) |
+| **04 Launch** | Direct Pump.fun execution. Real Solana mainnet, real wallet signature. X CLAW never holds keys. | `/launch` (wizard step 3–5) |
+| **05 Monitor** | Post-launch dashboard: supply, top-10 holders, creator wallet activity, Grok-recommended next actions, risk signals. | `/launches/[mint]` |
 
-| Phase | What the agent does |
-|---|---|
-| **01 Detect** | Real-time Meme Radar surfaces trending memes, keywords, and viral narratives on X. |
-| **02 Analyze** | Each meme is scored across trend, X attention, community momentum, meme-coin fit, on-chain relevance, and launch timing. |
-| **03 Generate** | Selecting a meme prefills the launch wizard: token concept, ticker, descriptions, mascot direction, X copy, raid replies, Telegram announcement, Dexscreener copy, 7-day plan. |
-| **04 Launch** | Direct Pump.fun execution (real tx), then on-chain monitoring on the per-token page. |
+## Live integrations
 
-### Engines (cross-cutting capabilities)
-
-| Engine | What the agent does |
-|---|---|
-| **Attention Engine** | Real-time Meme Radar · meme idea generation · narrative hooks · viral angles · 10 X launch posts per kit |
-| **Community Engine** | 20 raid replies · Telegram announcement · 5 influencer DM templates · 7-day campaign plan |
-| **On-chain Intelligence** | Wallet tracking · holder analytics · liquidity monitoring · volume signals · launch monitoring |
-| **Launch Execution** | Token concept · ticker · Pump.fun metadata · direct Pump.fun launch (real tx) · post-launch monitoring |
-
-## Pages
-
-| Route | What |
-|---|---|
-| `/` | Landing — hero, attention layer (live radar preview), engines, safety, CTA |
-| `/dashboard` | Command Center — Real-time Meme Radar at the top, four engine sections below |
-| `/launch` | The launch wizard — Concept → Generate → Review → Wallet → Sign → Launched. Accepts `?meme=<id>&go=1` to prefill from the radar. |
-| `/launches` | Your launched tokens (localStorage today, Supabase next) |
-| `/launches/[mint]` | Per-token monitor — supply, holders, creator wallet, post-launch X content |
-| `/settings` | Profile placeholder |
+| Surface | Real target | Status |
+|---|---|---|
+| `/api/meme-radar` | xAI/Grok trends + X API + on-chain indexers | Mock feed (4 memes) |
+| `/api/meme-analyze` | Grok analysis from radar meme | **Wired** (mock fallback) |
+| `/api/generate-launch-kit` | xAI Grok (primary) → Anthropic / OpenAI fallback | **Wired** |
+| `/api/pump-launch` | Pump.fun IPFS + PumpPortal `trade-local` | **Wired** |
+| `/api/wallet-tracking` | Solana RPC + Grok summary | **Wired** |
+| `/api/x-post-generator` | Grok content generation | **Wired** |
+| `/api/token-info` | Solana RPC `getTokenSupply` + `getTokenLargestAccounts` | **Wired** |
+| `/api/monitor-actions` | Grok next-actions advisor | **Wired** (mock fallback) |
+| Wallet adapter | Phantom + Solflare on Solana mainnet | **Wired** |
+| Launch history | localStorage (per browser) | **Wired** (Supabase next) |
 
 ## Safety model
 
@@ -60,35 +54,33 @@ Agent prepares  →  User approves  →  Wallet signs  →  Launch executes
 - No partnership claims with xAI, X, Grok, Pump.fun, PumpPortal, or Solana.
 - Every on-chain action requires an explicit user wallet signature.
 
-## Live integrations
+## Pages
 
-| Surface | Real target | Status |
-|---|---|---|
-| `/api/meme-radar` | X API + xAI search + on-chain indexer (Helius/Birdeye) | Mock feed wired (real signals next) |
-| `/api/generate-launch-kit` | xAI Grok (primary) → Anthropic / OpenAI fallback | **Wired** |
-| `/api/pump-launch` | Pump.fun IPFS + PumpPortal `trade-local` | **Wired** |
-| `/api/wallet-tracking` | Solana RPC + Grok summary | **Wired** |
-| `/api/x-post-generator` | Grok content generation | **Wired** |
-| `/api/token-info` | Solana RPC `getTokenSupply` + `getTokenLargestAccounts` | **Wired** |
-| Wallet adapter | Phantom + Solflare on Solana mainnet | **Wired** |
-| Launch history | localStorage (per browser) | **Wired** (Supabase next) |
+| Route | What |
+|---|---|
+| `/` | Landing — Hero + 5-phase loop + 4 engines + safety + final CTA |
+| `/dashboard` | Command Center — Real-time Meme Radar (Phase 01) + agent loop sections |
+| `/analyze?meme=<id>` | Launch readiness analysis (Phase 02) — 10 criteria + best angle + risks |
+| `/launch` | Launch wizard (Phase 03 + 04) — Concept → Generate → Review → Wallet → Sign → Launched |
+| `/launches` | Your launched tokens |
+| `/launches/[mint]` | Post-launch monitor (Phase 05) — supply, holders, suggested actions |
+| `/settings` | Profile placeholder |
 
-## LLM provider routing (Grok-first)
+## Phases of development
 
-`/api/generate-launch-kit`, `/api/wallet-tracking`, and `/api/x-post-generator` all flow through `lib/llm/router.ts`:
+```
+Phase 1 — Full Web App MVP                         (this repo, today)
+Phase 2 — GitHub open-source polish + docs         (this repo, ongoing)
+Phase 3 — Telegram Bot integration                 (separate workstream)
+```
 
-1. **xAI Grok** — primary. Set `XAI_API_KEY`.
-2. **Anthropic Claude** — fallback. Set `ANTHROPIC_API_KEY`.
-3. **OpenAI** — last-resort fallback. Set `OPENAI_API_KEY`.
-4. **Local mock** — used automatically when no key is configured.
-
-The UI honestly reports which provider actually served any output (`Generated by Grok` / `Generated by Claude (fallback)` / `Generated by mock`).
+See [ROADMAP.md](./ROADMAP.md) for the public roadmap and [ARCHITECTURE.md](./ARCHITECTURE.md) for the agent + module layout.
 
 ## Tech stack
 
 - Next.js 14 (App Router)
 - TypeScript
-- Tailwind CSS (custom dark / neon theme)
+- Tailwind CSS (custom dark theme, Coinbase-grade typography)
 - `@solana/web3.js` + wallet-adapter (Phantom / Solflare)
 - Pump.fun IPFS + PumpPortal `trade-local`
 - Lucide icons
@@ -110,71 +102,17 @@ npm run dev
 > ⚠️ **Mainnet only.** Pump.fun does not run on devnet. Real tokens, real SOL.
 > Test with a throwaway concept and a 0-SOL dev buy first.
 
-### Browser requirements
-
-- Chromium-based browser (Chrome, Brave, Arc) or Firefox
-- Phantom or Solflare wallet extension installed and unlocked
-- Wallet funded with at least **0.05 SOL** for a comfortable launch margin
-
-See [LAUNCH.md](./LAUNCH.md) for the launch-day runbook.
-
-## Project structure
-
-```
-x-claw/
-├── app/
-│   ├── layout.tsx
-│   ├── page.tsx                       # Landing
-│   ├── dashboard/page.tsx             # Command Center (4 phases)
-│   ├── launch/page.tsx                # Launch wizard
-│   ├── launches/page.tsx              # Launch history list
-│   ├── launches/[mint]/page.tsx       # Per-token monitor
-│   ├── settings/page.tsx
-│   └── api/
-│       ├── generate-launch-kit/       Grok kit generator
-│       ├── pump-launch/               IPFS upload + PumpPortal tx builder
-│       ├── wallet-tracking/           Solana RPC snapshot + Grok brief
-│       ├── x-post-generator/          Grok X content
-│       └── token-info/                Mint supply + top holders
-├── components/
-│   ├── shell/                         Navbar, Footer, PageHeader, WalletPill
-│   ├── ui/                            Badge, Button, Card, StatCard, StepIndicator, Field
-│   ├── landing/                       Hero, Engines, Safety, FinalCTA
-│   ├── dashboard/                     CommandCenter (4 phases)
-│   ├── pump-launch/                   PumpLaunchWizard (6 steps)
-│   ├── wallet-tracking/               WalletTrackingAgent (reused on monitor page)
-│   ├── x-post-generator/              XPostGeneratorAgent (reused on monitor page)
-│   ├── launches/                      LaunchesTable, TokenInfoBlock, LaunchMonitorPage
-│   └── solana/                        WalletContext (Phantom + Solflare)
-├── lib/
-│   ├── llm/                           Provider-agnostic LLM router + prompts
-│   ├── pumpfun/                       Pump.fun IPFS + PumpPortal adapters
-│   ├── solana/                        Connection helper, walletReport, tokenInfo
-│   ├── storage/launches.ts            localStorage adapter
-│   ├── generate.ts                    Mock launch kit fallback
-│   ├── types.ts
-│   └── ...
-├── supabase/schema.sql
-├── LICENSE  ·  SECURITY.md  ·  CONTRIBUTING.md  ·  LAUNCH.md
-├── next.config.mjs
-├── tailwind.config.ts
-└── package.json
-```
-
-## Compliance copy rules (enforced)
+## Compliance copy rules (enforced in all prompts)
 
 - No guaranteed-profit, guaranteed-viral, or guaranteed-listing language.
-- No fake partnership claims with xAI, X, Grok, Pump.fun, PumpPortal, or Solana.
+- No fake partnership claims.
 - No silent posting, sending, transferring, or signing.
-- Provider transparency — the UI never claims an LLM that didn't actually run.
+- Provider transparency — the UI always reports which LLM produced any given output.
 
-## Long-term direction
+## Related docs
 
-The agent loop scales naturally. Each phase deepens over time:
-
-- **Attention:** stronger trend research, X timeline ingestion, narrative scoring.
-- **Community:** real-time raid coordination, multi-channel publishing.
-- **Intelligence:** Helius / Birdeye integration, sniper detection, liquidity alerts.
-- **Execution:** direct Pump.fun program calls (no PumpPortal dependency), Jito bundles for time-critical launches.
-
-X CLAW will keep one product, one promise: **from meme idea to Pump.fun launch**, autonomously, with the user as the only signer.
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — modules, data flow, where to plug new providers.
+- [ROADMAP.md](./ROADMAP.md) — Phase 1/2/3 plan + per-phase checklists.
+- [LAUNCH.md](./LAUNCH.md) — launch-day runbook.
+- [SECURITY.md](./SECURITY.md) — vulnerability reporting + safety rules.
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — module conventions and PR rules.

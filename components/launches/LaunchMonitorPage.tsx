@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import TokenInfoBlock from "@/components/launches/TokenInfoBlock";
+import MonitorActionsBlock from "@/components/launches/MonitorActionsBlock";
 import WalletTrackingAgent from "@/components/wallet-tracking/WalletTrackingAgent";
 import XPostGeneratorAgent from "@/components/x-post-generator/XPostGeneratorAgent";
 import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
@@ -102,6 +103,29 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
           </div>
         </div>
       </div>
+
+      {/* 05 — Monitor: suggested next actions (from Grok) */}
+      <PhaseHeader
+        index="05"
+        name="Monitor — Suggested actions"
+        tag="Grok-recommended next moves for your launch"
+        icon={LineChart}
+      />
+      <MonitorActionsBlock
+        mint={mint}
+        tokenName={tokenName}
+        ticker={ticker}
+        supplyUiAmount={0}
+        top10SharePct={0}
+        recentTxCount={0}
+        hoursSinceLaunch={
+          record?.createdAt
+            ? Math.floor(
+                (Date.now() - new Date(record.createdAt).getTime()) / 3_600_000
+              )
+            : undefined
+        }
+      />
 
       {/* 03 — Intelligence (most useful immediately after launch) */}
       <PhaseHeader

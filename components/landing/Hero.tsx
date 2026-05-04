@@ -42,18 +42,19 @@ export default function Hero() {
           Solana mainnet · Phantom / Solflare · X CLAW never holds your keys.
         </div>
 
-        <div className="hairline mt-20 max-w-3xl" />
+        <div className="hairline mt-20 max-w-4xl" />
 
-        <div className="mt-10 max-w-3xl">
+        <div className="mt-10 max-w-4xl">
           <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500 mb-5">
             The agent loop
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
             {[
               { k: "Detect", d: "Real-time meme radar across X" },
-              { k: "Analyze", d: "Trend, attention, community, on-chain" },
-              { k: "Generate", d: "Concept, ticker, copy, full kit" },
+              { k: "Analyze", d: "10-criteria launch readiness scoring" },
+              { k: "Generate", d: "Full launch kit, 30+ assets" },
               { k: "Launch", d: "Direct Pump.fun execution" },
+              { k: "Monitor", d: "On-chain + X engagement dashboard" },
             ].map((s, i) => (
               <div key={s.k} className="bg-ink-950 p-5">
                 <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-600">

@@ -597,6 +597,21 @@ function ReviewStep({
           <Field label="Mascot concept" className="sm:col-span-2">
             <Textarea value={kit.mascotConcept} onChange={(e) => setKit({ ...kit, mascotConcept: e.target.value })} />
           </Field>
+          {kit.tagline && (
+            <Field label="Tagline" className="sm:col-span-2">
+              <Input value={kit.tagline} onChange={(e) => setKit({ ...kit, tagline: e.target.value })} />
+            </Field>
+          )}
+          {kit.memeThesis && (
+            <Field label="Meme thesis" hint="Why this meme works on X right now" className="sm:col-span-2">
+              <Textarea value={kit.memeThesis} onChange={(e) => setKit({ ...kit, memeThesis: e.target.value })} />
+            </Field>
+          )}
+          {kit.imagePrompt && (
+            <Field label="Image generation prompt" hint="Paste into your image generator of choice" className="sm:col-span-2">
+              <Textarea value={kit.imagePrompt} onChange={(e) => setKit({ ...kit, imagePrompt: e.target.value })} />
+            </Field>
+          )}
         </div>
 
         <div className="hairline" />
@@ -604,6 +619,21 @@ function ReviewStep({
         <div className="grid sm:grid-cols-2 gap-4">
           <PreviewBlock title="X bio" icon={<Twitter className="h-4 w-4" />} text={kit.xBio} />
           <PreviewBlock title="Telegram announcement" icon={<TgSend className="h-4 w-4" />} text={kit.telegramAnnouncement} />
+          {kit.discordAnnouncement && (
+            <PreviewBlock title="Discord announcement" icon={<Sparkles className="h-4 w-4" />} text={kit.discordAnnouncement} />
+          )}
+          {kit.communityOnboarding && (
+            <PreviewBlock title="Community onboarding" icon={<Sparkles className="h-4 w-4" />} text={kit.communityOnboarding} />
+          )}
+          {kit.raidMission && (
+            <PreviewBlock title="Raid mission (first 30 min)" icon={<Sparkles className="h-4 w-4" />} text={kit.raidMission} />
+          )}
+          {kit.founderAnnouncement && (
+            <PreviewBlock title="Founder announcement" icon={<Twitter className="h-4 w-4" />} text={kit.founderAnnouncement} />
+          )}
+          {kit.productAnnouncement && (
+            <PreviewBlock title="Product announcement" icon={<Twitter className="h-4 w-4" />} text={kit.productAnnouncement} />
+          )}
           <PreviewBlock title="Dexscreener copy" icon={<Sparkles className="h-4 w-4" />} text={kit.dexscreenerCopy} />
           <PreviewBlock title="CMC / CoinGecko description" icon={<Sparkles className="h-4 w-4" />} text={kit.cmcDescription} />
         </div>
@@ -614,7 +644,30 @@ function ReviewStep({
           <ListBlock title={`${kit.launchTweets.length} launch tweets`} items={kit.launchTweets} />
           <ListBlock title={`${kit.raidReplies.length} raid replies`} items={kit.raidReplies} />
           <ListBlock title={`${kit.influencerDmTemplates.length} influencer DM templates`} items={kit.influencerDmTemplates} />
+          {kit.viralHooks && kit.viralHooks.length > 0 && (
+            <ListBlock title={`${kit.viralHooks.length} viral hooks`} items={kit.viralHooks} />
+          )}
+          {kit.threadIdeas && kit.threadIdeas.length > 0 && (
+            <ListBlock title={`${kit.threadIdeas.length} thread ideas`} items={kit.threadIdeas} />
+          )}
         </div>
+
+        {kit.faq && kit.faq.length > 0 && (
+          <>
+            <div className="hairline" />
+            <div>
+              <h3 className="text-sm font-semibold mb-3">FAQ ({kit.faq.length})</h3>
+              <div className="grid md:grid-cols-2 gap-3">
+                {kit.faq.map((f, i) => (
+                  <div key={i} className="card p-4">
+                    <div className="text-sm font-semibold text-white">Q. {f.q}</div>
+                    <div className="mt-2 text-sm text-zinc-400 leading-relaxed">A. {f.a}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="hairline" />
 

@@ -62,18 +62,18 @@ export default function MemeCard({ meme, compact = false }: Props) {
 
       <div className="mt-auto flex flex-col sm:flex-row gap-2 pt-2">
         <Link
-          href={`/launch?meme=${meme.id}`}
+          href={`/analyze?meme=${meme.id}`}
           className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-claw-500/40 transition flex-1"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Generate Launch Kit
+          Analyze
         </Link>
         <Link
           href={`/launch?meme=${meme.id}&go=1`}
           className="inline-flex items-center justify-center gap-1.5 rounded-md bg-claw-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-claw-400 transition flex-1"
         >
           <Rocket className="h-3.5 w-3.5" />
-          Launch with X CLAW
+          Launch
           <ArrowRight className="h-3 w-3" />
         </Link>
       </div>

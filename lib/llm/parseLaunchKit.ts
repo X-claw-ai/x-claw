@@ -1,13 +1,5 @@
 import type { LaunchKit } from "@/lib/types";
 
-// ─────────────────────────────────────────────────────────────────────────
-// Parse + harden the JSON returned by the LLM into a LaunchKit.
-//
-// We intentionally avoid pulling in zod to keep the dependency surface
-// small. Validation is manual but exhaustive enough that the rest of the
-// app can trust the shape.
-// ─────────────────────────────────────────────────────────────────────────
-
 export class LaunchKitParseError extends Error {
   raw: string;
   constructor(message: string, raw: string) {
@@ -57,13 +49,39 @@ export function parseLaunchKit(raw: string): LaunchKit {
     obj.ticker = obj.ticker.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
   }
 
-  // Coerce arrays so downstream UI doesn't crash if the model returned wrong types.
+  // Coerce arrays
   obj.launchTweets = ensureStringArray(obj.launchTweets);
   obj.raidReplies = ensureStringArray(obj.raidReplies);
   obj.influencerDmTemplates = ensureStringArray(obj.influencerDmTemplates);
   obj.dailyChecklist = ensureStringArray(obj.dailyChecklist);
+  obj.viralHooks = ensureStringArray(obj.viralHooks ?? []);
+  obj.threadIdeas = ensureStringArray(obj.threadIdeas ?? []);
 
-  // sevenDayPlan should be exactly 7 entries with the right shape.
+  // String fields with defaults if model omitted them
+  obj.memeThesis = ensureString(obj.memeThesis, "");
+  obj.tagline = ensureString(obj.tagline, "");
+  obj.imagePrompt = ensureString(obj.imagePrompt, "");
+  obj.founderAnnouncement = ensureString(obj.founderAnnouncement, "");
+  obj.productAnnouncement = ensureString(obj.productAnnouncement, "");
+  obj.discordAnnouncement = ensureString(obj.discordAnnouncement, "");
+  obj.communityOnboarding = ensureString(obj.communityOnboarding, "");
+  obj.raidMission = ensureString(obj.raidMission, "");
+
+  // FAQ array of {q,a}
+  if (!Array.isArray(obj.faq)) {
+    obj.faq = [];
+  } else {
+    obj.faq = (obj.faq as unknown[])
+      .filter(
+        (x): x is { q: unknown; a: unknown } =>
+          typeof x === "object" && x !== null && "q" in x && "a" in x
+      )
+      .slice(0, 7)
+      .map((x) => ({ q: String(x.q ?? ""), a: String(x.a ?? "") }))
+      .filter((x) => x.q && x.a);
+  }
+
+  // sevenDayPlan
   if (!Array.isArray(obj.sevenDayPlan)) {
     obj.sevenDayPlan = [];
   } else {
@@ -80,7 +98,6 @@ export function parseLaunchKit(raw: string): LaunchKit {
       }));
   }
 
-  // pumpMetadata sanity
   if (
     typeof obj.pumpMetadata !== "object" ||
     obj.pumpMetadata === null ||
@@ -108,4 +125,8 @@ function ensureStringArray(v: unknown): string[] {
   return v
     .map((x) => (typeof x === "string" ? x : String(x ?? "")))
     .filter((x) => x.length > 0);
+}
+
+function ensureString(v: unknown, fallback: string): string {
+  return typeof v === "string" && v.length > 0 ? v : fallback;
 }
