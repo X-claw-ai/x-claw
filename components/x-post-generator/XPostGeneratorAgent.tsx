@@ -234,7 +234,7 @@ export default function XPostGeneratorAgent({
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-koki-500 px-3.5 py-2 text-xs font-semibold hover:bg-koki-400"
+                  className="btn btn-primary !py-2 !px-3.5 !text-xs"
                 >
                   Open whole thread in X compose
                   <ExternalLink className="h-3 w-3" />

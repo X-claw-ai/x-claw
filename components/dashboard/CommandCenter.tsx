@@ -207,8 +207,10 @@ function Tile({
       <div className="flex items-start justify-between gap-2">
         {Icon ? (
           <div
-            className={`h-10 w-10 rounded-full border-[1.5px] border-ink-1000 flex items-center justify-center ${
-              highlight ? "text-koki-500 bg-koki-500/10" : "text-ink-1000 bg-koki-500"
+            className={`h-10 w-10 rounded-full border-[1.5px] flex items-center justify-center ${
+              highlight
+                ? "border-koki-500 text-koki-500 bg-ink-1000"
+                : "border-ink-1000 text-ink-1000 bg-koki-500"
             }`}
           >
             <Icon className="h-4 w-4" />

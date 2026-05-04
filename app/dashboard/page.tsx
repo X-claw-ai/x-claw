@@ -17,7 +17,7 @@ export default function DashboardPage() {
         actions={
           <Link
             href="/launch"
-            className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-koki-500 px-3.5 py-2 text-sm font-semibold hover:bg-koki-400 transition"
+            className="btn btn-primary !py-2 !px-3.5 !text-sm"
           >
             <Rocket className="h-4 w-4" />
             Launch a Memecoin

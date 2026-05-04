@@ -78,7 +78,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               href={pumpUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md bg-koki-500 text-koki-500 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400"
+              className="btn btn-primary !py-1.5 !px-3 !text-xs"
             >
               Pump.fun <ExternalLink className="h-3 w-3" />
             </a>
