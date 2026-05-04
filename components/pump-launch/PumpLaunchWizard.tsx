@@ -485,18 +485,26 @@ function ConceptStep({
           />
         </Field>
         <Field label="Logo / mascot" hint="PNG, JPG, or GIF · uploaded to Pump.fun IPFS at launch" className="sm:col-span-2">
-          <input
-            type="file"
-            accept="image/*"
-            className="block w-full text-sm text-ink-1000/72 file:mr-3 file:rounded-md file:border-0 file:bg-koki-500 file:px-3 file:py-1.5 file:text-ink-1000 file:font-semibold hover:file:bg-koki-400"
-            onChange={(e) => onLogoChange(e.target.files?.[0] ?? null)}
-          />
+          <div className="flex items-center gap-3">
+            <label className="btn btn-primary !py-2 !px-4 !text-xs cursor-pointer">
+              Choose file
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => onLogoChange(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <span className="text-xs font-bold text-ink-1000/65">
+              {concept.logoDataUrl ? "Image selected" : "No file chosen"}
+            </span>
+          </div>
           {concept.logoDataUrl && (
             <div className="mt-3 flex items-center gap-3">
               <img
                 src={concept.logoDataUrl}
                 alt="Logo preview"
-                className="h-16 w-16 rounded-md border border-ink-1000 object-cover"
+                className="h-16 w-16 rounded-md border-[1.5px] border-ink-1000 object-cover"
               />
               <Badge>Preview</Badge>
             </div>
