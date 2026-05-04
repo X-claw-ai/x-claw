@@ -111,6 +111,10 @@ export default function PumpLaunchWizard() {
   const [autoPiloting, setAutoPiloting] = useState(false);
   const [autoReasoning, setAutoReasoning] = useState<string | null>(null);
 
+  // AI image generation (Aurora → DALL-E fallback)
+  const [generatingLogo, setGeneratingLogo] = useState(false);
+  const [logoProvider, setLogoProvider] = useState<string | null>(null);
+
   // Real-time Meme Radar prefill: when the user lands here from a radar
   // card, we hydrate the concept from /lib/memeRadar.ts and remember which
   // meme it came from so the UI can show the source banner.
@@ -198,6 +202,47 @@ export default function PumpLaunchWizard() {
   }
 
   /**
+   * Generate a logo image via xAI Aurora (DALL-E 3 fallback) using a prompt
+   * built from the current concept (or kit's imagePrompt if available).
+   * Writes the resulting data URL into concept.logoDataUrl.
+   */
+  async function runGenerateLogo(promptOverride?: string) {
+    const prompt =
+      promptOverride ||
+      kit?.imagePrompt ||
+      `Square logo for a Solana memecoin "${concept.tokenName || "Token"}" ($${
+        concept.ticker || "TOKEN"
+      }). Theme: ${concept.theme || "X-native meme aesthetic"}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness.`;
+
+    setGeneratingLogo(true);
+    try {
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          walletPubkey: publicKey ? publicKey.toBase58() : undefined,
+          feature: kit ? "logo-from-kit" : "logo-manual",
+        }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        imageDataUrl?: string;
+        provider?: string;
+        model?: string;
+      };
+      if (data.ok && data.imageDataUrl) {
+        setField("logoDataUrl", data.imageDataUrl);
+        setLogoProvider(data.provider ? `${data.provider}${data.model ? ` · ${data.model}` : ""}` : null);
+      }
+    } catch {
+      // silent — user can retry or upload manually
+    } finally {
+      setGeneratingLogo(false);
+    }
+  }
+
+  /**
    * Auto-pilot — Grok invents the concept itself, then immediately runs
    * launch-kit generation. The user lands on Step 2 (Review) with everything
    * filled in. They can still edit before signing.
@@ -247,8 +292,16 @@ export default function PumpLaunchWizard() {
       setConcept(seeded);
       setAutoReasoning(c.reasoning);
 
-      // Chain straight into the launch-kit generation with this concept
+      // Chain: launch-kit (text) → logo image (Aurora) — both fire in series
+      // so the user lands on Review with kit AND logo already in place.
       await runGenerate(seeded);
+
+      // Build a concept-aware logo prompt and generate it. We don't await
+      // setKit — its imagePrompt is read from the latest fetch result that
+      // runGenerate already stashed in state, so we use the seeded concept
+      // directly here.
+      const logoPrompt = `Square logo for a Solana memecoin "${seeded.tokenName}" ($${seeded.ticker}). Theme: ${seeded.theme}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness, no copyrighted IP.`;
+      await runGenerateLogo(logoPrompt);
     } catch (err) {
       setFallbackReason(err instanceof Error ? err.message : "Auto-pilot failed");
     } finally {
@@ -394,6 +447,9 @@ export default function PumpLaunchWizard() {
           onAutoPilot={runAutoPilot}
           autoPiloting={autoPiloting}
           autoReasoning={autoReasoning}
+          onGenerateLogo={() => runGenerateLogo()}
+          generatingLogo={generatingLogo}
+          logoProvider={logoProvider}
         />
       )}
 
@@ -453,6 +509,9 @@ function ConceptStep({
   onAutoPilot,
   autoPiloting,
   autoReasoning,
+  onGenerateLogo,
+  generatingLogo,
+  logoProvider,
 }: {
   concept: ConceptInput;
   setField: <K extends keyof ConceptInput>(k: K, v: ConceptInput[K]) => void;
@@ -461,6 +520,9 @@ function ConceptStep({
   onAutoPilot: () => void;
   autoPiloting: boolean;
   autoReasoning: string | null;
+  onGenerateLogo: () => void;
+  generatingLogo: boolean;
+  logoProvider: string | null;
 }) {
   function onLogoChange(file: File | null) {
     if (!file) return setField("logoDataUrl", null);
@@ -596,10 +658,28 @@ function ConceptStep({
             placeholder="https://t.me/yourproject"
           />
         </Field>
-        <Field label="Logo / mascot" hint="PNG, JPG, or GIF · uploaded to Pump.fun IPFS at launch" className="sm:col-span-2">
-          <div className="flex items-center gap-3">
-            <label className="btn btn-primary !py-2 !px-4 !text-xs cursor-pointer">
-              Choose file
+        <Field label="Logo / mascot" hint="Generate with Grok Aurora — or upload your own. Either way it ships to Pump.fun IPFS at launch." className="sm:col-span-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={onGenerateLogo}
+              disabled={generatingLogo}
+              className="btn btn-primary !py-2 !px-4 !text-xs disabled:opacity-60"
+            >
+              {generatingLogo ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Aurora drawing…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Generate with Grok
+                </>
+              )}
+            </button>
+            <label className="btn btn-secondary !py-2 !px-4 !text-xs cursor-pointer">
+              Upload file
               <input
                 type="file"
                 accept="image/*"
@@ -608,7 +688,7 @@ function ConceptStep({
               />
             </label>
             <span className="text-xs font-bold text-ink-1000/65">
-              {concept.logoDataUrl ? "Image selected" : "No file chosen"}
+              {concept.logoDataUrl ? "Image ready" : "No image yet"}
             </span>
           </div>
           {concept.logoDataUrl && (
@@ -616,9 +696,24 @@ function ConceptStep({
               <img
                 src={concept.logoDataUrl}
                 alt="Logo preview"
-                className="h-16 w-16 rounded-md border-[1.5px] border-ink-1000 object-cover"
+                className="h-20 w-20 rounded-md border-[1.5px] border-ink-1000 object-cover"
               />
-              <Badge>Preview</Badge>
+              <div className="flex flex-col gap-1">
+                <Badge>Preview</Badge>
+                {logoProvider && (
+                  <span className="text-[10px] font-bold text-ink-1000/65">
+                    Source: {logoProvider}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={onGenerateLogo}
+                  disabled={generatingLogo}
+                  className="text-[11px] font-extrabold text-ink-1000 underline hover:opacity-70 text-left"
+                >
+                  {generatingLogo ? "regenerating…" : "↻ Regenerate"}
+                </button>
+              </div>
             </div>
           )}
         </Field>
