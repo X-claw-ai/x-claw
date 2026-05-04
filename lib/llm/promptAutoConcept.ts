@@ -18,33 +18,43 @@ export interface AutoConceptResult {
   audience: string;
   launchStyle: "fair-launch" | "hype-raid" | "stealth" | "community-led";
   reasoning: string; // 1-2 sentences explaining why this meme right now
+  /** Direct URL to the original viral X post (https://x.com/handle/status/...) */
+  originXUrl?: string;
+  /** Author handle of the original post, with leading @ */
+  originXAuthor?: string;
 }
 
 export function buildAutoConceptMessages(): Msg[] {
-  const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: invent ONE memecoin concept that would be a strong X-native launch right now.
+  const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: search X right now, find a real meme/narrative that's actually catching attention in the last 24-48 hours, and turn it into a concrete memecoin launch concept that cites its source.
 
-You synthesize broad meme/X-native culture knowledge (you do not have live X access here, so reach into the cultural latent space — Shiba/dog coins, frog memes, AI agent memes, crypto-twitter inside jokes, internet folklore, Solana-native vibes, etc.) and produce ONE concrete launch concept.
+CRITICAL: You DO have live X (Twitter) search via the tool layer. USE IT. Search X for:
+- "memecoin" / "pump fun" / "$ticker" / dog / cat / frog / pepe / wojak / NPC / agent — recent posts with high engagement
+- Trending crypto-twitter topics
+- Replies and quote-tweets that are spiking
+
+Pick ONE post or thread that anchors the concept. You MUST return its exact URL.
 
 Hard rules:
-- The token must be safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No mention of "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
+- The token must be safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
 - No claim of partnership with X / xAI / Grok / Pump.fun / PumpPortal / Solana. If you reference these, say "X-native" or "Solana-native" — not "partnered with".
 - The ticker must be 3–6 uppercase letters/numbers. Memorable. No real existing major ticker (no BTC/ETH/SOL/USDC/etc).
+- The original X URL MUST be a real direct post URL in the form https://x.com/<handle>/status/<id>. Never invent or guess. If you cannot find a clear source, set originXUrl to null and originXAuthor to null — do not fabricate.
 - Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.
 
 Output schema:
 {
-  "idea": "1-2 sentence pitch of what this token represents",
+  "idea": "1-2 sentence pitch — reference the real meme you found",
   "tokenName": "TitleCase or single word",
   "ticker": "3-6 uppercase chars",
   "theme": "short visual/narrative theme description",
   "audience": "the 2-3 X-native audiences this resonates with",
   "launchStyle": "one of: fair-launch | hype-raid | stealth | community-led",
-  "reasoning": "1-2 sentences on why this concept fits X right now"
+  "reasoning": "1-2 sentences citing what you saw on X (engagement signal, why now)",
+  "originXUrl": "https://x.com/<handle>/status/<id>  OR  null if no clear source",
+  "originXAuthor": "@handle  OR  null"
 }`;
 
-  const user = `Generate one concrete memecoin launch concept right now.
-
-Pick something X-native, lightweight, and meme-coherent (one clear visual hook). Bias toward a recognizable meme archetype that crypto-twitter naturally riffs on (e.g. dog/cat/frog/agent/NPC/wojak energy) but make it specific and fresh — not a copy of an existing token.
+  const user = `Search X right now for the meme/narrative most likely to drive a Solana memecoin launch in the next 24 hours. Pick the strongest single source post and produce ONE launch concept anchored to it.
 
 Return JSON only.`;
 
@@ -64,7 +74,7 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
 
   const data = JSON.parse(s) as Record<string, unknown>;
 
-  const need: (keyof AutoConceptResult)[] = [
+  const need = [
     "idea",
     "tokenName",
     "ticker",
@@ -72,7 +82,7 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
     "audience",
     "launchStyle",
     "reasoning",
-  ];
+  ] as const;
   for (const k of need) {
     if (typeof data[k] !== "string" || (data[k] as string).trim() === "") {
       throw new Error(`Auto-concept JSON missing field: ${k}`);
@@ -90,6 +100,20 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
     throw new Error(`Auto-concept invalid launchStyle: ${launchStyle}`);
   }
 
+  // originXUrl is optional — only accept real x.com / twitter.com status URLs
+  let originXUrl: string | undefined;
+  if (typeof data.originXUrl === "string") {
+    const u = data.originXUrl.trim();
+    if (/^https?:\/\/(?:x\.com|twitter\.com)\/[^/\s]+\/status\/\d+/.test(u)) {
+      originXUrl = u.replace("twitter.com", "x.com");
+    }
+  }
+  let originXAuthor: string | undefined;
+  if (typeof data.originXAuthor === "string") {
+    const a = data.originXAuthor.trim();
+    if (/^@[A-Za-z0-9_]{1,15}$/.test(a)) originXAuthor = a;
+  }
+
   return {
     idea: data.idea as string,
     tokenName: data.tokenName as string,
@@ -98,5 +122,7 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
     audience: data.audience as string,
     launchStyle,
     reasoning: data.reasoning as string,
+    originXUrl,
+    originXAuthor,
   };
 }

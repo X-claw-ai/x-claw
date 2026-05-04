@@ -44,6 +44,17 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
+  // xAI Grok Live Search — lets the model search X / web during generation
+  // and cite real tweet URLs. Off by default; opt-in via req.liveSearch.
+  if (req.liveSearch) {
+    const sources = (req.liveSearch.sources || ["x"]).map((s) => ({ type: s }));
+    body.search_parameters = {
+      mode: req.liveSearch.mode || "on",
+      sources,
+      max_search_results: req.liveSearch.maxResults || 10,
+      return_citations: true,
+    };
+  }
 
   const res = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
@@ -65,6 +76,14 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
     throw new Error("xAI API returned an unexpected payload shape");
   }
 
+  // xAI returns Live Search citations either at top level or in the choice.
+  const citations: string[] | undefined =
+    Array.isArray(data?.citations) && data.citations.every((c: unknown) => typeof c === "string")
+      ? (data.citations as string[])
+      : Array.isArray(data?.choices?.[0]?.message?.citations)
+      ? (data.choices[0].message.citations as string[])
+      : undefined;
+
   return {
     content: choice,
     provider: "xai",
@@ -75,5 +94,6 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
           output: data.usage.completion_tokens ?? 0,
         }
       : undefined,
+    citations,
   };
 }

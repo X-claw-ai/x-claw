@@ -110,6 +110,8 @@ export default function PumpLaunchWizard() {
   // Auto-pilot mode — Grok invents the concept itself
   const [autoPiloting, setAutoPiloting] = useState(false);
   const [autoReasoning, setAutoReasoning] = useState<string | null>(null);
+  // Origin X post that anchored the auto-pilot concept (Live Search citation)
+  const [originX, setOriginX] = useState<{ url: string; author?: string } | null>(null);
 
   // AI image generation (Aurora → DALL-E fallback)
   const [generatingLogo, setGeneratingLogo] = useState(false);
@@ -279,17 +281,28 @@ export default function PumpLaunchWizard() {
         throw new Error("auto-launch returned no concept");
       }
 
-      const c = conceptData.concept;
+      const c = conceptData.concept as typeof conceptData.concept & {
+        originXUrl?: string;
+        originXAuthor?: string;
+      };
+      const ideaWithOrigin = c.originXUrl
+        ? `${c.idea}\n\nInspired by ${c.originXAuthor || "an X post"} — ${c.originXUrl}`
+        : c.idea;
       const seeded: ConceptInput = {
         ...DEFAULT,
-        idea: c.idea,
+        idea: ideaWithOrigin,
         tokenName: c.tokenName,
         ticker: c.ticker,
         theme: c.theme,
         audience: c.audience,
         launchStyle: c.launchStyle,
+        // Default the Pump.fun "twitter" field to the original meme URL so
+        // the on-chain token page links back to the source post. User can
+        // override on the Review step if they have their own project handle.
+        twitterUrl: c.originXUrl ?? "",
       };
       setConcept(seeded);
+      setOriginX(c.originXUrl ? { url: c.originXUrl, author: c.originXAuthor } : null);
       setAutoReasoning(c.reasoning);
 
       // Chain: launch-kit (text) → logo image (Aurora) — both fire in series
@@ -447,6 +460,7 @@ export default function PumpLaunchWizard() {
           onAutoPilot={runAutoPilot}
           autoPiloting={autoPiloting}
           autoReasoning={autoReasoning}
+          originX={originX}
           onGenerateLogo={() => runGenerateLogo()}
           generatingLogo={generatingLogo}
           logoProvider={logoProvider}
@@ -509,6 +523,7 @@ function ConceptStep({
   onAutoPilot,
   autoPiloting,
   autoReasoning,
+  originX,
   onGenerateLogo,
   generatingLogo,
   logoProvider,
@@ -520,6 +535,7 @@ function ConceptStep({
   onAutoPilot: () => void;
   autoPiloting: boolean;
   autoReasoning: string | null;
+  originX: { url: string; author?: string } | null;
   onGenerateLogo: () => void;
   generatingLogo: boolean;
   logoProvider: string | null;
@@ -548,6 +564,16 @@ function ConceptStep({
               <div className="text-[12px] font-bold mt-1.5 opacity-95">
                 Grok’s pick: {autoReasoning}
               </div>
+            )}
+            {originX && (
+              <a
+                href={originX.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[12px] font-extrabold mt-1.5 underline hover:opacity-80"
+              >
+                Source: {originX.author || "X post"} ↗
+              </a>
             )}
           </div>
         </div>

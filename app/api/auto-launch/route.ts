@@ -51,14 +51,34 @@ export async function POST(req: NextRequest) {
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
-      maxTokens: 600,
-      temperature: 0.95,
+      maxTokens: 800,
+      temperature: 0.85,
       model: "fast",
       feature: "auto-launch",
       walletPubkey,
+      // Grok Live X Search — let the model actually browse X for the
+      // viral post that anchors the concept and cite its URL.
+      liveSearch: {
+        mode: "on",
+        sources: ["x"],
+        maxResults: 12,
+      },
     });
 
     const concept = parseAutoConcept(llmRes.content);
+
+    // If the model forgot to populate originXUrl in JSON but a citation is
+    // present, take the first citation that looks like a real X status URL.
+    if (!concept.originXUrl && llmRes.citations) {
+      const citation = llmRes.citations.find((c) =>
+        /^https?:\/\/(?:x\.com|twitter\.com)\/[^/\s]+\/status\/\d+/.test(c),
+      );
+      if (citation) {
+        concept.originXUrl = citation.replace("twitter.com", "x.com");
+        const m = citation.match(/(?:x\.com|twitter\.com)\/([^/\s]+)\/status\//);
+        if (m && !concept.originXAuthor) concept.originXAuthor = `@${m[1]}`;
+      }
+    }
 
     return NextResponse.json<AutoLaunchResponse>({
       ok: true,

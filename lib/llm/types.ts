@@ -22,6 +22,18 @@ export interface LLMRequest {
   feature?: string;
   /** Optional caller wallet pubkey for per-user usage tracking. */
   walletPubkey?: string;
+  /**
+   * xAI-only: enable Grok Live Search (X / web / news).
+   * - "x"   → Grok searches X for trending posts and may cite tweet URLs
+   * - "web" → general web search
+   * - "auto" → model decides whether to search
+   * Other providers ignore this field.
+   */
+  liveSearch?: {
+    mode?: "auto" | "on" | "off";
+    sources?: Array<"x" | "web" | "news" | "rss">;
+    maxResults?: number;
+  };
 }
 
 export interface LLMResponse {
@@ -32,6 +44,8 @@ export interface LLMResponse {
     input: number;
     output: number;
   };
+  /** xAI Live Search citations — list of source URLs the model used. */
+  citations?: string[];
 }
 
 /** Used by the API to communicate provider info back to the client UI. */
