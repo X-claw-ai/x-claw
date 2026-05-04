@@ -39,15 +39,15 @@ const config: Config = {
         "extra-tight": "-0.025em",
       },
       colors: {
-        // ── Surface (deep dark) ─────────────────────────────────────────
+        // ── Ink (true black tones) ──────────────────────────────────────
         ink: {
-          1000: "#04060B",
-          950: "#070A12",
-          900: "#0B0F1A",
-          800: "#10162A",
-          700: "#161D34",
-          600: "#1E2641",
-          500: "#2A3354",
+          1000: "#0B0B0B", // brand black (logo paw + headlines)
+          950: "#1A0A04",
+          900: "#2A1408",
+          800: "#3A1F0F",
+          700: "#4A2A18",
+          600: "#5C3520",
+          500: "#6E4029",
         },
         // ── KOKi orange (brand primary — Shiba-energy tangerine) ────────
         koki: {

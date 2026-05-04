@@ -38,19 +38,15 @@ export default function CommandCenter() {
 
       {/* Top stats */}
       <section className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Stat label="Engines" value="4" sub="Online" tone="good" />
           <Stat
             label="Real launches"
             value={hydrated ? String(liveLaunches.length) : "—"}
             sub={lastLaunch ? `Last: ${lastLaunch.ticker}` : "None yet"}
           />
-          <Stat
-            label="Provider"
-            value="Grok"
-            sub="xAI · primary"
-          />
-          <Stat label="Network" value="Solana" sub="Mainnet" tone="info" />
+          <Stat label="Provider" value="Grok" sub="xAI · primary" />
+          <Stat label="Network" value="Solana" sub="Mainnet" />
         </div>
       </section>
 
@@ -169,19 +165,17 @@ function Section({
 }) {
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <div className="flex items-baseline gap-4 mb-6">
-        <span className="text-[11px] font-mono text-zinc-600 tracking-[0.18em]">
-          PHASE {index}
-        </span>
+      <div className="flex items-baseline gap-4 mb-6 flex-wrap">
+        <span className="eyebrow !text-[10px] opacity-65">PHASE {index}</span>
         <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-full border border-white/10 flex items-center justify-center text-koki-400">
+          <div className="h-8 w-8 rounded-full border-[1.5px] border-ink-1000 bg-cream-50 flex items-center justify-center text-ink-1000">
             <Icon className="h-3.5 w-3.5" />
           </div>
-          <span className="text-xl font-semibold text-white tracking-tight">
+          <span className="text-[22px] font-black text-ink-1000 tracking-tight">
             {name}
           </span>
         </div>
-        <span className="text-sm text-zinc-500 hidden sm:inline">— {tag}</span>
+        <span className="text-[13px] text-ink-1000/72 hidden sm:inline font-bold">— {tag}</span>
       </div>
       {children}
     </section>
@@ -206,25 +200,43 @@ function Tile({
   return (
     <Link
       href={href}
-      className={`card card-hover group flex flex-col ${
+      className={`card card-hover group flex flex-col !p-6 ${
         highlight ? "card-emph" : ""
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         {Icon ? (
-          <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-koki-400">
+          <div
+            className={`h-10 w-10 rounded-full border-[1.5px] border-ink-1000 flex items-center justify-center ${
+              highlight ? "text-koki-500 bg-koki-500/10" : "text-ink-1000 bg-koki-500"
+            }`}
+          >
             <Icon className="h-4 w-4" />
           </div>
         ) : (
-          <div className="h-9 w-9" />
+          <div className="h-10 w-10" />
         )}
         {highlight && <Badge tone="live">Primary</Badge>}
       </div>
-      <div className="mt-4 text-base font-semibold text-white tracking-tight">
+      <div
+        className={`mt-4 text-[18px] font-black tracking-tight ${
+          highlight ? "text-koki-500" : "text-ink-1000"
+        }`}
+      >
         {title}
       </div>
-      <p className="mt-1.5 text-sm text-zinc-400 leading-relaxed">{body}</p>
-      <div className="mt-5 inline-flex items-center gap-1.5 text-sm text-koki-400 font-medium group-hover:gap-2 transition-all">
+      <p
+        className={`mt-1.5 text-[13px] leading-snug font-medium ${
+          highlight ? "text-koki-500/85" : "text-ink-1000/72"
+        }`}
+      >
+        {body}
+      </p>
+      <div
+        className={`mt-5 inline-flex items-center gap-1.5 text-[13px] font-extrabold group-hover:gap-2 transition-all ${
+          highlight ? "text-koki-500" : "text-ink-1000"
+        }`}
+      >
         {cta}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </div>
@@ -243,21 +255,28 @@ function Stat({
   sub?: string;
   tone?: "neutral" | "good" | "info";
 }) {
-  const accent =
-    tone === "good"
-      ? "text-koki-400"
-      : tone === "info"
-      ? "text-sea-400"
-      : "text-white";
+  const isEmph = tone === "good";
   return (
-    <div className="bg-ink-950 p-5 md:p-6">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+    <div className={`card !p-5 md:!p-6 ${isEmph ? "card-emph" : ""}`}>
+      <div className={`eyebrow !text-[10px] ${isEmph ? "text-koki-500" : "text-ink-1000/70"}`}>
         {label}
       </div>
-      <div className={`mt-2.5 text-2xl md:text-3xl font-semibold tabular-nums tracking-extra-tight ${accent}`}>
+      <div
+        className={`mt-2.5 text-[28px] md:text-[32px] font-black tabular-nums tracking-tight ${
+          isEmph ? "text-koki-500" : "text-ink-1000"
+        }`}
+      >
         {value}
       </div>
-      {sub && <div className="mt-1 text-xs text-zinc-500">{sub}</div>}
+      {sub && (
+        <div
+          className={`mt-1 text-[12px] font-bold ${
+            isEmph ? "text-koki-500/80" : "text-ink-1000/65"
+          }`}
+        >
+          {sub}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,30 +13,30 @@ export default function MemeCard({ meme, compact = false }: Props) {
   const meta = READINESS_META[meme.launchReadiness];
 
   return (
-    <div className="card card-hover p-5 flex flex-col gap-4">
+    <div className="card card-hover !p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400 shrink-0">
+          <div className="h-10 w-10 rounded-md bg-koki-500 border-[1.5px] border-ink-1000 flex items-center justify-center text-ink-1000 shrink-0">
             <Radar className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <div className="text-base font-semibold text-zinc-100 truncate">
+            <div className="text-[16px] font-black text-ink-1000 truncate tracking-tight">
               {meme.name}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-koki-500">
+            <div className="text-[10px] uppercase tracking-[0.12em] text-ink-1000/70 font-extrabold">
               ${meme.ticker}
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
           <Badge tone={meta.tone}>{meta.label}</Badge>
-          <span className="text-[10px] text-zinc-500">
+          <span className="text-[10px] text-ink-1000/55 font-bold">
             {meme.source}
           </span>
         </div>
       </div>
 
-      <p className="text-sm text-zinc-400 leading-relaxed">
+      <p className="text-[13px] text-ink-1000/72 leading-snug font-medium">
         {meme.shortDescription}
       </p>
 
@@ -54,7 +54,7 @@ export default function MemeCard({ meme, compact = false }: Props) {
       </div>
 
       {!compact && (
-        <div className="text-[11px] text-zinc-500">
+        <div className="text-[11px] text-ink-1000/55 font-bold">
           {meme.sampleTweetCount.toLocaleString()} sample posts · detected{" "}
           {timeSince(meme.detectedAt)}
         </div>
@@ -63,14 +63,14 @@ export default function MemeCard({ meme, compact = false }: Props) {
       <div className="mt-auto flex flex-col sm:flex-row gap-2 pt-2">
         <Link
           href={`/analyze?meme=${meme.id}`}
-          className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-koki-500/40 transition flex-1"
+          className="btn btn-secondary !py-1.5 !px-3 !text-xs flex-1"
         >
           <Sparkles className="h-3.5 w-3.5" />
           Analyze
         </Link>
         <Link
           href={`/launch?meme=${meme.id}&go=1`}
-          className="inline-flex items-center justify-center gap-1.5 rounded-md bg-koki-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400 transition flex-1"
+          className="btn btn-primary !py-1.5 !px-3 !text-xs flex-1"
         >
           <Rocket className="h-3.5 w-3.5" />
           Launch
@@ -90,24 +90,20 @@ function ScorePill({
   value: number;
   headline?: boolean;
 }) {
-  const tone =
+  const bg =
     value >= 90
-      ? "text-koki-400 border-koki-500/40 bg-koki-500/5"
-      : value >= 80
-      ? "text-zinc-100 border-white/10 bg-white/[0.03]"
-      : value >= 70
-      ? "text-zinc-300 border-white/10 bg-white/[0.02]"
-      : "text-zinc-500 border-white/5 bg-transparent";
+      ? "bg-ink-1000 text-koki-500"
+      : "bg-cream-50 text-ink-1000";
   return (
     <div
-      className={`rounded-md border px-2 py-1.5 ${tone} ${
-        headline ? "ring-1 ring-koki-500/20" : ""
+      className={`rounded-[10px] border-[1.5px] border-ink-1000 px-2 py-1.5 ${bg} ${
+        headline ? "ring-2 ring-ink-1000" : ""
       }`}
     >
-      <div className="text-[9px] uppercase tracking-widest opacity-70">
+      <div className="text-[9px] uppercase tracking-[0.1em] opacity-80 font-extrabold">
         {label}
       </div>
-      <div className={`tabular-nums font-semibold ${headline ? "text-base" : "text-sm"}`}>
+      <div className={`tabular-nums font-black ${headline ? "text-[18px]" : "text-[14px]"}`}>
         {value}
       </div>
     </div>

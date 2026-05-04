@@ -91,7 +91,7 @@ export default function XPostGeneratorAgent({
           <h2 className="text-lg font-semibold">X Post Generator</h2>
           <Badge tone="live">Live · Creator Agents</Badge>
         </div>
-        <p className="text-sm text-zinc-400 max-w-2xl">
+        <p className="text-sm text-ink-1000/72 max-w-2xl">
           Turn a topic into ready-to-post X content. Drafts only — no
           auto-posting; you confirm and click "Open in X" to compose.
         </p>
@@ -137,7 +137,7 @@ export default function XPostGeneratorAgent({
             />
           </Field>
           <Field label="Include thread" className="sm:col-span-2">
-            <label className="inline-flex items-center gap-2 text-sm text-zinc-300">
+            <label className="inline-flex items-center gap-2 text-sm text-ink-1000">
               <input
                 type="checkbox"
                 checked={includeThread}
@@ -150,7 +150,7 @@ export default function XPostGeneratorAgent({
         </div>
 
         <div className="flex items-center justify-between flex-wrap gap-3 pt-2">
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-ink-1000/65">
             Off-chain safety: agent recommends. User confirms. Workflow
             executes (when you click "Open in X").
           </p>
@@ -191,7 +191,7 @@ export default function XPostGeneratorAgent({
               {providerLabel(data.provider)}
               {data.model ? ` · ${data.model}` : ""}
             </Badge>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-ink-1000/65">
               {data.posts?.length ?? 0} posts
               {data.thread ? " · 1 thread" : ""}
             </span>
@@ -234,12 +234,12 @@ export default function XPostGeneratorAgent({
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-ink-950 px-3.5 py-2 text-xs font-semibold hover:bg-koki-400"
+                  className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-koki-500 px-3.5 py-2 text-xs font-semibold hover:bg-koki-400"
                 >
                   Open whole thread in X compose
                   <ExternalLink className="h-3 w-3" />
                 </a>
-                <span className="ml-3 text-[10px] text-zinc-500">
+                <span className="ml-3 text-[10px] text-ink-1000/65">
                   X compose only takes one tweet at a time — paste the rest
                   manually as replies.
                 </span>
@@ -263,13 +263,13 @@ function PostCard({ index, text }: { index: number; text: string }) {
   return (
     <div className="card p-4 space-y-2">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+        <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
           Post {index} · {text.length}/280
         </div>
         <div className="flex gap-2">
           <button
             onClick={copy}
-            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200"
+            className="inline-flex items-center gap-1 text-xs text-ink-1000/72 hover:text-ink-1000"
           >
             <Copy className="h-3 w-3" /> Copy
           </button>
@@ -277,13 +277,13 @@ function PostCard({ index, text }: { index: number; text: string }) {
             href={intent}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
+            className="inline-flex items-center gap-1 text-xs text-ink-1000 hover:underline"
           >
             Open in X <ExternalLink className="h-3 w-3" />
           </a>
         </div>
       </div>
-      <pre className="text-sm whitespace-pre-wrap text-zinc-200 font-sans leading-relaxed">
+      <pre className="text-sm whitespace-pre-wrap text-ink-1000 font-sans leading-relaxed">
         {text}
       </pre>
       {overLimit && (
@@ -302,19 +302,19 @@ function ThreadTweet({ label, text }: { label: string; text: string }) {
     }
   }
   return (
-    <div className="border border-white/5 rounded-md p-3 space-y-1.5">
+    <div className="border border-ink-1000/20 rounded-md p-3 space-y-1.5">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+        <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
           {label} · {text.length}/280
         </div>
         <button
           onClick={copy}
-          className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200"
+          className="inline-flex items-center gap-1 text-xs text-ink-1000/72 hover:text-ink-1000"
         >
           <Copy className="h-3 w-3" /> Copy
         </button>
       </div>
-      <pre className="text-sm whitespace-pre-wrap text-zinc-200 font-sans leading-relaxed">
+      <pre className="text-sm whitespace-pre-wrap text-ink-1000 font-sans leading-relaxed">
         {text}
       </pre>
     </div>

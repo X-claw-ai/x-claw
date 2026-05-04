@@ -24,7 +24,7 @@ export function CardTitle({
   children: React.ReactNode;
 }) {
   return (
-    <h3 className={cn("text-base font-semibold text-zinc-100", className)}>
+    <h3 className={cn("text-base font-semibold text-ink-1000", className)}>
       {children}
     </h3>
   );
@@ -38,7 +38,7 @@ export function CardDescription({
   children: React.ReactNode;
 }) {
   return (
-    <p className={cn("text-sm text-zinc-400 leading-relaxed", className)}>
+    <p className={cn("text-sm text-ink-1000/72 leading-relaxed", className)}>
       {children}
     </p>
   );

@@ -21,7 +21,7 @@ export default function LaunchesTable() {
 
   if (!hydrated) {
     return (
-      <div className="card p-6 text-sm text-zinc-500">Loading launches…</div>
+      <div className="card p-6 text-sm font-bold text-ink-1000/65">Loading launches…</div>
     );
   }
 
@@ -30,14 +30,13 @@ export default function LaunchesTable() {
   return (
     <>
       {showingMockOnly && (
-        <div className="card p-3 text-xs text-amber-200 border-amber-300/30 mb-4">
-          No real launches yet — showing sample rows. Run the Pump Launch
-          Agent to see your actual launches here.
+        <div className="card p-3 text-xs font-bold text-ink-1000 mb-4">
+          아직 실제 런치 없음 — 샘플 행 표시 중. Pump Launch Agent 실행 후 여기에 실제 런치가 보입니다.
         </div>
       )}
 
-      <div className="card overflow-hidden">
-        <div className="grid grid-cols-12 px-5 py-3 text-[11px] uppercase tracking-widest text-zinc-500 border-b border-white/5">
+      <div className="card !p-0 overflow-hidden">
+        <div className="grid grid-cols-12 px-5 py-3 eyebrow !text-[10px] border-b-[1.5px] border-ink-1000 bg-cream-100">
           <div className="col-span-4">Token</div>
           <div className="col-span-2">Chain</div>
           <div className="col-span-2">Status</div>
@@ -47,18 +46,20 @@ export default function LaunchesTable() {
         {items.map((l) => (
           <div
             key={l.id}
-            className="grid grid-cols-12 items-center px-5 py-4 border-b border-white/5 last:border-b-0 text-sm"
+            className="grid grid-cols-12 items-center px-5 py-4 border-b-[1.5px] border-ink-1000/15 last:border-b-0 text-sm"
           >
             <div className="col-span-4">
-              <div className="font-medium text-zinc-100">{l.tokenName}</div>
-              <div className="text-xs text-zinc-500">{l.ticker}</div>
+              <div className="font-black text-[15px] text-ink-1000 tracking-tight">
+                {l.tokenName}
+              </div>
+              <div className="text-xs font-extrabold text-ink-1000/65">{l.ticker}</div>
               {l.mintPubkey && (
-                <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
+                <div className="text-[10px] font-mono text-ink-1000/55 mt-0.5">
                   {l.mintPubkey.slice(0, 6)}…{l.mintPubkey.slice(-6)}
                 </div>
               )}
             </div>
-            <div className="col-span-2 text-zinc-300 capitalize">{l.chain}</div>
+            <div className="col-span-2 text-ink-1000 font-bold capitalize">{l.chain}</div>
             <div className="col-span-2 flex flex-col gap-1">
               <Badge
                 tone={
@@ -75,7 +76,7 @@ export default function LaunchesTable() {
               </Badge>
               {l.mock && <Badge tone="mock">Mock</Badge>}
             </div>
-            <div className="col-span-3 text-xs text-zinc-400">
+            <div className="col-span-3 text-xs text-ink-1000/72 font-bold">
               {new Date(l.createdAt).toLocaleString()}
             </div>
             <div className="col-span-1 text-right space-x-2">
@@ -83,7 +84,7 @@ export default function LaunchesTable() {
                 <Link
                   href={l.pumpUrl}
                   target="_blank"
-                  className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
+                  className="inline-flex items-center gap-1 text-xs text-ink-1000 font-extrabold hover:underline"
                 >
                   Pump
                   <ExternalLink className="h-3 w-3" />
@@ -93,14 +94,14 @@ export default function LaunchesTable() {
                 <Link
                   href={`https://solscan.io/tx/${l.txSignature}`}
                   target="_blank"
-                  className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200"
+                  className="inline-flex items-center gap-1 text-xs text-ink-1000/72 font-bold hover:text-ink-1000"
                 >
                   Tx
                   <ExternalLink className="h-3 w-3" />
                 </Link>
               )}
               {!l.pumpUrl && !l.txSignature && (
-                <span className="text-xs text-zinc-600">—</span>
+                <span className="text-xs text-ink-1000/55">—</span>
               )}
             </div>
           </div>

@@ -108,7 +108,7 @@ export default function WalletTrackingAgent({
           <h2 className="text-lg font-semibold">Wallet Tracking Agent</h2>
           <Badge tone="live">Live · On-chain</Badge>
         </div>
-        <p className="text-sm text-zinc-400 max-w-2xl">
+        <p className="text-sm text-ink-1000/72 max-w-2xl">
           Pull a public Solana wallet's on-chain footprint and let Grok turn
           the raw data into an X-native intelligence brief. Read-only — KOKi
           never asks for private keys.
@@ -208,7 +208,7 @@ function ReportView({
               href={solscan}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
+              className="inline-flex items-center gap-1 text-xs text-ink-1000 hover:underline"
             >
               Solscan <ExternalLink className="h-3 w-3" />
             </a>
@@ -228,17 +228,17 @@ function ReportView({
             Intelligence brief
           </div>
           {summary.headline && (
-            <div className="mt-1 text-base font-semibold text-zinc-100">
+            <div className="mt-1 text-base font-semibold text-ink-1000">
               {summary.headline}
             </div>
           )}
           {summary.summary && (
-            <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
+            <p className="mt-3 text-sm text-ink-1000 leading-relaxed">
               {summary.summary}
             </p>
           )}
           {summary.highlights && summary.highlights.length > 0 && (
-            <ul className="mt-3 space-y-1 text-sm text-zinc-300">
+            <ul className="mt-3 space-y-1 text-sm text-ink-1000">
               {summary.highlights.map((h) => (
                 <li key={h} className="flex gap-2">
                   <span className="text-koki-500">•</span>
@@ -261,7 +261,7 @@ function ReportView({
         <div className="card p-5">
           <div className="text-sm font-semibold mb-3">Top token positions</div>
           {report.topTokens.length === 0 ? (
-            <div className="text-xs text-zinc-500">
+            <div className="text-xs text-ink-1000/65">
               No SPL token balances found on this wallet.
             </div>
           ) : (
@@ -269,17 +269,17 @@ function ReportView({
               {report.topTokens.map((t) => (
                 <div
                   key={t.mint}
-                  className="flex items-center justify-between gap-3 border-b border-white/5 pb-2 last:border-b-0"
+                  className="flex items-center justify-between gap-3 border-b border-ink-1000/20 pb-2 last:border-b-0"
                 >
                   <a
                     href={`https://solscan.io/token/${t.mint}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-xs text-zinc-300 hover:text-koki-400 truncate max-w-[60%]"
+                    className="font-mono text-xs text-ink-1000 hover:text-ink-1000 truncate max-w-[60%]"
                   >
                     {t.mint}
                   </a>
-                  <div className="text-zinc-200 tabular-nums">
+                  <div className="text-ink-1000 tabular-nums">
                     {formatAmount(t.uiAmount)}
                   </div>
                 </div>
@@ -291,7 +291,7 @@ function ReportView({
         <div className="card p-5">
           <div className="text-sm font-semibold mb-3">Recent transactions</div>
           {report.recentTxs.length === 0 ? (
-            <div className="text-xs text-zinc-500">
+            <div className="text-xs text-ink-1000/65">
               No recent transactions found.
             </div>
           ) : (
@@ -299,18 +299,18 @@ function ReportView({
               {report.recentTxs.slice(0, 12).map((tx) => (
                 <div
                   key={tx.signature}
-                  className="flex items-center justify-between gap-3 border-b border-white/5 pb-2 last:border-b-0"
+                  className="flex items-center justify-between gap-3 border-b border-ink-1000/20 pb-2 last:border-b-0"
                 >
                   <a
                     href={`https://solscan.io/tx/${tx.signature}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-mono text-xs text-zinc-300 hover:text-koki-400 truncate max-w-[55%]"
+                    className="font-mono text-xs text-ink-1000 hover:text-ink-1000 truncate max-w-[55%]"
                   >
                     {tx.signature}
                   </a>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-[10px] text-ink-1000/65">
                       slot {tx.slot}
                     </span>
                     <Badge tone={tx.err ? "danger" : "live"}>
@@ -344,7 +344,7 @@ function XPostCard({ text }: { text: string }) {
         <div className="flex gap-2">
           <button
             onClick={copy}
-            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200"
+            className="inline-flex items-center gap-1 text-xs text-ink-1000/72 hover:text-ink-1000"
           >
             <Copy className="h-3 w-3" /> Copy
           </button>
@@ -352,13 +352,13 @@ function XPostCard({ text }: { text: string }) {
             href={intent}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-koki-400 hover:text-koki-500"
+            className="inline-flex items-center gap-1 text-xs text-ink-1000 hover:underline"
           >
             Open in X <ExternalLink className="h-3 w-3" />
           </a>
         </div>
       </div>
-      <pre className="text-xs whitespace-pre-wrap text-zinc-200 font-sans leading-relaxed">
+      <pre className="text-xs whitespace-pre-wrap text-ink-1000 font-sans leading-relaxed">
         {text}
       </pre>
     </div>
@@ -368,10 +368,10 @@ function XPostCard({ text }: { text: string }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-3">
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+      <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
         {label}
       </div>
-      <div className="mt-1 text-lg font-semibold text-zinc-100 tabular-nums">
+      <div className="mt-1 text-lg font-semibold text-ink-1000 tabular-nums">
         {value}
       </div>
     </div>

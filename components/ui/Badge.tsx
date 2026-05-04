@@ -10,17 +10,17 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    neutral: "border-white/10 text-zinc-300 bg-white/[0.02]",
-    live: "border-koki-500/35 text-koki-300 bg-koki-500/10",
-    soon: "border-plum-500/30 text-plum-400 bg-plum-500/10",
-    mock: "border-amber-400/25 text-amber-300 bg-amber-400/[0.06]",
-    danger: "border-red-500/30 text-red-300 bg-red-500/10",
-    info: "border-sea-500/30 text-sea-400 bg-sea-500/10",
+    neutral: "border-ink-1000 text-ink-1000 bg-cream-50",
+    live: "border-ink-1000 text-koki-500 bg-ink-1000",
+    soon: "border-ink-1000 text-ink-1000 bg-cream-100",
+    mock: "border-ink-1000 text-ink-1000 bg-koki-100",
+    danger: "border-ink-1000 text-cream-50 bg-ink-1000",
+    info: "border-ink-1000 text-ink-1000 bg-cream-50",
   };
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 h-[22px] text-[11px] uppercase tracking-[0.04em] font-medium leading-none",
+        "inline-flex items-center gap-1 rounded-full border-[1.5px] px-2.5 h-[22px] text-[11px] uppercase tracking-[0.06em] font-extrabold leading-none",
         tones[tone],
         className
       )}

@@ -4,64 +4,57 @@ const PILLARS = [
   {
     icon: Cpu,
     title: "Agent prepares",
-    body:
-      "Grok drafts the launch kit, on-chain metadata, and the unsigned transaction.",
+    body: "Grok가 런치킷, 온체인 메타데이터, 서명 안 된 트랜잭션을 짭니다.",
   },
   {
     icon: UserCheck,
     title: "User approves",
-    body:
-      "You review token name, ticker, description, links, and the dev buy.",
+    body: "토큰명·티커·설명·링크·dev buy를 직접 검토하고 승인합니다.",
   },
   {
     icon: Wallet,
     title: "Wallet signs",
-    body:
-      "Phantom or Solflare signs the create-token transaction. We never see your keys.",
+    body: "Phantom/Solflare가 create-token 트랜잭션에 사인합니다. 키는 우리 손에 없습니다.",
   },
   {
     icon: ShieldCheck,
     title: "Launch executes",
-    body:
-      "Only after your signature does the token go live on Solana mainnet.",
+    body: "사인 후에만 Solana 메인넷에 토큰이 올라갑니다.",
   },
 ];
 
 export default function SafetySection() {
   return (
-    <section className="border-t border-white/5">
-      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
         <div className="max-w-3xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400">
-            Safety model
-          </div>
-          <h2 className="mt-3 text-display text-4xl md:text-5xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
-            Agents prepare. People decide. Wallets sign.
+          <div className="eyebrow">Safety model</div>
+          <h2 className="mt-3 text-display text-display-md text-balance">
+            에이전트는 준비. <span className="stamp">사람</span>이 결정. 지갑이 사인.
           </h2>
-          <p className="mt-5 text-zinc-400 text-lg leading-relaxed text-balance">
-            Memecoin launches go wrong when an agent silently controls funds.
-            KOKi is built so that never happens. The agent is powerful
-            because it prepares — not because it holds keys.
+          <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium text-balance">
+            Memecoin 런치는 에이전트가 돈을 조용히 만질 때 망가집니다. KOKi는 그게 절대 일어나지 않게 만들어졌습니다.
+            힘은 에이전트가 키를 가져서가 아니라 — 잘 준비해서 나옵니다.
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {PILLARS.map((p, i) => {
             const Icon = p.icon;
             return (
-              <div key={p.title} className="card">
+              <div key={p.title} className="card !p-5">
                 <div className="flex items-center justify-between">
-                  <div className="h-10 w-10 rounded-full border border-koki-500/30 bg-koki-500/[0.06] flex items-center justify-center text-koki-400">
+                  <div className="h-10 w-10 rounded-full border-[1.5px] border-ink-1000 bg-koki-500 flex items-center justify-center text-ink-1000">
                     <Icon className="h-4 w-4" />
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-600 tracking-[0.18em]">
+                  <span className="eyebrow !text-[10px] opacity-60">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <div className="mt-5 text-base font-semibold text-white tracking-tight">
+                <div className="mt-5 text-[18px] font-black tracking-tight text-ink-1000">
                   {p.title}
                 </div>
-                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+                <p className="mt-1.5 text-[13px] text-ink-1000/72 leading-snug font-medium">
                   {p.body}
                 </p>
               </div>
@@ -69,12 +62,11 @@ export default function SafetySection() {
           })}
         </div>
 
-        <div className="mt-10 surface p-6 text-sm text-zinc-300 leading-relaxed">
-          <span className="text-koki-400 font-semibold">Hard rules:</span>{" "}
-          KOKi does not store private keys. Does not ask for seed phrases.
-          Does not move funds without your explicit signature. Does not claim
-          a partnership with xAI, X, Grok, Pump.fun, or Solana. Memecoin
-          launches involve risk; you are the final decision maker.
+        <div className="mt-10 surface-ink p-6 text-[14px] leading-relaxed font-medium">
+          <span className="font-extrabold">Hard rules:</span>{" "}
+          KOKi는 private key를 저장하지 않습니다. seed phrase를 묻지 않습니다.
+          명시적 서명 없이 자금을 옮기지 않습니다. xAI · X · Grok · Pump.fun · Solana 와의 파트너십을 주장하지 않습니다.
+          Memecoin 런치는 리스크가 있고, 최종 결정은 당신이 합니다.
         </div>
       </div>
     </section>

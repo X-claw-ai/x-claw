@@ -14,9 +14,8 @@ const META: Record<Phase, { num: string; label: string; href?: string }> = {
 };
 
 /**
- * Linear progress strip for the agent journey.
- *   Detect → Analyze → Generate → Launch → Monitor
- * Pass `current` as the phase you're on.
+ * 5-step linear progress strip — Detect → Analyze → Generate → Launch → Monitor.
+ * Style: black hairline, cream tiles, active = solid black tile with orange text.
  */
 export function PhaseProgress({
   current,
@@ -28,40 +27,41 @@ export function PhaseProgress({
   const idx = ORDER.indexOf(current);
   return (
     <div className={cn("w-full", className)}>
-      <div className="grid grid-cols-5 gap-px bg-white/[0.04] rounded-xl overflow-hidden border border-white/5">
+      <div className="grid grid-cols-5 gap-2">
         {ORDER.map((p, i) => {
           const m = META[p];
           const done = i < idx;
           const active = i === idx;
-          const Wrap = m.href && !active
-            ? ({ children }: { children: React.ReactNode }) => (
-                <Link href={m.href!} className="block">{children}</Link>
-              )
-            : ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+          const Wrap =
+            m.href && !active
+              ? ({ children }: { children: React.ReactNode }) => (
+                  <Link href={m.href!} className="block">
+                    {children}
+                  </Link>
+                )
+              : ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
           return (
             <Wrap key={p}>
               <div
                 className={cn(
-                  "px-3 py-2.5 text-center transition-colors",
-                  active
-                    ? "bg-koki-500/[0.08] border-b-2 border-koki-500"
-                    : done
-                    ? "bg-ink-950"
-                    : "bg-ink-950 hover:bg-ink-900"
+                  "px-3 py-2.5 text-center border-[1.5px] border-ink-1000 rounded-[10px] transition-all",
+                  active && "bg-ink-1000",
+                  !active && done && "bg-cream-50",
+                  !active && !done && "bg-cream-50 hover:bg-cream-100"
                 )}
               >
                 <div
                   className={cn(
-                    "text-[10px] font-mono tracking-[0.18em]",
-                    active ? "text-koki-400" : done ? "text-zinc-400" : "text-zinc-600"
+                    "text-[10px] font-extrabold tracking-[0.16em]",
+                    active ? "text-koki-500" : "text-ink-1000/70"
                   )}
                 >
                   {m.num}
                 </div>
                 <div
                   className={cn(
-                    "mt-0.5 text-xs font-semibold tracking-tight",
-                    active ? "text-white" : done ? "text-zinc-300" : "text-zinc-500"
+                    "mt-0.5 text-[13px] font-black tracking-tight",
+                    active ? "text-koki-500" : "text-ink-1000"
                   )}
                 >
                   {m.label}

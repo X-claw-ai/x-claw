@@ -25,9 +25,9 @@ export default function LaunchHistoryPage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <LaunchesTable />
 
-        <p className="mt-6 text-xs text-zinc-500">
+        <p className="mt-6 text-xs text-ink-1000/65">
           Real launches link out to Pump.fun and Solscan. Records are persisted
-          in <code className="text-zinc-400">localStorage</code> for now —
+          in <code className="text-ink-1000/72">localStorage</code> for now —
           connect Supabase to share across devices.
         </p>
       </section>

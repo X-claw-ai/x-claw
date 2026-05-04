@@ -54,18 +54,18 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
             <div className="flex items-center gap-2 flex-wrap">
               <Rocket className="h-5 w-5 text-koki-500" />
               <h1 className="text-xl font-semibold">{tokenName}</h1>
-              <span className="text-sm text-zinc-400">· {ticker}</span>
+              <span className="text-sm text-ink-1000/72">· {ticker}</span>
               {isMock && <Badge tone="mock">Mock</Badge>}
               {!isMock && record && <Badge tone="live">Live launch</Badge>}
               {!record && hydrated && (
                 <Badge tone="neutral">External token</Badge>
               )}
             </div>
-            <div className="mt-2 text-xs text-zinc-500 font-mono">
+            <div className="mt-2 text-xs text-ink-1000/65 font-mono">
               Mint: {mint}
             </div>
             {record?.createdAt && (
-              <div className="mt-1 text-xs text-zinc-500">
+              <div className="mt-1 text-xs text-ink-1000/65">
                 Launched {new Date(record.createdAt).toLocaleString()}
                 {record?.devBuyInSol != null
                   ? ` · dev buy ${record.devBuyInSol} SOL`
@@ -78,7 +78,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               href={pumpUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md bg-koki-500 text-ink-950 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400"
+              className="inline-flex items-center gap-1 rounded-md bg-koki-500 text-koki-500 px-3 py-1.5 text-xs font-semibold hover:bg-koki-400"
             >
               Pump.fun <ExternalLink className="h-3 w-3" />
             </a>
@@ -86,7 +86,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               href={solscanToken}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
+              className="inline-flex items-center gap-1 rounded-md border border-ink-1000 px-3 py-1.5 text-xs hover:bg-cream-100"
             >
               Solscan token <ExternalLink className="h-3 w-3" />
             </a>
@@ -95,7 +95,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
                 href={solscanTx}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
+                className="inline-flex items-center gap-1 rounded-md border border-ink-1000 px-3 py-1.5 text-xs hover:bg-cream-100"
               >
                 Launch tx <ExternalLink className="h-3 w-3" />
               </a>
@@ -144,7 +144,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               Creator wallet activity
             </div>
           </div>
-          <p className="text-xs text-zinc-500 mb-4">
+          <p className="text-xs text-ink-1000/65 mb-4">
             Tracking the wallet that signed the launch transaction. Note: for
             tokens you didn't launch, paste any wallet address.
           </p>
@@ -160,7 +160,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
             <Activity className="h-4 w-4 text-koki-500" />
             <div className="text-sm font-semibold">Wallet tracker</div>
           </div>
-          <p className="text-xs text-zinc-500 mb-4">
+          <p className="text-xs text-ink-1000/65 mb-4">
             Paste any wallet address to track its on-chain activity.
           </p>
           <WalletTrackingAgent />
@@ -179,7 +179,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
           <Twitter className="h-4 w-4 text-koki-500" />
           <span className="font-semibold">X Post Generator (post-launch)</span>
         </div>
-        <p className="text-xs text-zinc-500 mb-4">
+        <p className="text-xs text-ink-1000/65 mb-4">
           Pre-filled to write about this token. Generate updates, milestone
           posts, and reply hooks. Drafts only — you confirm before posting.
         </p>
@@ -205,14 +205,14 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
           <div className="text-sm font-semibold">
             Need fresh raid replies, TG announcements, or DMs?
           </div>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-ink-1000/65 mt-1">
             The launch wizard's kit generator works on any concept — start a
             new flow if you need updated community materials.
           </p>
         </div>
         <Link
           href="/launch"
-          className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:border-koki-500/40"
+          className="inline-flex items-center gap-2 rounded-md border border-ink-1000 px-3 py-1.5 text-xs hover:bg-cream-100"
         >
           Open launch wizard
         </Link>
@@ -256,15 +256,15 @@ function PhaseHeader({
   icon: React.ElementType;
 }) {
   return (
-    <div className="flex items-center gap-3 border-t border-white/5 pt-8">
-      <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-koki-400">
+    <div className="flex items-center gap-3 border-t border-ink-1000/20 pt-8">
+      <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-ink-1000">
         <Icon className="h-4 w-4" />
       </div>
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+      <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
         Phase {index}
       </div>
-      <div className="text-base font-semibold text-zinc-100">{name}</div>
-      <div className="text-xs text-zinc-500">— {tag}</div>
+      <div className="text-base font-semibold text-ink-1000">{name}</div>
+      <div className="text-xs text-ink-1000/65">— {tag}</div>
     </div>
   );
 }
@@ -272,10 +272,10 @@ function PhaseHeader({
 function KV({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-3">
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+      <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
         {label}
       </div>
-      <div className="mt-1 text-xs font-mono break-all text-zinc-200">
+      <div className="mt-1 text-xs font-mono break-all text-ink-1000">
         {value}
       </div>
     </div>

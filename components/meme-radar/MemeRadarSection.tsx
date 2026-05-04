@@ -4,11 +4,8 @@ import { Badge } from "@/components/ui/Badge";
 import { RADAR_MEMES } from "@/lib/memeRadar";
 
 interface Props {
-  /** Show the heading + description block above the cards. Default true. */
   showHeader?: boolean;
-  /** Limit how many cards to render (e.g. 3 for a landing preview). */
   limit?: number;
-  /** Use compact card variant (fewer score pills). */
   compact?: boolean;
 }
 
@@ -24,17 +21,17 @@ export default function MemeRadarSection({
       {showHeader && (
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full border border-koki-500/25 bg-koki-500/[0.06] flex items-center justify-center text-koki-400">
+            <div className="h-11 w-11 rounded-full border-[1.5px] border-ink-1000 bg-cream-50 flex items-center justify-center text-ink-1000">
               <Radar className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <div className="text-base font-semibold text-white tracking-tight">
+                <div className="text-[18px] font-black text-ink-1000 tracking-tight">
                   Real-time Meme Radar
                 </div>
                 <Badge tone="mock">MOCK</Badge>
               </div>
-              <p className="text-sm text-zinc-500 mt-1">
+              <p className="text-[12px] text-ink-1000/65 mt-1 font-bold">
                 Detect → Analyze → Generate → Launch → Monitor · {RADAR_MEMES.length} signals
               </p>
             </div>
@@ -58,14 +55,14 @@ export default function MemeRadarSection({
 function EmptyState() {
   return (
     <div className="surface p-12 md:p-16 text-center">
-      <div className="mx-auto h-12 w-12 rounded-full border border-koki-500/25 bg-koki-500/[0.06] flex items-center justify-center text-koki-400 mb-6 relative">
+      <div className="mx-auto h-14 w-14 rounded-full border-[1.5px] border-ink-1000 bg-cream-50 flex items-center justify-center text-ink-1000 mb-6 relative">
         <Radar className="h-5 w-5" />
-        <span className="absolute inset-0 rounded-full border border-koki-500/30 animate-ping" />
+        <span className="absolute inset-0 rounded-full border-[1.5px] border-ink-1000 animate-ping opacity-40" />
       </div>
-      <div className="text-display text-2xl md:text-3xl font-semibold tracking-extra-tight text-white text-balance max-w-md mx-auto">
+      <div className="text-display text-display-sm text-balance max-w-md mx-auto">
         Real-time trends are connecting.
       </div>
-      <p className="mt-3 text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
+      <p className="mt-3 text-[14px] text-ink-1000/72 max-w-md mx-auto leading-relaxed font-medium">
         Once X API + Grok trend search + on-chain indexers are wired in,
         live trending memes appear here ready to be turned into launches.
       </p>
@@ -74,7 +71,7 @@ function EmptyState() {
         <Badge tone="info">Pipeline · Grok search</Badge>
         <Badge tone="info">Pipeline · On-chain</Badge>
       </div>
-      <p className="mt-7 text-xs text-zinc-600">
+      <p className="mt-7 text-[11px] text-ink-1000/55 font-bold">
         In the meantime, you can launch from your own idea via the Launch wizard.
       </p>
     </div>

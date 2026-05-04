@@ -1,11 +1,5 @@
 import Link from "next/link";
-import {
-  Sparkles,
-  Users2,
-  LineChart,
-  Rocket,
-  ArrowRight,
-} from "lucide-react";
+import { Sparkles, Users2, LineChart, Rocket, ArrowRight } from "lucide-react";
 
 interface Engine {
   num: string;
@@ -21,7 +15,7 @@ const ENGINES: Engine[] = [
   {
     num: "01",
     name: "Attention",
-    insight: "Memes are born on X. The agent watches first, then shapes.",
+    insight: "밈은 X에서 태어난다. 에이전트가 먼저 본다.",
     capabilities: [
       "Real-time Meme Radar",
       "Meme idea generation",
@@ -35,7 +29,7 @@ const ENGINES: Engine[] = [
   {
     num: "02",
     name: "Community",
-    insight: "Communities move on X and Telegram. The agent prepares the wave.",
+    insight: "커뮤니티는 X와 텔레그램에서 움직인다. 에이전트가 파도를 짠다.",
     capabilities: [
       "20 community raid replies",
       "Telegram announcement",
@@ -49,8 +43,7 @@ const ENGINES: Engine[] = [
   {
     num: "03",
     name: "Intelligence",
-    insight:
-      "Alpha is on-chain. The agent reads wallets, holders, liquidity, volume.",
+    insight: "알파는 온체인이다. 지갑·홀더·유동성·볼륨을 읽는다.",
     capabilities: [
       "Wallet tracking",
       "Holder analytics",
@@ -64,7 +57,7 @@ const ENGINES: Engine[] = [
   {
     num: "04",
     name: "Execution",
-    insight: "Three engines feed one signature. Pump.fun launch in one flow.",
+    insight: "세 엔진이 한 사인으로 모인다. Pump.fun 한 방.",
     capabilities: [
       "Token concept · ticker",
       "Pump.fun metadata (IPFS)",
@@ -79,57 +72,51 @@ const ENGINES: Engine[] = [
 
 export default function EnginesSection() {
   return (
-    <section className="border-t border-white/5">
+    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-3xl">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-koki-400">
-            Four engines · one agent
-          </div>
-          <h2 className="mt-3 text-display text-4xl md:text-5xl font-semibold tracking-extra-tight text-white leading-[1.05] text-balance">
-            X attention · community momentum · on-chain intelligence · launch
-            execution.
+          <div className="eyebrow">Four engines · one agent</div>
+          <h2 className="mt-3 text-display text-display-md text-balance">
+            X attention · community · on-chain · <span className="stamp">launch</span>.
           </h2>
-          <p className="mt-5 text-zinc-400 text-lg leading-relaxed">
-            Memecoins are born on X. Communities move on X. Narratives spread
-            on X. On-chain alpha is amplified on X. Nobody had connected those
-            four into a single autonomous launch agent — until now.
+          <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
+            Memecoin은 X에서 태어난다. 커뮤니티도 X에서 움직인다. 알파는 온체인에서 X로 흐른다.
+            이 네 가지를 한 에이전트로 묶은 건 KOKi가 처음.
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.04] rounded-2xl overflow-hidden border border-white/5">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
           {ENGINES.map((e) => {
             const Icon = e.icon;
             return (
               <Link
                 key={e.num}
                 href={e.href}
-                className="group bg-ink-950 p-7 md:p-9 flex flex-col hover:bg-ink-900 transition-colors"
+                className="card card-hover group flex flex-col !p-7"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-zinc-500 tracking-[0.18em]">
-                    PHASE {e.num}
-                  </span>
-                  <div className="h-9 w-9 rounded-full border border-white/10 flex items-center justify-center text-koki-400 group-hover:border-koki-500/40 transition-colors">
+                  <span className="eyebrow !text-[10px] opacity-70">PHASE {e.num}</span>
+                  <div className="h-9 w-9 rounded-full border-[1.5px] border-ink-1000 flex items-center justify-center text-ink-1000 bg-koki-500">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
-                <div className="mt-8">
-                  <div className="text-display text-3xl md:text-4xl font-semibold tracking-extra-tight text-white">
+                <div className="mt-6">
+                  <div className="text-display text-[34px] md:text-[40px]">
                     {e.name}
                   </div>
-                  <p className="mt-2 text-sm text-zinc-500 leading-relaxed italic">
+                  <p className="mt-2 text-[13px] text-ink-1000/72 leading-snug font-medium">
                     {e.insight}
                   </p>
                 </div>
-                <ul className="mt-6 space-y-1.5 text-sm text-zinc-300">
+                <ul className="mt-5 space-y-1.5 text-[13px] text-ink-1000 font-semibold">
                   {e.capabilities.map((c) => (
                     <li key={c} className="flex gap-2.5 items-start">
-                      <span className="text-koki-400 leading-6">•</span>
+                      <span className="text-ink-1000 leading-6">●</span>
                       <span>{c}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-8 inline-flex items-center gap-1.5 text-sm text-koki-400 font-medium group-hover:gap-2 transition-all">
+                <div className="mt-7 inline-flex items-center gap-1.5 text-[13px] text-ink-1000 font-extrabold group-hover:gap-2.5 transition-all">
                   {e.cta}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>

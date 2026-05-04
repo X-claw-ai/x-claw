@@ -23,10 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-ink-1000">
-      <body className="min-h-screen bg-ink-1000 text-zinc-100 antialiased">
+    <html lang="en" className="bg-koki-500">
+      <body className="min-h-screen bg-koki-500 text-ink-1000 antialiased">
         <XClawWalletProvider>
-          <div className="bg-app min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
