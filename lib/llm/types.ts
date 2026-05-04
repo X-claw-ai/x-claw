@@ -18,6 +18,10 @@ export interface LLMRequest {
   temperature?: number;
   /** Optional override of the provider's default model. */
   model?: string;
+  /** Feature label for Supabase usage tracking (e.g. "generate-launch-kit"). */
+  feature?: string;
+  /** Optional caller wallet pubkey for per-user usage tracking. */
+  walletPubkey?: string;
 }
 
 export interface LLMResponse {

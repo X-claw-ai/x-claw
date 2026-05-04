@@ -304,6 +304,7 @@ export default function PumpLaunchWizard() {
         mintPubkey: result.mintPubkey,
         metadataUri: result.metadataUri,
         devBuyInSol: result.devBuyInSol,
+        walletPubkey: publicKey.toBase58(),
       });
 
       setLaunchPhase("done");

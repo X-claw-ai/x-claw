@@ -2,6 +2,7 @@ import type { LLMRequest, LLMResponse, Provider } from "./types";
 import { callXAI } from "./xai";
 import { callAnthropic } from "./anthropic";
 import { callOpenAI } from "./openai";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 // ─────────────────────────────────────────────────────────────────────────
 // KOKi LLM router
@@ -61,12 +62,24 @@ export class LLMRouterError extends Error {
 
 export async function callLLM(req: LLMRequest): Promise<LLMResponse> {
   const attempts: { provider: Provider; error: string }[] = [];
+  const startedAt = Date.now();
 
   for (const p of ORDER) {
     const k = ENV_KEY[p as Exclude<Provider, "mock">];
     if (!process.env[k]) continue;
     try {
-      return await CALLERS[p as Exclude<Provider, "mock">](req);
+      const res = await CALLERS[p as Exclude<Provider, "mock">](req);
+      logUsage({
+        provider: res.provider,
+        model: res.model,
+        feature: req.feature ?? "unknown",
+        inputTokens: res.usage?.input,
+        outputTokens: res.usage?.output,
+        durationMs: Date.now() - startedAt,
+        walletPubkey: req.walletPubkey,
+        fallbackReason: attempts.length > 0 ? attempts.map((a) => a.provider).join("→") : undefined,
+      });
+      return res;
     } catch (err: unknown) {
       attempts.push({
         provider: p,
@@ -88,4 +101,32 @@ export async function callLLM(req: LLMRequest): Promise<LLMResponse> {
       .join(", ")}`,
     attempts
   );
+}
+
+/** Best-effort usage logging to Supabase. Never throws. */
+function logUsage(row: {
+  provider: Provider;
+  model: string;
+  feature: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  durationMs?: number;
+  walletPubkey?: string;
+  fallbackReason?: string;
+}) {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+  void sb
+    .from("llm_usage")
+    .insert({
+      wallet_pubkey: row.walletPubkey ?? null,
+      provider: row.provider,
+      model: row.model,
+      feature: row.feature,
+      input_tokens: row.inputTokens ?? null,
+      output_tokens: row.outputTokens ?? null,
+      duration_ms: row.durationMs ?? null,
+      fallback_reason: row.fallbackReason ?? null,
+    })
+    .then(() => undefined, () => undefined);
 }
