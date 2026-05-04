@@ -15,7 +15,7 @@ const ENGINES: Engine[] = [
   {
     num: "01",
     name: "Attention",
-    insight: "밈은 X에서 태어난다. 에이전트가 먼저 본다.",
+    insight: "Memes are born on X. The agent watches first.",
     capabilities: [
       "Real-time Meme Radar",
       "Meme idea generation",
@@ -29,7 +29,7 @@ const ENGINES: Engine[] = [
   {
     num: "02",
     name: "Community",
-    insight: "커뮤니티는 X와 텔레그램에서 움직인다. 에이전트가 파도를 짠다.",
+    insight: "Communities move on X and Telegram. The agent prepares the wave.",
     capabilities: [
       "20 community raid replies",
       "Telegram announcement",
@@ -43,7 +43,7 @@ const ENGINES: Engine[] = [
   {
     num: "03",
     name: "Intelligence",
-    insight: "알파는 온체인이다. 지갑·홀더·유동성·볼륨을 읽는다.",
+    insight: "Alpha is on-chain. Read wallets, holders, liquidity, volume.",
     capabilities: [
       "Wallet tracking",
       "Holder analytics",
@@ -57,7 +57,7 @@ const ENGINES: Engine[] = [
   {
     num: "04",
     name: "Execution",
-    insight: "세 엔진이 한 사인으로 모인다. Pump.fun 한 방.",
+    insight: "Three engines into one signature. Pump.fun in a single shot.",
     capabilities: [
       "Token concept · ticker",
       "Pump.fun metadata (IPFS)",
@@ -80,8 +80,9 @@ export default function EnginesSection() {
             X attention · community · on-chain · <span className="stamp">launch</span>.
           </h2>
           <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
-            Memecoin은 X에서 태어난다. 커뮤니티도 X에서 움직인다. 알파는 온체인에서 X로 흐른다.
-            이 네 가지를 한 에이전트로 묶은 건 KOKi가 처음.
+            Memecoins are born on X. Communities move on X. Alpha flows from
+            on-chain to X. KOKi is the first to wire all four into a single
+            autonomous launch agent.
           </p>
         </div>
 

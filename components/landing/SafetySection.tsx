@@ -4,22 +4,22 @@ const PILLARS = [
   {
     icon: Cpu,
     title: "Agent prepares",
-    body: "Grok가 런치킷, 온체인 메타데이터, 서명 안 된 트랜잭션을 짭니다.",
+    body: "Grok drafts the launch kit, on-chain metadata, and the unsigned transaction.",
   },
   {
     icon: UserCheck,
     title: "User approves",
-    body: "토큰명·티커·설명·링크·dev buy를 직접 검토하고 승인합니다.",
+    body: "You review token name, ticker, description, links, and the dev buy.",
   },
   {
     icon: Wallet,
     title: "Wallet signs",
-    body: "Phantom/Solflare가 create-token 트랜잭션에 사인합니다. 키는 우리 손에 없습니다.",
+    body: "Phantom or Solflare signs the create-token transaction. We never see your keys.",
   },
   {
     icon: ShieldCheck,
     title: "Launch executes",
-    body: "사인 후에만 Solana 메인넷에 토큰이 올라갑니다.",
+    body: "Only after your signature does the token go live on Solana mainnet.",
   },
 ];
 
@@ -30,11 +30,12 @@ export default function SafetySection() {
         <div className="max-w-3xl">
           <div className="eyebrow">Safety model</div>
           <h2 className="mt-3 text-display text-display-md text-balance">
-            에이전트는 준비. <span className="stamp">사람</span>이 결정. 지갑이 사인.
+            Agents prepare. <span className="stamp">People</span> decide. Wallets sign.
           </h2>
           <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium text-balance">
-            Memecoin 런치는 에이전트가 돈을 조용히 만질 때 망가집니다. KOKi는 그게 절대 일어나지 않게 만들어졌습니다.
-            힘은 에이전트가 키를 가져서가 아니라 — 잘 준비해서 나옵니다.
+            Memecoin launches go wrong when an agent silently controls funds.
+            KOKi is built so that never happens. The agent is powerful because
+            it prepares — not because it holds keys.
           </p>
         </div>
 
@@ -64,9 +65,10 @@ export default function SafetySection() {
 
         <div className="mt-10 surface-ink p-6 text-[14px] leading-relaxed font-medium">
           <span className="font-extrabold">Hard rules:</span>{" "}
-          KOKi는 private key를 저장하지 않습니다. seed phrase를 묻지 않습니다.
-          명시적 서명 없이 자금을 옮기지 않습니다. xAI · X · Grok · Pump.fun · Solana 와의 파트너십을 주장하지 않습니다.
-          Memecoin 런치는 리스크가 있고, 최종 결정은 당신이 합니다.
+          KOKi does not store private keys. Does not ask for seed phrases.
+          Does not move funds without your explicit signature. Does not claim
+          partnership with xAI, X, Grok, Pump.fun, PumpPortal, or Solana.
+          Memecoin launches involve risk; you are the final decision maker.
         </div>
       </div>
     </section>

@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="border-t-[1.5px] border-ink-1000 mt-32 bg-koki-500">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-3 text-sm text-ink-1000">
         <div>
-          <KokiLogo height={28} bare />
+          <KokiLogo height={44} bare />
           <p className="mt-4 text-ink-1000/72 leading-relaxed max-w-xs font-medium">
             Grok-native Meme Coin Launch Agent. Detect → Analyze → Generate → Launch → Monitor. From meme idea to Pump.fun launch.
           </p>

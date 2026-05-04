@@ -11,9 +11,9 @@ const NAV = [
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-koki-500/85 border-b-[1.5px] border-ink-1000">
-      <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
+      <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <KokiLogo height={26} bare />
+          <KokiLogo height={40} bare />
           <span className="hidden sm:inline eyebrow text-ink-1000/70 !text-[10px]">
             Meme Coin Launch Agent
           </span>

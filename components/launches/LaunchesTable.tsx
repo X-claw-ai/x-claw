@@ -31,7 +31,8 @@ export default function LaunchesTable() {
     <>
       {showingMockOnly && (
         <div className="card p-3 text-xs font-bold text-ink-1000 mb-4">
-          아직 실제 런치 없음 — 샘플 행 표시 중. Pump Launch Agent 실행 후 여기에 실제 런치가 보입니다.
+          No real launches yet — showing sample rows. Run the Pump Launch
+          Agent to see your actual launches here.
         </div>
       )}
 

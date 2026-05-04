@@ -34,8 +34,8 @@ export default function Hero() {
         </h1>
 
         <p className="mt-8 text-ink-1000/80 text-lg md:text-xl leading-snug max-w-2xl font-medium text-balance">
-          Grok이 X에서 다음 밈을 골라주고, 런치킷을 짜고,
-          Pump.fun에 올립니다. 너는 한 번 사인. 끝.
+          Grok picks the next meme on X, drafts the launch kit, and ships it to
+          Pump.fun. You sign once. Done.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center gap-3">

@@ -11,13 +11,14 @@ export default function AttentionLayerSection() {
             Attention layer
           </div>
           <h2 className="mt-3 text-display text-display-md text-balance">
-            대부분 런치툴은 아이디어를 기다립니다.
+            Most launch tools wait for an idea.
             <br />
-            <span className="opacity-60">KOKi는 먼저 본다.</span>
+            <span className="opacity-60">KOKi watches first.</span>
           </h2>
           <p className="mt-6 text-ink-1000/80 text-base md:text-lg leading-relaxed max-w-2xl text-balance font-medium">
-            KOKi는 X 밈 시그널, 커뮤니티 모멘텀, 온체인 관련성을 먼저 분석한 후 런치킷을 짜고 Pump.fun 실행을 준비합니다.
-            너는 빈 폼이 아니라 — 깔끔히 정리된 기회 위에서 시작합니다.
+            KOKi reads X meme signals, community momentum, and on-chain
+            relevance before drafting a launch kit and preparing Pump.fun
+            execution. You start at the top of the funnel — not a blank form.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
