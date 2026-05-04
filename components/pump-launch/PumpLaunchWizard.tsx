@@ -107,6 +107,10 @@ export default function PumpLaunchWizard() {
   const [launchResult, setLaunchResult] = useState<RealLaunchResult | null>(null);
   const [devBuySol, setDevBuySol] = useState<number>(0);
 
+  // Auto-pilot mode — Grok invents the concept itself
+  const [autoPiloting, setAutoPiloting] = useState(false);
+  const [autoReasoning, setAutoReasoning] = useState<string | null>(null);
+
   // Real-time Meme Radar prefill: when the user lands here from a radar
   // card, we hydrate the concept from /lib/memeRadar.ts and remember which
   // meme it came from so the UI can show the source banner.
@@ -190,6 +194,65 @@ export default function PumpLaunchWizard() {
     } finally {
       setGenerating(false);
       setStep(2);
+    }
+  }
+
+  /**
+   * Auto-pilot — Grok invents the concept itself, then immediately runs
+   * launch-kit generation. The user lands on Step 2 (Review) with everything
+   * filled in. They can still edit before signing.
+   */
+  async function runAutoPilot() {
+    setAutoPiloting(true);
+    setAutoReasoning(null);
+    setFallbackReason(null);
+
+    try {
+      const conceptRes = await fetch("/api/auto-launch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletPubkey: publicKey ? publicKey.toBase58() : undefined,
+        }),
+      });
+      const conceptData = (await conceptRes.json()) as {
+        ok: boolean;
+        concept?: {
+          idea: string;
+          tokenName: string;
+          ticker: string;
+          theme: string;
+          audience: string;
+          launchStyle: ConceptInput["launchStyle"];
+          reasoning: string;
+        };
+        provider?: string;
+        fallbackReason?: string;
+      };
+
+      if (!conceptData.ok || !conceptData.concept) {
+        throw new Error("auto-launch returned no concept");
+      }
+
+      const c = conceptData.concept;
+      const seeded: ConceptInput = {
+        ...DEFAULT,
+        idea: c.idea,
+        tokenName: c.tokenName,
+        ticker: c.ticker,
+        theme: c.theme,
+        audience: c.audience,
+        launchStyle: c.launchStyle,
+      };
+      setConcept(seeded);
+      setAutoReasoning(c.reasoning);
+
+      // Chain straight into the launch-kit generation with this concept
+      await runGenerate(seeded);
+    } catch (err) {
+      setFallbackReason(err instanceof Error ? err.message : "Auto-pilot failed");
+    } finally {
+      setAutoPiloting(false);
     }
   }
 
@@ -328,6 +391,9 @@ export default function PumpLaunchWizard() {
           setField={setField}
           onNext={() => runGenerate()}
           conceptValid={conceptValid}
+          onAutoPilot={runAutoPilot}
+          autoPiloting={autoPiloting}
+          autoReasoning={autoReasoning}
         />
       )}
 
@@ -384,11 +450,17 @@ function ConceptStep({
   setField,
   onNext,
   conceptValid,
+  onAutoPilot,
+  autoPiloting,
+  autoReasoning,
 }: {
   concept: ConceptInput;
   setField: <K extends keyof ConceptInput>(k: K, v: ConceptInput[K]) => void;
   onNext: () => void;
   conceptValid: boolean;
+  onAutoPilot: () => void;
+  autoPiloting: boolean;
+  autoReasoning: string | null;
 }) {
   function onLogoChange(file: File | null) {
     if (!file) return setField("logoDataUrl", null);
@@ -398,14 +470,53 @@ function ConceptStep({
   }
 
   return (
-    <div className="card p-6 space-y-6">
-      <div className="flex items-center gap-2">
-        <Rocket className="h-5 w-5 text-ink-1000" />
-        <h2 className="text-lg font-semibold">Create Concept</h2>
+    <div className="space-y-4">
+      {/* ✨ Auto-pilot banner */}
+      <div className="surface-ink p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3 min-w-0">
+          <Sparkles className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            <div className="text-[15px] font-black tracking-tight">
+              Let Grok pick &amp; ship.
+            </div>
+            <div className="text-[12px] font-medium opacity-85 mt-0.5">
+              Auto-pilot picks a meme, drafts the kit, hands you a signature-ready launch.
+            </div>
+            {autoReasoning && (
+              <div className="text-[12px] font-bold mt-1.5 opacity-95">
+                Grok’s pick: {autoReasoning}
+              </div>
+            )}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onAutoPilot}
+          disabled={autoPiloting}
+          className="btn !bg-koki-500 !text-ink-1000 !border-koki-500 !py-2 !px-4 !text-xs whitespace-nowrap disabled:opacity-60"
+        >
+          {autoPiloting ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Grok is picking…
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3.5 w-3.5" />
+              Auto-pilot launch
+            </>
+          )}
+        </button>
       </div>
-      <p className="text-sm text-ink-1000/72">
-        Describe the project. The agent will draft launch materials. You'll review everything before any signature.
-      </p>
+
+      <div className="card p-6 space-y-6">
+        <div className="flex items-center gap-2">
+          <Rocket className="h-5 w-5 text-ink-1000" />
+          <h2 className="text-lg font-semibold">Or — manual concept</h2>
+        </div>
+        <p className="text-sm text-ink-1000/72">
+          Describe the project yourself. The agent drafts launch materials. You review everything before any signature.
+        </p>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Project idea" hint="One or two sentences" className="sm:col-span-2">
@@ -513,14 +624,15 @@ function ConceptStep({
         </Field>
       </div>
 
-      <div className="flex items-center justify-between pt-2">
-        <p className="text-xs text-ink-1000/65">
-          Inputs stay on your device until you submit. Nothing is signed yet.
-        </p>
-        <Button onClick={onNext} disabled={!conceptValid}>
-          <Sparkles className="h-4 w-4" />
-          Generate Launch Kit
-        </Button>
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-ink-1000/65">
+            Inputs stay on your device until you submit. Nothing is signed yet.
+          </p>
+          <Button onClick={onNext} disabled={!conceptValid}>
+            <Sparkles className="h-4 w-4" />
+            Generate Launch Kit
+          </Button>
+        </div>
       </div>
     </div>
   );
