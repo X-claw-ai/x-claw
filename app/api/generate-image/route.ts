@@ -7,6 +7,9 @@ interface GenerateImageBody {
   prompt: string;
   walletPubkey?: string;
   feature?: string; // for usage tracking, e.g. "auto-launch" / "manual-logo"
+  /** Optional ticker — used when both real image APIs fail, so the
+   *  visual fallback at least shows the user the ticker on an orange tile. */
+  ticker?: string;
 }
 
 interface GenerateImageResponse {
@@ -106,17 +109,39 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 3. No image provider configured → deterministic mock
+  // 3. Both real APIs failed (or no key configured) → render a visible
+  //    SVG fallback so the user can see SOMETHING. The ticker (or first
+  //    word of the prompt) goes on an orange tile in heavy black type.
+  console.error(`[generate-image] all providers failed, returning SVG fallback. Attempts: ${attempts.map((a) => `${a.provider}: ${a.error}`).join("; ")}`);
+  const ticker = (body.ticker || body.prompt.match(/\$([A-Z0-9]{2,8})/)?.[1] || "KOKi").toUpperCase().slice(0, 6);
+  const svgFallback = renderSvgFallback(ticker);
   return NextResponse.json<GenerateImageResponse>({
     ok: true,
-    imageDataUrl: PLACEHOLDER_DATA_URL,
+    imageDataUrl: svgFallback,
     provider: "mock",
-    model: "deterministic-placeholder",
+    model: "svg-placeholder",
     fallbackReason:
       attempts.length > 0
         ? attempts.map((a) => `${a.provider}: ${a.error}`).join("; ")
         : "No image provider configured (set XAI_API_KEY or OPENAI_API_KEY)",
   });
+}
+
+/** Visible SVG placeholder — orange tile with ticker in heavy black type. */
+function renderSvgFallback(ticker: string): string {
+  const safeTicker = ticker.replace(/[<>&"']/g, "");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#E55B14"/>
+  <text x="512" y="540" font-family="Inter, -apple-system, system-ui, sans-serif" font-weight="900" font-size="220" fill="#0B0B0B" text-anchor="middle" dominant-baseline="middle" letter-spacing="-8">${safeTicker}</text>
+  <g transform="translate(900,80) scale(2.5)">
+    <ellipse cx="16" cy="22" rx="7.5" ry="6" fill="#0B0B0B"/>
+    <ellipse cx="6.5" cy="13" rx="2.6" ry="3.2" fill="#0B0B0B"/>
+    <ellipse cx="11.5" cy="8.5" rx="2.6" ry="3.2" fill="#0B0B0B"/>
+    <ellipse cx="20.5" cy="8.5" rx="2.6" ry="3.2" fill="#0B0B0B"/>
+    <ellipse cx="25.5" cy="13" rx="2.6" ry="3.2" fill="#0B0B0B"/>
+  </g>
+</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
 /** Strip / soften phrases that often trip image-model safety. */
@@ -151,6 +176,3 @@ function logUsage(row: {
     .then(() => undefined, () => undefined);
 }
 
-// Tiny 1×1 orange placeholder so even the mock branch returns a valid PNG.
-const PLACEHOLDER_DATA_URL =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPk/Y//PwAFhAJ/wlseKgAAAABJRU5ErkJggg==";

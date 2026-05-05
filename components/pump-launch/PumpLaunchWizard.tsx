@@ -225,6 +225,7 @@ export default function PumpLaunchWizard() {
           prompt,
           walletPubkey: publicKey ? publicKey.toBase58() : undefined,
           feature: kit ? "logo-from-kit" : "logo-manual",
+          ticker: concept.ticker || kit?.ticker,
         }),
       });
       const data = (await res.json()) as {
