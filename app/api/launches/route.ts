@@ -78,16 +78,22 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * GET ?wallet=<pubkey> — list a wallet's launches, newest first.
+ * GET — list launches.
+ *
+ * Two modes:
+ *   ?wallet=<pubkey>  → only that wallet's launches (used by /dashboard,
+ *                       'My Launches', wallet-scoped)
+ *   (no wallet)       → ALL launches across all wallets, newest first.
+ *                       Used by /launches ('All Launches'), the public
+ *                       discovery surface — like Pump.fun's homepage.
+ *                       Capped at 200 so the response stays bounded.
  *
  * Without Supabase, returns an empty list (the client will fall back to
- * its localStorage history).
+ * its own localStorage in the wallet-scoped case; the public-all view
+ * just shows nothing until Supabase is wired up).
  */
 export async function GET(req: NextRequest) {
   const wallet = req.nextUrl.searchParams.get("wallet");
-  if (!wallet) {
-    return NextResponse.json({ ok: false, error: "wallet param required" }, { status: 400 });
-  }
 
   if (!supabaseEnabled()) {
     return NextResponse.json({ ok: true, persisted: false, launches: [] });
@@ -98,12 +104,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, persisted: false, launches: [] });
   }
 
-  const { data, error } = await sb
+  let query = sb
     .from("launches_v1")
     .select("*")
-    .eq("wallet_pubkey", wallet)
+    .eq("mock", false) // public board: never expose mock rows
+    .eq("status", "launched") // only show actually-shipped tokens
     .order("created_at", { ascending: false })
     .limit(200);
+
+  if (wallet) {
+    query = query.eq("wallet_pubkey", wallet);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
