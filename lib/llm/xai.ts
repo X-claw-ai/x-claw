@@ -65,36 +65,25 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
     body: JSON.stringify(body),
   });
 
-  // Self-healing retry: if the request was rejected because of
-  // search_parameters (Live Search not enabled on this model/account/tier),
-  // retry once without it. This keeps the agent functional without forcing
-  // operators to upgrade their xAI plan.
-  if (
-    !res.ok &&
-    body.search_parameters &&
-    (res.status === 400 || res.status === 422 || res.status === 404)
-  ) {
+  // Self-healing retry: if the request was rejected with search_parameters
+  // attached, ALWAYS retry once without them on any 4xx. xAI's error text
+  // varies (sometimes "search not enabled", sometimes just "Bad Request"
+  // or "invalid request"), so a regex-narrow check was missing real cases
+  // and forcing a hard provider-level fallback to OpenAI.
+  if (!res.ok && body.search_parameters && res.status >= 400 && res.status < 500) {
     const errText = await res.text().catch(() => "");
-    const looksLikeSearchIssue =
-      /search|parameter|not.*support|enable|tier|plan/i.test(errText);
-
-    if (looksLikeSearchIssue) {
-      console.warn(
-        `[xai] retrying without search_parameters — original ${res.status}: ${errText.slice(0, 200)}`,
-      );
-      delete body.search_parameters;
-      res = await fetch(`${BASE}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(body),
-      });
-    } else {
-      // Re-throw with the body we already drained
-      throw new Error(`xAI API error ${res.status}: ${errText.slice(0, 400)}`);
-    }
+    console.warn(
+      `[xai] retrying without search_parameters — original ${res.status}: ${errText.slice(0, 300)}`,
+    );
+    delete body.search_parameters;
+    res = await fetch(`${BASE}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
   }
 
   if (!res.ok) {

@@ -46,6 +46,12 @@ export interface LLMResponse {
   };
   /** xAI Live Search citations — list of source URLs the model used. */
   citations?: string[];
+  /**
+   * Providers that were tried before this one succeeded (with their error
+   * messages). Empty array when the primary provider worked. Useful for
+   * surfacing "why did we fall back to OpenAI" in API debug responses.
+   */
+  previousAttempts?: { provider: Provider; error: string }[];
 }
 
 /** Used by the API to communicate provider info back to the client UI. */

@@ -79,7 +79,10 @@ export async function callLLM(req: LLMRequest): Promise<LLMResponse> {
         walletPubkey: req.walletPubkey,
         fallbackReason: attempts.length > 0 ? attempts.map((a) => a.provider).join("→") : undefined,
       });
-      return res;
+      // Annotate the response so callers can see which providers failed
+      // BEFORE this one succeeded — critical for debugging "why is xAI
+      // not being used even though XAI_API_KEY is set?" cases.
+      return { ...res, previousAttempts: attempts };
     } catch (err: unknown) {
       attempts.push({
         provider: p,

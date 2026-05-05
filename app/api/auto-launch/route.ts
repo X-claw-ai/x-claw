@@ -22,6 +22,8 @@ interface AutoLaunchResponse {
     /** Lowercased & trimmed XAI_LIVE_SEARCH value. Empty string = env not set. */
     liveSearchEnvRaw: string;
     hasXaiKey: boolean;
+    /** Providers that failed before the one that answered, with errors. */
+    providerAttempts?: { provider: string; error: string }[];
   };
 }
 
@@ -115,12 +117,14 @@ export async function POST(req: NextRequest) {
       model: llmRes.model,
       liveSearchRequested: wantLiveSearch,
       citations: llmRes.citations ?? [],
-      // Debug: surface the raw env value (lowercased & trimmed) so we can
-      // tell whether Vercel even has XAI_LIVE_SEARCH set on this deployment.
-      // Empty string => env var missing entirely. Anything else => what's set.
+      // Debug: surface the raw env value (lowercased & trimmed) + which
+      // providers failed before the one that actually answered. Lets us
+      // see things like "xai threw 'API error 400: search not available'"
+      // without spelunking through Vercel function logs.
       debug: {
         liveSearchEnvRaw: liveRaw,
         hasXaiKey: Boolean(process.env.XAI_API_KEY),
+        providerAttempts: llmRes.previousAttempts ?? [],
       },
     });
   } catch (err) {
