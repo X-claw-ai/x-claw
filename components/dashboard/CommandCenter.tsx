@@ -10,6 +10,7 @@ import {
   clearLaunchesEverywhere,
   type SavedLaunch,
 } from "@/lib/storage/launches";
+import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 
 // Pump.fun-style dashboard: AI-agent-launched tokens are the primary
 // content. Top stats stay for quick context, everything else (the old
@@ -127,6 +128,7 @@ export default function CommandCenter() {
 
 function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const stats = usePumpCoin(launch.mintPubkey);
 
   useEffect(() => {
     if (!launch.metadataUri) return;
@@ -211,9 +213,28 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
         <div className="text-[10px] text-ink-1000/55 font-mono truncate">
           {shortAddr(launch.mintPubkey || "—")}
         </div>
+
+        {/* Live market cap from Pump.fun */}
+        {stats && (
+          <div className="flex items-baseline justify-between gap-2 pt-1">
+            <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+              Mcap
+            </span>
+            <span className="text-[13px] font-black tabular-nums tracking-tight">
+              {formatMcUsd(stats.marketCapUsd)}
+            </span>
+          </div>
+        )}
+        {stats && stats.bondingProgress !== null && (
+          <BondingBar progress={stats.bondingProgress} complete={stats.complete} />
+        )}
+
         <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-          <Badge tone="live" className="!h-[18px] !text-[9px] !px-2">
-            Launched
+          <Badge
+            tone={stats?.complete ? "live" : "neutral"}
+            className="!h-[18px] !text-[9px] !px-2"
+          >
+            {stats?.complete ? "Graduated" : "Launched"}
           </Badge>
           <span className="text-[10px] text-ink-1000/55 font-bold">
             {new Date(launch.createdAt).toLocaleDateString("en-US", {
@@ -273,6 +294,32 @@ function SkeletonGrid() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function BondingBar({
+  progress,
+  complete,
+}: {
+  progress: number;
+  complete: boolean;
+}) {
+  const pct = Math.max(0, Math.min(1, progress)) * 100;
+  return (
+    <div className="space-y-1 pt-1">
+      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
+        <span>Bonding</span>
+        <span className="tabular-nums">{pct.toFixed(0)}%</span>
+      </div>
+      <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
+        <div
+          className={`h-full transition-all duration-500 ${
+            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-ink-1000"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
     </div>
   );
 }

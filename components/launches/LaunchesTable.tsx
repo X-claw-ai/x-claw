@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 
 // Public 'All Launches' gallery — shows every memecoin every KOKi agent
 // has shipped, across all wallets. Hits /api/launches with no `wallet`
@@ -92,6 +93,7 @@ function PublicLaunchCard({
   idx: number;
 }) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const stats = usePumpCoin(launch.mint_pubkey);
 
   useEffect(() => {
     if (!launch.metadata_uri) return;
@@ -167,9 +169,28 @@ function PublicLaunchCard({
         <div className="text-[10px] text-ink-1000/55 font-mono truncate">
           {launch.mint_pubkey.slice(0, 5)}…{launch.mint_pubkey.slice(-5)}
         </div>
+
+        {/* Live market cap from Pump.fun */}
+        {stats && (
+          <div className="flex items-baseline justify-between gap-2 pt-1">
+            <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+              Mcap
+            </span>
+            <span className="text-[13px] font-black tabular-nums tracking-tight">
+              {formatMcUsd(stats.marketCapUsd)}
+            </span>
+          </div>
+        )}
+        {stats && stats.bondingProgress !== null && (
+          <BondingBar progress={stats.bondingProgress} complete={stats.complete} />
+        )}
+
         <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-          <Badge tone="live" className="!h-[18px] !text-[9px] !px-2">
-            Launched
+          <Badge
+            tone={stats?.complete ? "live" : "neutral"}
+            className="!h-[18px] !text-[9px] !px-2"
+          >
+            {stats?.complete ? "Graduated" : "Launched"}
           </Badge>
           <span className="text-[10px] text-ink-1000/55 font-bold">
             {new Date(launch.created_at).toLocaleDateString("en-US", {
@@ -199,6 +220,32 @@ function PublicLaunchCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+function BondingBar({
+  progress,
+  complete,
+}: {
+  progress: number;
+  complete: boolean;
+}) {
+  const pct = Math.max(0, Math.min(1, progress)) * 100;
+  return (
+    <div className="space-y-1 pt-1">
+      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
+        <span>Bonding</span>
+        <span className="tabular-nums">{pct.toFixed(0)}%</span>
+      </div>
+      <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
+        <div
+          className={`h-full transition-all duration-500 ${
+            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-ink-1000"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
   );
 }
 
