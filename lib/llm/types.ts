@@ -52,6 +52,13 @@ export interface LLMResponse {
    * surfacing "why did we fall back to OpenAI" in API debug responses.
    */
   previousAttempts?: { provider: Provider; error: string }[];
+  /**
+   * xAI-only: populated when the first call (with search_parameters) was
+   * rejected and we silently retried without them. The original status +
+   * error text tell us EXACTLY why Live Search isn't working — usually
+   * "Live Search not enabled for your tier" or similar.
+   */
+  searchRejection?: { status: number; error: string };
 }
 
 /** Used by the API to communicate provider info back to the client UI. */

@@ -70,11 +70,13 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   // varies (sometimes "search not enabled", sometimes just "Bad Request"
   // or "invalid request"), so a regex-narrow check was missing real cases
   // and forcing a hard provider-level fallback to OpenAI.
+  let searchRejection: { status: number; error: string } | undefined;
   if (!res.ok && body.search_parameters && res.status >= 400 && res.status < 500) {
     const errText = await res.text().catch(() => "");
     console.warn(
       `[xai] retrying without search_parameters — original ${res.status}: ${errText.slice(0, 300)}`,
     );
+    searchRejection = { status: res.status, error: errText.slice(0, 500) };
     delete body.search_parameters;
     res = await fetch(`${BASE}/chat/completions`, {
       method: "POST",
@@ -117,5 +119,6 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
         }
       : undefined,
     citations,
+    searchRejection,
   };
 }

@@ -24,6 +24,12 @@ interface AutoLaunchResponse {
     hasXaiKey: boolean;
     /** Providers that failed before the one that answered, with errors. */
     providerAttempts?: { provider: string; error: string }[];
+    /**
+     * Set when xAI accepted the bare request but rejected search_parameters.
+     * The status + error text reveal exactly why Live Search isn't running
+     * (e.g. "Live Search requires a Pro tier" / "model does not support search").
+     */
+    xaiSearchRejection?: { status: number; error: string };
   };
 }
 
@@ -125,6 +131,7 @@ export async function POST(req: NextRequest) {
         liveSearchEnvRaw: liveRaw,
         hasXaiKey: Boolean(process.env.XAI_API_KEY),
         providerAttempts: llmRes.previousAttempts ?? [],
+        xaiSearchRejection: llmRes.searchRejection,
       },
     });
   } catch (err) {
