@@ -44,36 +44,32 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
-  // ─── Agent Tools API (replaced deprecated Live Search) ──────────────
-  // xAI deprecated `search_parameters` in May 2026. The replacement is
-  // their Agent Tools API — server-side built-in tools that the model
-  // invokes during generation. We use the `x_search` tool which performs
-  // keyword/semantic/user search + thread fetch on X.
+  // ─── Agent Tools API ─────────────────────────────────────────────────
+  // xAI deprecated the top-level `search_parameters` field but kept the
+  // search functionality alive as a built-in tool: `tools: [{type: "live_search"}]`
+  // on the same /v1/chat/completions endpoint. The newer `x_search` /
+  // `web_search` types live on the OpenAI Responses API endpoint
+  // (/v1/responses) — for chat/completions we use `live_search`.
   //
-  // Reference: https://docs.x.ai/docs/guides/tools/x-search
-  // Built-in tools run on xAI's servers; we just provide tool config.
-  // Citations come back the same way Live Search returned them.
+  // Confirmed by error: "expected `function` or `live_search`" when we
+  // tried type:'x_search' on chat/completions.
   //
-  // X Search requires a search-capable model. The recommended model per
-  // xAI docs is `grok-4.3`. Older `grok-4-latest` / `grok-4-0709` may
-  // not support the new tools schema. Operators can pin the auto-concept
-  // call to a specific model via XAI_MODEL_AUTO_CONCEPT.
+  // Reference: https://docs.x.ai/docs/guides/tools/overview
   if (req.liveSearch) {
-    const xSearchTool: Record<string, unknown> = { type: "x_search" };
-    // Optional sub-parameters (date range / handle filters / image+video
-    // understanding) — only attach when the caller actually set them.
     const ls = req.liveSearch;
-    if (ls.fromDate) xSearchTool.from_date = ls.fromDate;
-    if (ls.toDate) xSearchTool.to_date = ls.toDate;
-    if (ls.allowedXHandles && ls.allowedXHandles.length > 0) {
-      xSearchTool.allowed_x_handles = ls.allowedXHandles.slice(0, 10);
-    }
-    if (ls.excludedXHandles && ls.excludedXHandles.length > 0) {
-      xSearchTool.excluded_x_handles = ls.excludedXHandles.slice(0, 10);
-    }
-    if (ls.enableImageUnderstanding) xSearchTool.enable_image_understanding = true;
-    if (ls.enableVideoUnderstanding) xSearchTool.enable_video_understanding = true;
-    body.tools = [xSearchTool];
+    // Build the live_search config. xAI accepts the same field names that
+    // worked under search_parameters: mode, sources, max_search_results,
+    // return_citations. We map our friendlier camelCase fields onto them.
+    const sources = (ls.sources || ["x"]).map((s) => ({ type: s }));
+    const liveSearchConfig: Record<string, unknown> = {
+      mode: ls.mode || "on",
+      sources,
+      max_search_results: ls.maxResults || 10,
+      return_citations: true,
+    };
+    if (ls.fromDate) liveSearchConfig.from_date = ls.fromDate;
+    if (ls.toDate) liveSearchConfig.to_date = ls.toDate;
+    body.tools = [{ type: "live_search", live_search: liveSearchConfig }];
   }
 
   let res = await fetch(`${BASE}/chat/completions`, {
