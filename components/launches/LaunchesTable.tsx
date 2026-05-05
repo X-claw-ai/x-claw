@@ -170,17 +170,16 @@ function PublicLaunchCard({
           {launch.mint_pubkey.slice(0, 5)}…{launch.mint_pubkey.slice(-5)}
         </div>
 
-        {/* Live market cap from Pump.fun */}
-        {stats && (
-          <div className="flex items-baseline justify-between gap-2 pt-1">
-            <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
-              Mcap
-            </span>
-            <span className="text-[13px] font-black tabular-nums tracking-tight">
-              {formatMcUsd(stats.marketCapUsd)}
-            </span>
-          </div>
-        )}
+        {/* Live market cap from Pump.fun. Always show the row so the user
+            can see when the data hasn't arrived yet. */}
+        <div className="flex items-baseline justify-between gap-2 pt-1">
+          <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+            Mcap
+          </span>
+          <span className="text-[13px] font-black tabular-nums tracking-tight">
+            {stats ? formatMcUsd(stats.marketCapUsd) : "—"}
+          </span>
+        </div>
         {stats && stats.bondingProgress !== null && (
           <BondingBar progress={stats.bondingProgress} complete={stats.complete} />
         )}

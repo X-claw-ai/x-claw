@@ -10,7 +10,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
-const PUMP_FUN_API = "https://frontend-api.pump.fun/coins";
+// Pump.fun has migrated their public coin endpoint at least twice.
+// Try the newest first and fall back through older ones so we don't
+// silently drop market caps when they cut over again.
+const PUMP_FUN_ENDPOINTS = [
+  "https://frontend-api-v3.pump.fun/coins",
+  "https://frontend-api.pump.fun/coins",
+  "https://swap-api.pump.fun/coins",
+];
 
 interface PumpCoin {
   mint: string;
@@ -27,6 +34,10 @@ interface PumpCoinResponse {
   ok: boolean;
   coin?: PumpCoin;
   error?: string;
+  /** Which endpoint actually answered (debug). */
+  source?: string;
+  /** Per-endpoint failures (debug). */
+  attempts?: { endpoint: string; status: number; body: string }[];
 }
 
 // In-memory short-circuit so simultaneous card renders don't all stampede
@@ -46,34 +57,82 @@ export async function GET(req: NextRequest) {
 
   const hit = cache.get(mint);
   if (hit && Date.now() - hit.at < TTL_MS) {
-    return NextResponse.json<PumpCoinResponse>({ ok: true, coin: hit.coin });
+    return NextResponse.json<PumpCoinResponse>({
+      ok: true,
+      coin: hit.coin,
+      source: "cache",
+    });
   }
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(`${PUMP_FUN_API}/${mint}`, {
-      headers: {
-        // Pump.fun's frontend-api 403s a bare fetch — identify ourselves.
-        "User-Agent": "KOKi-agent/1.0 (+https://kokiai.app)",
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-  } catch (err) {
+  // Walk the known endpoints in order. First one that returns 200 with a
+  // parseable body wins. Failures are stashed for debug exposure if all
+  // three eventually fall through.
+  let raw: Record<string, unknown> | null = null;
+  let source: string | null = null;
+  const attempts: { endpoint: string; status: number; body: string }[] = [];
+
+  for (const base of PUMP_FUN_ENDPOINTS) {
+    const url = `${base}/${mint}`;
+    let upstream: Response;
+    try {
+      upstream = await fetch(url, {
+        headers: {
+          // Pump.fun gates a bare fetch — pretend to be a normal browser
+          // so we get past the basic UA filter.
+          "User-Agent":
+            "Mozilla/5.0 (compatible; KOKi-agent/1.0; +https://kokiai.app)",
+          Accept: "application/json, text/plain, */*",
+          Origin: "https://pump.fun",
+          Referer: "https://pump.fun/",
+        },
+        cache: "no-store",
+      });
+    } catch (err) {
+      attempts.push({
+        endpoint: base,
+        status: 0,
+        body: `Network: ${(err as Error).message}`,
+      });
+      continue;
+    }
+
+    if (!upstream.ok) {
+      const text = await upstream.text().catch(() => "");
+      attempts.push({
+        endpoint: base,
+        status: upstream.status,
+        body: text.slice(0, 200),
+      });
+      continue;
+    }
+
+    try {
+      raw = (await upstream.json()) as Record<string, unknown>;
+      source = base;
+      break;
+    } catch (err) {
+      attempts.push({
+        endpoint: base,
+        status: upstream.status,
+        body: `Parse error: ${(err as Error).message}`,
+      });
+      continue;
+    }
+  }
+
+  if (!raw) {
+    console.error(
+      `[pump-coin] all endpoints failed for ${mint}: ${JSON.stringify(attempts)}`,
+    );
     return NextResponse.json<PumpCoinResponse>(
-      { ok: false, error: `Network: ${(err as Error).message}` },
+      {
+        ok: false,
+        error: "All Pump.fun endpoints unreachable",
+        attempts,
+      },
       { status: 502 },
     );
   }
-
-  if (!upstream.ok) {
-    return NextResponse.json<PumpCoinResponse>(
-      { ok: false, error: `Pump.fun ${upstream.status}` },
-      { status: upstream.status === 404 ? 404 : 502 },
-    );
-  }
-
-  const raw = (await upstream.json()) as Record<string, unknown>;
 
   // Pump.fun's bonding curve is "complete" when the token has graduated
   // to Raydium. Until then, market cap rises along the curve. We compute
@@ -97,7 +156,11 @@ export async function GET(req: NextRequest) {
   };
 
   cache.set(mint, { at: Date.now(), coin });
-  return NextResponse.json<PumpCoinResponse>({ ok: true, coin });
+  return NextResponse.json<PumpCoinResponse>({
+    ok: true,
+    coin,
+    source: source ?? undefined,
+  });
 }
 
 function numOrNull(v: unknown): number | null {

@@ -164,16 +164,14 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
           </span>
         </div>
 
-        {stats && (
-          <div className="flex items-baseline justify-between gap-2 pt-1">
-            <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
-              Mcap
-            </span>
-            <span className="text-[13px] font-black tabular-nums tracking-tight">
-              {formatMcUsd(stats.marketCapUsd)}
-            </span>
-          </div>
-        )}
+        <div className="flex items-baseline justify-between gap-2 pt-1">
+          <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+            Mcap
+          </span>
+          <span className="text-[13px] font-black tabular-nums tracking-tight">
+            {stats ? formatMcUsd(stats.marketCapUsd) : "—"}
+          </span>
+        </div>
         {stats && stats.bondingProgress !== null && (
           <div className="space-y-1 pt-1">
             <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
