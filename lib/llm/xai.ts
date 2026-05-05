@@ -44,33 +44,27 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
-  // ─── Agent Tools API ─────────────────────────────────────────────────
-  // xAI deprecated the top-level `search_parameters` field but kept the
-  // search functionality alive as a built-in tool: `tools: [{type: "live_search"}]`
-  // on the same /v1/chat/completions endpoint. The newer `x_search` /
-  // `web_search` types live on the OpenAI Responses API endpoint
-  // (/v1/responses) — for chat/completions we use `live_search`.
+  // ─── X Search migration status ───────────────────────────────────────
+  // chat/completions endpoint dead-ends for X search:
+  //   - search_parameters (top-level)             → 410 deprecated
+  //   - tools:[{type:'live_search', ...}]         → 410 deprecated (parses
+  //                                                  fine but executes dead)
+  //   - tools:[{type:'x_search'}]                 → 422 unknown variant
+  //                                                  (only accepts 'function'
+  //                                                  or 'live_search' here)
   //
-  // Confirmed by error: "expected `function` or `live_search`" when we
-  // tried type:'x_search' on chat/completions.
+  // The new x_search / web_search tools live ONLY on the OpenAI Responses
+  // API endpoint (/v1/responses), which has a DIFFERENT request/response
+  // shape from chat/completions. To re-enable X search we need a separate
+  // adapter that hits /v1/responses — pending docs read.
   //
-  // Reference: https://docs.x.ai/docs/guides/tools/overview
+  // For now, callers that set req.liveSearch get a no-op here. Auto-pilot
+  // falls back to imagination + the ticker-search URL on Pump.fun.
+  //
+  // Reference: https://docs.x.ai/docs/guides/tools/x-search
+  // Migration: https://docs.x.ai/docs/migrating-to-responses-api
   if (req.liveSearch) {
-    const ls = req.liveSearch;
-    // Fields go FLAT on the tool object — not nested under live_search.
-    // Confirmed by xAI's 422: "tools[0]: missing field `sources`" when we
-    // had everything wrapped in a sub-object.
-    const sources = (ls.sources || ["x"]).map((s) => ({ type: s }));
-    const liveSearchTool: Record<string, unknown> = {
-      type: "live_search",
-      sources,
-      mode: ls.mode || "on",
-      max_search_results: ls.maxResults || 10,
-      return_citations: true,
-    };
-    if (ls.fromDate) liveSearchTool.from_date = ls.fromDate;
-    if (ls.toDate) liveSearchTool.to_date = ls.toDate;
-    body.tools = [liveSearchTool];
+    // No-op until Responses API adapter lands.
   }
 
   let res = await fetch(`${BASE}/chat/completions`, {
