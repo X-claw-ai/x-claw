@@ -17,10 +17,17 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#E55B14",
     categories: ["finance", "productivity", "developer"],
     lang: "en",
+    // Next.js auto-emits /icon (no extension) from app/icon.tsx — that's
+    // the right URL to point the manifest at. /icon.png is a 404.
     icons: [
       {
-        src: "/icon.png",
-        sizes: "any",
+        src: "/icon",
+        sizes: "64x64",
+        type: "image/png",
+      },
+      {
+        src: "/apple-icon",
+        sizes: "180x180",
         type: "image/png",
       },
     ],
