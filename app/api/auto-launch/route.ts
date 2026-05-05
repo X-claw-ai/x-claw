@@ -129,6 +129,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Safety net: if the cited X post body looks like a token-shill (CA,
+    // contract, pump.fun link, dexscreener, base58 mint address, "$TICKER"
+    // mentions, "fair launch live"), the post probably already has its own
+    // coin and our token's Twitter button would point at that coin's
+    // promo — bad look. Drop the originXUrl in that case so the token
+    // falls back to the safe ticker-search URL on Pump.fun.
+    //
+    // We only see what the model wrote in `idea` / `reasoning` though, not
+    // the post body itself — so check those fields and the URL itself for
+    // the shill signal. Conservative: when in doubt, drop the link.
+    const shillSignal = /\b(?:CA|contract)\s*[:=]?\s*[1-9A-HJ-NP-Za-km-z]{32,}|pump\.fun\/coin|dexscreener|0x[0-9a-f]{40}|fair\s*launch\s*live|sending\s+it\s+now|buy\s+now\s+\$[A-Z]{2,8}/i;
+    const ideaBlob = `${concept.idea} ${concept.reasoning} ${concept.originXUrl ?? ""}`;
+    if (concept.originXUrl && shillSignal.test(ideaBlob)) {
+      console.warn(
+        `[auto-launch] dropping originXUrl — looks like a token-shill post: ${concept.originXUrl}`,
+      );
+      concept.originXUrl = undefined;
+      concept.originXAuthor = undefined;
+    }
+
     return NextResponse.json<AutoLaunchResponse>({
       ok: true,
       concept,
