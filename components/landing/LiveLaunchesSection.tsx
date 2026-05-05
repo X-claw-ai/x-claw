@@ -50,8 +50,8 @@ export default function LiveLaunchesSection() {
   if (items !== null && items.length === 0) return null;
 
   return (
-    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
-      <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
+    <section className="bg-koki-500 border-b-[1.5px] border-ink-1000">
+      <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 md:pt-20 md:pb-24">
         <div className="flex items-end justify-between gap-4 mb-10 flex-wrap">
           <div>
             <div className="eyebrow !text-[10px] mb-2">
