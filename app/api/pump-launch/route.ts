@@ -104,13 +104,23 @@ export async function POST(req: Request) {
   }
 
   // 2. Upload to Pump.fun IPFS
+  // Guard: never let Pump.fun receive an empty `twitter` field — that
+  // hides the Twitter button on the token page entirely. If the wizard
+  // didn't pass one (e.g. Auto-pilot ran without Live Search and Grok
+  // returned no originXUrl, or manual-mode user left it blank), fall back
+  // to an X search URL for $TICKER. That link is at least ABOUT this coin
+  // (people tagging $TICKER on X), not a generic project page.
+  const tickerSearchUrl = `https://x.com/search?q=%24${ticker}&src=typed_query`;
+  const twitter =
+    body.twitter && body.twitter.trim() !== "" ? body.twitter : tickerSearchUrl;
+
   let metadataUri: string;
   try {
     const upload = await uploadPumpIpfs(logoBlob, {
       name: body.tokenName!,
       symbol: ticker,
       description: body.description!,
-      twitter: body.twitter,
+      twitter,
       telegram: body.telegram,
       website: body.website,
     });

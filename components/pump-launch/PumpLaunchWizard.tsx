@@ -38,6 +38,20 @@ const STEPS = [
   { label: "Launch Dashboard" },
 ];
 
+/**
+ * Coin-specific fallback for the Pump.fun token page's Twitter button when
+ * neither Live Search (originXUrl) nor user input gave us one. Builds an X
+ * search URL for `$TICKER` so the link is at least about THIS coin, not a
+ * generic project page.
+ *
+ * Examples:
+ *   tickerSearchUrl("GROKCAT") → "https://x.com/search?q=%24GROKCAT&src=typed_query"
+ */
+function tickerSearchUrl(ticker: string): string {
+  const safe = (ticker || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6) || "MEME";
+  return `https://x.com/search?q=%24${safe}&src=typed_query`;
+}
+
 const DEFAULT: ConceptInput = {
   idea: "",
   tokenName: "",
@@ -47,6 +61,8 @@ const DEFAULT: ConceptInput = {
   audience: "",
   launchStyle: "fair-launch",
   websiteUrl: "",
+  // Empty by default — server-side guard in /api/pump-launch will inject a
+  // coin-specific X search URL ($TICKER) at submit time if user skipped this.
   twitterUrl: "",
   telegramUrl: "",
   logoDataUrl: null,
@@ -298,9 +314,12 @@ export default function PumpLaunchWizard() {
         audience: c.audience,
         launchStyle: c.launchStyle,
         // Default the Pump.fun "twitter" field to the original meme URL so
-        // the on-chain token page links back to the source post. User can
-        // override on the Review step if they have their own project handle.
-        twitterUrl: c.originXUrl ?? "",
+        // the on-chain token page links back to the source post. If Live
+        // Search didn't find one (originXUrl null), fall back to an X search
+        // URL for $TICKER — at least it's a link ABOUT this coin (people
+        // tagging it on X), not a generic project page. User can override on
+        // the Review step.
+        twitterUrl: c.originXUrl ?? tickerSearchUrl(c.ticker),
       };
       setConcept(seeded);
       setOriginX(c.originXUrl ? { url: c.originXUrl, author: c.originXAuthor } : null);
