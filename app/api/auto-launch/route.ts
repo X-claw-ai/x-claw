@@ -64,7 +64,10 @@ export async function POST(req: NextRequest) {
       ...(wantLiveSearch
         ? {
             liveSearch: {
-              mode: "auto",
+              // "on" = always search, don't let Grok decide it can skip.
+              // "auto" lets Grok skip search and just imagine concepts —
+              // which means originXUrl never gets populated.
+              mode: "on",
               sources: ["x"] as const,
               maxResults: 12,
             },
