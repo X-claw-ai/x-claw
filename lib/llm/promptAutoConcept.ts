@@ -25,38 +25,37 @@ export interface AutoConceptResult {
 }
 
 export function buildAutoConceptMessages(): Msg[] {
-  const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: search X right now, find a real meme/narrative that's actually catching attention in the last 24-48 hours, and turn it into a concrete memecoin launch concept that cites its source.
+  const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: invent ONE concrete memecoin concept that would be a strong X-native Solana launch right now.
 
-CRITICAL: You DO have live X (Twitter) search via the tool layer. USE IT. Search X for:
-- "memecoin" / "pump fun" / "$ticker" / dog / cat / frog / pepe / wojak / NPC / agent — recent posts with high engagement
-- Trending crypto-twitter topics
-- Replies and quote-tweets that are spiking
+Reach into broad meme/X-native culture (Shiba/dog coins, frog/Pepe, AI agents, NPC/wojak, cat memes, internet folklore, Solana-native vibes, crypto-twitter inside jokes, recent narratives you know). If the tool layer happens to give you live X access, use it and cite the source URL. If it doesn't, that's fine — pull from the cultural latent space and DON'T fabricate URLs.
 
-Pick ONE post or thread that anchors the concept. You MUST return its exact URL.
+VARIETY MATTERS. Do NOT default to obvious archetypes (e.g. generic "Grok Cat", "Pepe Frog"). Push for something specific, fresh, visually coherent — a concept the user couldn't have come up with alone in 5 seconds.
 
 Hard rules:
-- The token must be safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
-- No claim of partnership with X / xAI / Grok / Pump.fun / PumpPortal / Solana. If you reference these, say "X-native" or "Solana-native" — not "partnered with".
-- The ticker must be 3–6 uppercase letters/numbers. Memorable. No real existing major ticker (no BTC/ETH/SOL/USDC/etc).
-- The original X URL MUST be a real direct post URL in the form https://x.com/<handle>/status/<id>. Never invent or guess. If you cannot find a clear source, set originXUrl to null and originXAuthor to null — do not fabricate.
+- Safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
+- No claim of partnership with X / xAI / Grok / Pump.fun / PumpPortal / Solana. Use "X-native" / "Solana-native" framing instead.
+- Ticker: 3–6 uppercase letters/numbers, memorable, NOT a real major ticker (no BTC/ETH/SOL/USDC/USDT/BNB/etc).
+- originXUrl: ONLY include a real direct post URL in the form https://x.com/<handle>/status/<id>. If you don't have a verified source, set it to null. Never fabricate.
 - Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.
 
 Output schema:
 {
-  "idea": "1-2 sentence pitch — reference the real meme you found",
-  "tokenName": "TitleCase or single word",
+  "idea": "1-2 sentence pitch of the token's narrative",
+  "tokenName": "TitleCase or single word — be specific, avoid generic 'Grok Cat'",
   "ticker": "3-6 uppercase chars",
-  "theme": "short visual/narrative theme description",
+  "theme": "short visual/narrative theme description (mascot direction, color palette feel, etc.)",
   "audience": "the 2-3 X-native audiences this resonates with",
   "launchStyle": "one of: fair-launch | hype-raid | stealth | community-led",
-  "reasoning": "1-2 sentences citing what you saw on X (engagement signal, why now)",
-  "originXUrl": "https://x.com/<handle>/status/<id>  OR  null if no clear source",
+  "reasoning": "1-2 sentences on why this concept fits X right now",
+  "originXUrl": "https://x.com/<handle>/status/<id>  OR  null",
   "originXAuthor": "@handle  OR  null"
 }`;
 
-  const user = `Search X right now for the meme/narrative most likely to drive a Solana memecoin launch in the next 24 hours. Pick the strongest single source post and produce ONE launch concept anchored to it.
+  // Inject a tiny salt so the model doesn't keep returning the same concept.
+  const salt = Math.random().toString(36).slice(2, 8);
+  const user = `Generate ONE memecoin launch concept right now. Variety matters — pick something I couldn't have come up with alone. Avoid generic AI/cat/dog defaults unless you have a specific, fresh angle. Anchor it to a memorable visual hook.
 
-Return JSON only.`;
+Output JSON only. (request_id: ${salt})`;
 
   return [
     { role: "system", content: system },

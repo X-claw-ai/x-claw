@@ -48,21 +48,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Use the flagship Grok model — fast variants don't reliably support
-    // search_parameters yet, so they 400 and we fall through to mock.
+    // Live Search (search_parameters) requires a tier/feature that not all
+    // xAI accounts have, and when it 400s we end up returning the mock
+    // "Grok Cat" concept. Default OFF; opt-in via XAI_LIVE_SEARCH=on.
+    const wantLiveSearch = process.env.XAI_LIVE_SEARCH === "on";
+
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
       maxTokens: 800,
-      temperature: 0.85,
+      temperature: 0.95, // higher = more variety so we don't keep getting the same idea
       // model: undefined → router picks XAI_MODEL (grok-4-latest) by default
       feature: "auto-launch",
       walletPubkey,
-      liveSearch: {
-        mode: "auto", // "auto" lets the model choose to search instead of forcing it
-        sources: ["x"],
-        maxResults: 12,
-      },
+      ...(wantLiveSearch
+        ? {
+            liveSearch: {
+              mode: "auto",
+              sources: ["x"] as const,
+              maxResults: 12,
+            },
+          }
+        : {}),
     });
 
     const concept = parseAutoConcept(llmRes.content);
