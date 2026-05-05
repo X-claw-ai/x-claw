@@ -44,16 +44,22 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
-  // xAI Grok Live Search — lets the model search X / web during generation
-  // and cite real tweet URLs. Off by default; opt-in via req.liveSearch.
+  // ─── Live Search migration note ──────────────────────────────────────
+  // xAI deprecated the search_parameters API in May 2026. Calls now return
+  // HTTP 410 with: "Live search is deprecated. Please switch to the Agent
+  // Tools API: https://docs.x.ai/docs/guides/tools/overview"
+  //
+  // We KEEP the field on LLMRequest so callers don't have to change yet,
+  // but we no longer attach search_parameters to the outgoing request —
+  // there's no point round-tripping a guaranteed 410. originXUrl stays
+  // null on auto-concept output, and the Pump.fun token Twitter button
+  // falls back to the ticker-search URL (still coin-specific).
+  //
+  // TODO: re-implement via Agent Tools API. Likely shape (OpenAI-compatible
+  // tool use): pass `tools: [{type:"function", function:{name:"x_search",...}}]`
+  // and handle tool_calls in the response. Confirm exact shape from xAI docs.
   if (req.liveSearch) {
-    const sources = (req.liveSearch.sources || ["x"]).map((s) => ({ type: s }));
-    body.search_parameters = {
-      mode: req.liveSearch.mode || "on",
-      sources,
-      max_search_results: req.liveSearch.maxResults || 10,
-      return_citations: true,
-    };
+    // Intentionally no-op until Agent Tools migration lands.
   }
 
   let res = await fetch(`${BASE}/chat/completions`, {
