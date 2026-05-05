@@ -375,15 +375,24 @@ export default function PumpLaunchWizard() {
       const txBytes = base64ToBytes(data.txBase64);
       const tx = VersionedTransaction.deserialize(txBytes);
 
-      setLaunchPhase("signing-mint");
-
-      // 4. Sign with the mint keypair (this is OUR keypair, generated above)
-      tx.sign([mintKeypair]);
+      // SIGN ORDER MATTERS — per Phantom security review (William @ Phantom):
+      //   "Phantom Lighthouse may flag transactions when the signature order
+      //    isn't correct. To avoid the warning, use this order:
+      //      let signedTx = await signer.signTransaction(tx);   // wallet first
+      //      signedTx.partialSign(additionalSigner);            // mint after"
+      //
+      // We previously did mint.sign() THEN wallet.signTransaction(), which
+      // is what triggered Phantom's malicious-dApp warning on every launch.
 
       setLaunchPhase("signing-wallet");
 
-      // 5. Wallet (Phantom/Solflare) signs — user sees the popup
+      // 4. Wallet (Phantom/Solflare) signs FIRST — user sees the popup
       const signedTx = await signTransaction(tx);
+
+      setLaunchPhase("signing-mint");
+
+      // 5. Then the mint keypair partial-signs the already-wallet-signed tx
+      signedTx.sign([mintKeypair]);
 
       setLaunchPhase("submitting");
 
@@ -1142,8 +1151,8 @@ function LaunchProgress({ phase, error }: { phase: LaunchPhase; error: string | 
     { p: "preparing", label: "Preparing mint keypair (local only)" },
     { p: "uploading", label: "Uploading metadata to Pump.fun IPFS" },
     { p: "building", label: "Building unsigned transaction (PumpPortal)" },
-    { p: "signing-mint", label: "Signing with mint keypair" },
     { p: "signing-wallet", label: "Awaiting wallet signature" },
+    { p: "signing-mint", label: "Signing with mint keypair" },
     { p: "submitting", label: "Submitting to Solana" },
     { p: "confirming", label: "Awaiting confirmation" },
     { p: "done", label: "Confirmed" },
