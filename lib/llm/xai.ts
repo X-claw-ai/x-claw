@@ -35,6 +35,13 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
 
   const model = resolveXaiModel(req.model);
 
+  // X Search lives ONLY on the Responses API endpoint (/v1/responses).
+  // chat/completions returns 410/422 for every search variant we tried.
+  // Route requests with liveSearch through the dedicated adapter below.
+  if (req.liveSearch) {
+    return callXAIResponses(req, apiKey, model);
+  }
+
   const body: Record<string, unknown> = {
     model,
     messages: req.messages,
@@ -44,30 +51,8 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
-  // ─── X Search migration status ───────────────────────────────────────
-  // chat/completions endpoint dead-ends for X search:
-  //   - search_parameters (top-level)             → 410 deprecated
-  //   - tools:[{type:'live_search', ...}]         → 410 deprecated (parses
-  //                                                  fine but executes dead)
-  //   - tools:[{type:'x_search'}]                 → 422 unknown variant
-  //                                                  (only accepts 'function'
-  //                                                  or 'live_search' here)
-  //
-  // The new x_search / web_search tools live ONLY on the OpenAI Responses
-  // API endpoint (/v1/responses), which has a DIFFERENT request/response
-  // shape from chat/completions. To re-enable X search we need a separate
-  // adapter that hits /v1/responses — pending docs read.
-  //
-  // For now, callers that set req.liveSearch get a no-op here. Auto-pilot
-  // falls back to imagination + the ticker-search URL on Pump.fun.
-  //
-  // Reference: https://docs.x.ai/docs/guides/tools/x-search
-  // Migration: https://docs.x.ai/docs/migrating-to-responses-api
-  if (req.liveSearch) {
-    // No-op until Responses API adapter lands.
-  }
 
-  let res = await fetch(`${BASE}/chat/completions`, {
+  const res = await fetch(`${BASE}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -75,28 +60,6 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
     },
     body: JSON.stringify(body),
   });
-
-  // Self-healing retry: if Agent Tools were rejected (model doesn't support,
-  // wrong endpoint, payload-shape mismatch, etc.), retry once without `tools`
-  // on any 4xx so the agent stays functional. Keeps Auto-pilot working even
-  // if x_search availability changes again.
-  let searchRejection: { status: number; error: string } | undefined;
-  if (!res.ok && body.tools && res.status >= 400 && res.status < 500) {
-    const errText = await res.text().catch(() => "");
-    console.warn(
-      `[xai] retrying without tools — original ${res.status}: ${errText.slice(0, 300)}`,
-    );
-    searchRejection = { status: res.status, error: errText.slice(0, 500) };
-    delete body.tools;
-    res = await fetch(`${BASE}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    });
-  }
 
   if (!res.ok) {
     const text = await res.text();
@@ -129,6 +92,138 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
         }
       : undefined,
     citations,
-    searchRejection,
+  };
+}
+
+/**
+ * xAI Responses API adapter (/v1/responses).
+ *
+ * Used for any request that needs server-managed Agent Tools (x_search,
+ * web_search, code_execution, MCP). The Responses API is xAI's recommended
+ * endpoint going forward and is the ONLY place X search works after the
+ * chat/completions deprecation.
+ *
+ * Differences from chat/completions:
+ *   - endpoint: /v1/responses
+ *   - messages → input
+ *   - max_tokens → max_output_tokens
+ *   - response.choices[0].message.content → response.output[*]…content[*].text
+ *   - tools are server-executed (we never see tool_calls — just the final
+ *     text + citations)
+ *
+ * Reference: https://docs.x.ai/docs/migrating-to-responses-api
+ */
+async function callXAIResponses(
+  req: LLMRequest,
+  apiKey: string,
+  model: string,
+): Promise<LLMResponse> {
+  const ls = req.liveSearch ?? {};
+
+  // Build the x_search tool. Fields go flat on the tool object; the docs
+  // SDK example shows `x_search(allowed_x_handles=[...], from_date=...)`.
+  const xSearchTool: Record<string, unknown> = { type: "x_search" };
+  if (ls.fromDate) xSearchTool.from_date = ls.fromDate;
+  if (ls.toDate) xSearchTool.to_date = ls.toDate;
+  if (ls.allowedXHandles && ls.allowedXHandles.length > 0) {
+    xSearchTool.allowed_x_handles = ls.allowedXHandles.slice(0, 10);
+  }
+  if (ls.excludedXHandles && ls.excludedXHandles.length > 0) {
+    xSearchTool.excluded_x_handles = ls.excludedXHandles.slice(0, 10);
+  }
+  if (ls.enableImageUnderstanding) xSearchTool.enable_image_understanding = true;
+  if (ls.enableVideoUnderstanding) xSearchTool.enable_video_understanding = true;
+
+  const body: Record<string, unknown> = {
+    model,
+    input: req.messages,
+    tools: [xSearchTool],
+    // Don't store stateful conversation server-side — we manage history
+    // ourselves and don't need the 30-day retention.
+    store: false,
+  };
+  if (req.maxTokens) body.max_output_tokens = req.maxTokens;
+  if (req.temperature !== undefined) body.temperature = req.temperature;
+  // Responses API accepts response_format the same way (JSON output mode).
+  if (req.responseFormat === "json") {
+    body.response_format = { type: "json_object" };
+  }
+
+  const res = await fetch(`${BASE}/responses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    console.error(`[xai/responses] ${res.status} ${errText.slice(0, 400)}`);
+    const err = new Error(
+      `xAI Responses API error ${res.status}: ${errText.slice(0, 400)}`,
+    );
+    // Attach the rejection so callers can surface it for debugging without
+    // losing the http status when the router falls through.
+    (err as Error & { searchRejection?: { status: number; error: string } }).searchRejection = {
+      status: res.status,
+      error: errText.slice(0, 500),
+    };
+    throw err;
+  }
+
+  const data = (await res.json()) as Record<string, unknown>;
+
+  // Walk output[] and pull every `output_text` chunk. Concatenate them so
+  // the caller sees a single string, same as it gets from chat/completions.
+  const output = Array.isArray(data?.output) ? (data.output as unknown[]) : [];
+  const textChunks: string[] = [];
+  const inlineCitations: string[] = [];
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const it = item as Record<string, unknown>;
+    if (it.type === "message" && Array.isArray(it.content)) {
+      for (const c of it.content as unknown[]) {
+        if (!c || typeof c !== "object") continue;
+        const cc = c as Record<string, unknown>;
+        if (cc.type === "output_text" && typeof cc.text === "string") {
+          textChunks.push(cc.text);
+        }
+        // Some responses inline citations under each text chunk.
+        if (Array.isArray(cc.citations)) {
+          for (const cit of cc.citations as unknown[]) {
+            if (typeof cit === "string") inlineCitations.push(cit);
+          }
+        }
+      }
+    }
+  }
+
+  const content = textChunks.join("");
+  if (!content) {
+    throw new Error("xAI Responses API returned no text output");
+  }
+
+  // Citations may also live at the top of the response.
+  const topLevelCitations: string[] = Array.isArray(data?.citations)
+    ? (data.citations as unknown[]).filter((c): c is string => typeof c === "string")
+    : [];
+  const citations = Array.from(new Set([...topLevelCitations, ...inlineCitations]));
+
+  // Usage in Responses API uses input_tokens / output_tokens names.
+  const usage = data?.usage as Record<string, unknown> | undefined;
+
+  return {
+    content,
+    provider: "xai",
+    model: (data.model as string) || model,
+    usage: usage
+      ? {
+          input: Number(usage.input_tokens ?? usage.prompt_tokens ?? 0),
+          output: Number(usage.output_tokens ?? usage.completion_tokens ?? 0),
+        }
+      : undefined,
+    citations: citations.length > 0 ? citations : undefined,
   };
 }

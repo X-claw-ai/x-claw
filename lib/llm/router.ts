@@ -62,6 +62,9 @@ export class LLMRouterError extends Error {
 
 export async function callLLM(req: LLMRequest): Promise<LLMResponse> {
   const attempts: { provider: Provider; error: string }[] = [];
+  // Captured the FIRST searchRejection we see across attempts so we can
+  // forward it on the response even when xAI fails over to Anthropic/OpenAI.
+  let lastSearchRejection: { status: number; error: string } | undefined;
   const startedAt = Date.now();
 
   for (const p of ORDER) {
@@ -82,12 +85,21 @@ export async function callLLM(req: LLMRequest): Promise<LLMResponse> {
       // Annotate the response so callers can see which providers failed
       // BEFORE this one succeeded — critical for debugging "why is xAI
       // not being used even though XAI_API_KEY is set?" cases.
-      return { ...res, previousAttempts: attempts };
+      return {
+        ...res,
+        previousAttempts: attempts,
+        // Forward any captured search rejection from earlier providers
+        // so it surfaces in the debug payload even when xAI itself failed.
+        searchRejection: res.searchRejection ?? lastSearchRejection,
+      };
     } catch (err: unknown) {
-      attempts.push({
-        provider: p,
-        error: err instanceof Error ? err.message : String(err),
-      });
+      const msg = err instanceof Error ? err.message : String(err);
+      // If callXAIResponses attached a searchRejection on the error, surface
+      // it through the response.searchRejection field so the auto-launch
+      // debug payload can show the actual 4xx body even after fallback.
+      const sr = (err as Error & { searchRejection?: { status: number; error: string } })?.searchRejection;
+      if (sr && !lastSearchRejection) lastSearchRejection = sr;
+      attempts.push({ provider: p, error: msg });
       // continue to next provider
     }
   }
