@@ -17,6 +17,12 @@ interface AutoLaunchResponse {
   liveSearchRequested?: boolean;
   /** Debug: citation URLs xAI returned (empty array = search likely no-op'd). */
   citations?: string[];
+  /** Debug: env-var introspection so we can tell why liveSearchRequested is false. */
+  debug?: {
+    /** Lowercased & trimmed XAI_LIVE_SEARCH value. Empty string = env not set. */
+    liveSearchEnvRaw: string;
+    hasXaiKey: boolean;
+  };
 }
 
 /**
@@ -54,8 +60,10 @@ export async function POST(req: NextRequest) {
   try {
     // Live Search (search_parameters) requires a tier/feature that not all
     // xAI accounts have, and when it 400s we end up returning the mock
-    // "Grok Cat" concept. Default OFF; opt-in via XAI_LIVE_SEARCH=on.
-    const wantLiveSearch = process.env.XAI_LIVE_SEARCH === "on";
+    // "Grok Cat" concept. Default OFF; opt-in via XAI_LIVE_SEARCH.
+    // Accept any truthy variant so a typo'd "On" / "true" / "1" still works.
+    const liveRaw = (process.env.XAI_LIVE_SEARCH || "").trim().toLowerCase();
+    const wantLiveSearch = ["on", "true", "1", "yes", "y", "enable", "enabled"].includes(liveRaw);
 
     // grok-4-latest sometimes silently no-ops search_parameters. Allow operator
     // to override the search-call model via XAI_MODEL_AUTO_CONCEPT
@@ -107,6 +115,13 @@ export async function POST(req: NextRequest) {
       model: llmRes.model,
       liveSearchRequested: wantLiveSearch,
       citations: llmRes.citations ?? [],
+      // Debug: surface the raw env value (lowercased & trimmed) so we can
+      // tell whether Vercel even has XAI_LIVE_SEARCH set on this deployment.
+      // Empty string => env var missing entirely. Anything else => what's set.
+      debug: {
+        liveSearchEnvRaw: liveRaw,
+        hasXaiKey: Boolean(process.env.XAI_API_KEY),
+      },
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
