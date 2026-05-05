@@ -16,9 +16,6 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <KokiLogo height={40} bare />
-          <span className="hidden sm:inline eyebrow text-ink-1000/70 !text-[10px]">
-            Meme Coin Launch Agent
-          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
