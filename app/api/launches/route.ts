@@ -111,3 +111,39 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ ok: true, persisted: true, launches: data ?? [] });
 }
+
+/**
+ * DELETE ?wallet=<pubkey> — clear all launch history rows for a wallet.
+ *
+ * On-chain tokens themselves are immutable — this only removes the rows
+ * KOKi has tracked. The user's dashboard goes back to an empty state.
+ *
+ * Without Supabase, this still returns ok:true so the client can clear
+ * its localStorage even when there's no server-side state to clean.
+ */
+export async function DELETE(req: NextRequest) {
+  const wallet = req.nextUrl.searchParams.get("wallet");
+  if (!wallet) {
+    return NextResponse.json({ ok: false, error: "wallet param required" }, { status: 400 });
+  }
+
+  if (!supabaseEnabled()) {
+    return NextResponse.json({ ok: true, persisted: false, deleted: 0 });
+  }
+
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return NextResponse.json({ ok: true, persisted: false, deleted: 0 });
+  }
+
+  const { error, count } = await sb
+    .from("launches_v1")
+    .delete({ count: "exact" })
+    .eq("wallet_pubkey", wallet);
+
+  if (error) {
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, persisted: true, deleted: count ?? 0 });
+}

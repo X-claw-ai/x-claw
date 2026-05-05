@@ -133,4 +133,40 @@ export async function hydrateFromSupabase(walletPubkey: string): Promise<SavedLa
 export function clearLaunches() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(KEY);
+  // Also drop the cached meme images so the dashboard doesn't show
+  // stale orphaned art if the user re-launches the same mint pubkey.
+  try {
+    for (let i = window.localStorage.length - 1; i >= 0; i--) {
+      const k = window.localStorage.key(i);
+      if (k && k.startsWith("koki:img:")) window.localStorage.removeItem(k);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Clear locally + tell Supabase to drop this wallet's launches too.
+ * Returns the number of server-side rows that were deleted (0 if Supabase
+ * isn't configured). The local cache is wiped regardless.
+ */
+export async function clearLaunchesEverywhere(walletPubkey?: string): Promise<{
+  localCleared: boolean;
+  serverDeleted: number;
+}> {
+  clearLaunches();
+  if (!walletPubkey) {
+    return { localCleared: true, serverDeleted: 0 };
+  }
+  try {
+    const res = await fetch(
+      `/api/launches?wallet=${encodeURIComponent(walletPubkey)}`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) return { localCleared: true, serverDeleted: 0 };
+    const json = (await res.json()) as { deleted?: number };
+    return { localCleared: true, serverDeleted: json.deleted ?? 0 };
+  } catch {
+    return { localCleared: true, serverDeleted: 0 };
+  }
 }

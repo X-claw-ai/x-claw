@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Rocket, ExternalLink, ArrowUpRight } from "lucide-react";
+import { Rocket, ExternalLink, ArrowUpRight, Trash2 } from "lucide-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Badge } from "@/components/ui/Badge";
-import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
+import {
+  readLaunches,
+  clearLaunchesEverywhere,
+  type SavedLaunch,
+} from "@/lib/storage/launches";
 
 // Pump.fun-style dashboard: AI-agent-launched tokens are the primary
 // content. Top stats stay for quick context, everything else (the old
@@ -13,6 +18,8 @@ import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
 export default function CommandCenter() {
   const [launches, setLaunches] = useState<SavedLaunch[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const { publicKey } = useWallet();
 
   useEffect(() => {
     setLaunches(readLaunches());
@@ -23,6 +30,29 @@ export default function CommandCenter() {
     (l) => !l.mock && l.status === "launched",
   );
   const lastLaunch = liveLaunches[0];
+
+  async function handleClearAll() {
+    const count = launches.length;
+    if (count === 0) return;
+    const ok = window.confirm(
+      `Clear all ${count} launch record${count === 1 ? "" : "s"} from your KOKi history?\n\n` +
+        "On-chain tokens themselves stay live on Solana — this only wipes " +
+        "what KOKi displays in your dashboard.",
+    );
+    if (!ok) return;
+
+    setClearing(true);
+    const wallet = publicKey?.toBase58();
+    const res = await clearLaunchesEverywhere(wallet);
+    setLaunches([]);
+    setClearing(false);
+
+    if (res.serverDeleted > 0) {
+      window.alert(
+        `Cleared. ${res.serverDeleted} record${res.serverDeleted === 1 ? "" : "s"} removed from server, local cache wiped.`,
+      );
+    }
+  }
 
   return (
     <div className="space-y-10 pb-16">
@@ -56,10 +86,25 @@ export default function CommandCenter() {
               to open the live monitor.
             </p>
           </div>
-          <Link href="/launch" className="btn btn-primary !py-2.5 !px-4 !text-sm">
-            <Rocket className="h-4 w-4" />
-            New launch
-          </Link>
+          <div className="flex items-center gap-2">
+            {hydrated && launches.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                disabled={clearing}
+                className="btn btn-secondary !py-2.5 !px-3 !text-xs disabled:opacity-50"
+                aria-label="Clear all launch history"
+                title="Clear all launch history from KOKi (on-chain tokens stay live)"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {clearing ? "Clearing…" : "Clear all"}
+              </button>
+            )}
+            <Link href="/launch" className="btn btn-primary !py-2.5 !px-4 !text-sm">
+              <Rocket className="h-4 w-4" />
+              New launch
+            </Link>
+          </div>
         </div>
 
         {!hydrated ? (
