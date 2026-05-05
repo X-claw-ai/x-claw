@@ -6,9 +6,10 @@ import { parseLaunchKit, LaunchKitParseError } from "@/lib/llm/parseLaunchKit";
 import type { ConceptInput } from "@/lib/types";
 
 // Launch kit generation does a lot of writing (10 tweets, 20 raid replies,
-// 5 DM templates, telegram, dexscreener copy, 7-day plan). 30s+ on grok-4
-// is normal — bump the function timeout off the 10s default.
-export const maxDuration = 60;
+// 5 DM templates, telegram, dexscreener copy, 7-day plan). 30-60s on
+// grok-4 is normal. Pro plan headroom = 300s; we set 120 to keep lambda
+// time tight while leaving margin for slow days.
+export const maxDuration = 120;
 export const runtime = "nodejs";
 
 // ─────────────────────────────────────────────────────────────────────────

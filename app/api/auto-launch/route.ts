@@ -6,11 +6,11 @@ import {
   type AutoConceptResult,
 } from "@/lib/llm/promptAutoConcept";
 
-// Live X Search via the Responses API can take 20-40s end-to-end
-// (Grok decides to search → x_search runs → Grok summarizes results).
-// Vercel's default function timeout is 10s on Hobby — way too short.
-// Bump to the platform max so x_search has room to actually finish.
-export const maxDuration = 60;
+// Live X Search via the Responses API takes 30-90s end-to-end (Grok
+// plans → x_search runs → Grok summarizes results). On Vercel Pro plan
+// functions can run up to 300s; we set 180 so we have plenty of margin
+// without holding the lambda open longer than necessary.
+export const maxDuration = 180;
 export const runtime = "nodejs";
 
 interface AutoLaunchResponse {
@@ -87,18 +87,17 @@ export async function POST(req: NextRequest) {
     // via XAI_MODEL_AUTO_CONCEPT for testing.
     const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
 
-    // 7-day window: meme-coin attention cycles are measured in hours, and
-    // a tighter window also keeps the x_search call fast enough to fit in
-    // Vercel's 60s function ceiling. Image understanding doubles latency
-    // for marginal benefit (most viral posts are text-led), so it's off.
+    // 14-day window balances freshness vs result depth. Pro plan gives us
+    // 300s of function time so we can afford a richer search than the
+    // 7-day/5-result minimum we'd squeeze into Hobby's 60s ceiling.
     const today = new Date();
-    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
-      maxTokens: 600, // tighter budget = faster gen
+      maxTokens: 800,
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
       model: searchModel,
       feature: "auto-launch",
@@ -106,10 +105,10 @@ export async function POST(req: NextRequest) {
       ...(wantLiveSearch
         ? {
             liveSearch: {
-              fromDate: isoDate(weekAgo),
+              fromDate: isoDate(twoWeeksAgo),
               toDate: isoDate(today),
-              maxResults: 5, // fewer search results = faster x_search
-              // enableImageUnderstanding intentionally disabled — too slow
+              maxResults: 10,
+              enableImageUnderstanding: true,
             },
           }
         : {}),
