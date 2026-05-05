@@ -125,6 +125,7 @@ async function callXAIResponses(
   const xSearchTool: Record<string, unknown> = { type: "x_search" };
   if (ls.fromDate) xSearchTool.from_date = ls.fromDate;
   if (ls.toDate) xSearchTool.to_date = ls.toDate;
+  if (ls.maxResults) xSearchTool.max_search_results = ls.maxResults;
   if (ls.allowedXHandles && ls.allowedXHandles.length > 0) {
     xSearchTool.allowed_x_handles = ls.allowedXHandles.slice(0, 10);
   }

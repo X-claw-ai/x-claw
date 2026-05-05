@@ -87,16 +87,18 @@ export async function POST(req: NextRequest) {
     // via XAI_MODEL_AUTO_CONCEPT for testing.
     const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
 
-    // 30-day window keeps results recent — meme-coin attention cycles are
-    // measured in hours, so anything older isn't actionable.
+    // 7-day window: meme-coin attention cycles are measured in hours, and
+    // a tighter window also keeps the x_search call fast enough to fit in
+    // Vercel's 60s function ceiling. Image understanding doubles latency
+    // for marginal benefit (most viral posts are text-led), so it's off.
     const today = new Date();
-    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
-      maxTokens: 800,
+      maxTokens: 600, // tighter budget = faster gen
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
       model: searchModel,
       feature: "auto-launch",
@@ -104,9 +106,10 @@ export async function POST(req: NextRequest) {
       ...(wantLiveSearch
         ? {
             liveSearch: {
-              fromDate: isoDate(monthAgo),
+              fromDate: isoDate(weekAgo),
               toDate: isoDate(today),
-              enableImageUnderstanding: true,
+              maxResults: 5, // fewer search results = faster x_search
+              // enableImageUnderstanding intentionally disabled — too slow
             },
           }
         : {}),
