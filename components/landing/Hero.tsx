@@ -17,16 +17,7 @@ export default function Hero() {
         <ellipse cx="25.5" cy="13" rx="2.6" ry="3.2" fill="#0B0B0B" />
       </svg>
 
-      <span className="meme-tag absolute top-6 right-6 hidden md:inline-block">
-        very launch · much grok
-      </span>
-
       <div className="relative mx-auto max-w-6xl px-6 pt-24 pb-28 md:pt-32 md:pb-36">
-        <div className="pill pill-emph anim-up">
-          <span className="pill-live" />
-          $KOKI · Grok-native meme coin agent
-        </div>
-
         <h1 className="text-display text-display-lg mt-7 max-w-5xl text-balance anim-up">
           Detect. Analyze.
           <br />

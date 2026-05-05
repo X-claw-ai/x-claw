@@ -78,7 +78,14 @@ export default function LaunchesTable() {
               {l.mock && <Badge tone="mock">Mock</Badge>}
             </div>
             <div className="col-span-3 text-xs text-ink-1000/72 font-bold">
-              {new Date(l.createdAt).toLocaleString()}
+              {new Date(l.createdAt).toLocaleString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </div>
             <div className="col-span-1 text-right space-x-2">
               {l.pumpUrl && (

@@ -584,14 +584,18 @@ function ConceptStep({
           <Sparkles className="h-5 w-5 shrink-0" />
           <div className="min-w-0">
             <div className="text-[15px] font-black tracking-tight">
-              Let Grok pick &amp; ship.
+              {autoPiloting
+                ? "KOKi agent is on the job."
+                : "Let the KOKi agent pick & ship."}
             </div>
             <div className="text-[12px] font-medium opacity-85 mt-0.5">
-              Auto-pilot picks a meme, drafts the kit, hands you a signature-ready launch.
+              {autoPiloting
+                ? "Scanning X in real time, picking a meme, drafting the kit, and prepping a one-signature launch — give it a moment."
+                : "Auto-pilot picks a meme, drafts the kit, hands you a signature-ready launch."}
             </div>
             {autoReasoning && (
               <div className="text-[12px] font-bold mt-1.5 opacity-95">
-                Grok’s pick: {autoReasoning}
+                Agent’s pick: {autoReasoning}
               </div>
             )}
             {originX && (
@@ -615,7 +619,7 @@ function ConceptStep({
           {autoPiloting ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Grok is picking…
+              KOKi agent thinking…
             </>
           ) : (
             <>
