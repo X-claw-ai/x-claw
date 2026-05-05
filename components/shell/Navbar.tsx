@@ -3,9 +3,11 @@ import WalletPill from "./WalletPill";
 import KokiLogo from "./KokiLogo";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
+  // /dashboard is wallet-scoped — only the connected wallet's own launches.
+  // /launches is public — every coin every KOKi agent has ever shipped.
+  { href: "/dashboard", label: "My Launches" },
   { href: "/launch", label: "Launch" },
-  { href: "/launches", label: "Launches" },
+  { href: "/launches", label: "All Launches" },
 ];
 
 export default function Navbar() {

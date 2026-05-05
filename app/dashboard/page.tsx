@@ -3,17 +3,17 @@ import { Rocket } from "lucide-react";
 import PageHeader from "@/components/shell/PageHeader";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 
-// KOKi Command Center.
-//
-// Pump.fun-style gallery of every memecoin the KOKi agent has shipped,
-// plus a top-line stats strip. Replaces the older 4-phase command center.
+// "My Launches" — wallet-scoped Pump.fun-style gallery of every memecoin
+// THIS user has shipped via the KOKi agent. Mirrors the public /launches
+// view, but filtered to the connected wallet's own history. Stats card
+// strip stays at the top for at-a-glance context.
 export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Command Center"
-        title="KOKi"
-        description="Every memecoin the KOKi agent has shipped. Real launches on Solana mainnet, the meme art that went on-chain, and quick links to the live monitor on Pump.fun."
+        eyebrow="Your KOKi agent"
+        title="My Launches"
+        description="Every memecoin you've shipped through the KOKi agent. Real launches on Solana mainnet, the meme art that went on-chain, and quick links to the live monitor on Pump.fun."
         actions={
           <Link
             href="/launch"
