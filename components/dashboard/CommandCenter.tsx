@@ -15,11 +15,26 @@ import {
 // content. Top stats stay for quick context, everything else (the old
 // Attention / Community / Execution phases) was either redundant with
 // the /launch wizard or repeated info already on this page.
+// Comma-separated list of admin wallet pubkeys allowed to wipe history.
+// Set NEXT_PUBLIC_KOKI_ADMIN_WALLETS in Vercel to your own wallet pubkey
+// so only you see the dashboard "Clear all" button. Other users — even when
+// connected — never see it. (Server-side DELETE is still wallet-scoped, so
+// this is purely UI hardening.)
+const ADMIN_WALLETS = new Set(
+  (process.env.NEXT_PUBLIC_KOKI_ADMIN_WALLETS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
 export default function CommandCenter() {
   const [launches, setLaunches] = useState<SavedLaunch[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [clearing, setClearing] = useState(false);
   const { publicKey } = useWallet();
+  const isAdmin = Boolean(
+    publicKey && ADMIN_WALLETS.has(publicKey.toBase58()),
+  );
 
   useEffect(() => {
     setLaunches(readLaunches());
@@ -87,14 +102,14 @@ export default function CommandCenter() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {hydrated && launches.length > 0 && (
+            {hydrated && isAdmin && launches.length > 0 && (
               <button
                 type="button"
                 onClick={handleClearAll}
                 disabled={clearing}
                 className="btn btn-secondary !py-2.5 !px-3 !text-xs disabled:opacity-50"
                 aria-label="Clear all launch history"
-                title="Clear all launch history from KOKi (on-chain tokens stay live)"
+                title="Admin: clear all launch history (on-chain tokens stay live)"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 {clearing ? "Clearing…" : "Clear all"}
@@ -113,8 +128,8 @@ export default function CommandCenter() {
           <EmptyState />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {liveLaunches.map((l) => (
-              <TokenCard key={l.id} launch={l} />
+            {liveLaunches.map((l, i) => (
+              <TokenCard key={l.id} launch={l} idx={i} />
             ))}
           </div>
         )}
@@ -125,7 +140,7 @@ export default function CommandCenter() {
 
 /* ─────────── token card with lazy meme image ─────────── */
 
-function TokenCard({ launch }: { launch: SavedLaunch }) {
+function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
   const [imgUrl, setImgUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -176,7 +191,8 @@ function TokenCard({ launch }: { launch: SavedLaunch }) {
   return (
     <Link
       href={monitorHref}
-      className="card card-hover group flex flex-col overflow-hidden !p-0"
+      className="card card-hover group flex flex-col overflow-hidden !p-0 launch-card-anim"
+      style={{ animationDelay: `${Math.min(idx, 12) * 60}ms` }}
     >
       {/* Meme image / fallback tile */}
       <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b-[1.5px] border-ink-1000">
@@ -186,7 +202,7 @@ function TokenCard({ launch }: { launch: SavedLaunch }) {
             src={imgUrl}
             alt={launch.tokenName}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">

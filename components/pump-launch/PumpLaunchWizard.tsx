@@ -301,10 +301,37 @@ export default function PumpLaunchWizard() {
       const c = conceptData.concept as typeof conceptData.concept & {
         originXUrl?: string;
         originXAuthor?: string;
+        originImageUrl?: string;
       };
       const ideaWithOrigin = c.originXUrl
         ? `${c.idea}\n\nInspired by ${c.originXAuthor || "an X post"} — ${c.originXUrl}`
         : c.idea;
+
+      // Step 1: try to fetch the actual X post image FIRST. If Grok returned
+      // an originImageUrl, that's the real viral meme art — way better than
+      // an AI-generated approximation. Server-side proxy validates the host
+      // and returns a base64 data URL we can ship straight to Pump.fun IPFS.
+      let xImageDataUrl: string | null = null;
+      let xImageProvider: string | null = null;
+      if (c.originImageUrl) {
+        try {
+          const imgRes = await fetch(
+            `/api/fetch-x-image?url=${encodeURIComponent(c.originImageUrl)}`,
+          );
+          const imgData = (await imgRes.json()) as {
+            ok: boolean;
+            imageDataUrl?: string;
+            error?: string;
+          };
+          if (imgData.ok && imgData.imageDataUrl) {
+            xImageDataUrl = imgData.imageDataUrl;
+            xImageProvider = "x-post (original meme)";
+          }
+        } catch {
+          // Network error — fall back to AI generation below.
+        }
+      }
+
       const seeded: ConceptInput = {
         ...DEFAULT,
         idea: ideaWithOrigin,
@@ -320,21 +347,26 @@ export default function PumpLaunchWizard() {
         // tagging it on X), not a generic project page. User can override on
         // the Review step.
         twitterUrl: c.originXUrl ?? tickerSearchUrl(c.ticker),
+        // Pre-fill the logo with the real X post image when we managed to
+        // fetch it. Wizard's Review step then shows the original meme art
+        // as the token's eventual logo — no AI gen needed.
+        logoDataUrl: xImageDataUrl,
       };
       setConcept(seeded);
       setOriginX(c.originXUrl ? { url: c.originXUrl, author: c.originXAuthor } : null);
       setAutoReasoning(c.reasoning);
+      if (xImageProvider) setLogoProvider(xImageProvider);
 
-      // Chain: launch-kit (text) → logo image (Aurora) — both fire in series
-      // so the user lands on Review with kit AND logo already in place.
+      // Chain: launch-kit (text) → (logo image only if we don't already have
+      // the X image) — both run in series so Review lands ready-to-ship.
       await runGenerate(seeded);
 
-      // Build a concept-aware logo prompt and generate it. We don't await
-      // setKit — its imagePrompt is read from the latest fetch result that
-      // runGenerate already stashed in state, so we use the seeded concept
-      // directly here.
-      const logoPrompt = `Square logo for a Solana memecoin "${seeded.tokenName}" ($${seeded.ticker}). Theme: ${seeded.theme}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness, no copyrighted IP.`;
-      await runGenerateLogo(logoPrompt);
+      if (!xImageDataUrl) {
+        // No real X image → fall back to AI-generated logo so Pump.fun still
+        // has SOMETHING visual at upload time.
+        const logoPrompt = `Square logo for a Solana memecoin "${seeded.tokenName}" ($${seeded.ticker}). Theme: ${seeded.theme}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness, no copyrighted IP.`;
+        await runGenerateLogo(logoPrompt);
+      }
     } catch (err) {
       setFallbackReason(err instanceof Error ? err.message : "Auto-pilot failed");
     } finally {

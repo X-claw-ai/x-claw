@@ -22,15 +22,22 @@ export interface AutoConceptResult {
   originXUrl?: string;
   /** Author handle of the original post, with leading @ */
   originXAuthor?: string;
+  /**
+   * Direct URL to the FIRST image attached to the X post (the actual meme art).
+   * Lets us upload the real viral image as the token logo instead of an
+   * AI-generated approximation. Typically `https://pbs.twimg.com/media/...`.
+   */
+  originImageUrl?: string;
 }
 
 export function buildAutoConceptMessages(): Msg[] {
   const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: pick ONE concrete memecoin concept that's resonating on X RIGHT NOW — built on top of an ORGANIC cultural meme, not someone else's already-launched token.
 
 YOU HAVE THE x_search TOOL. USE IT. Steps:
-1. Call x_search to find what's trending in meme / crypto-twitter / AI-agent / Solana culture in the last 14 days.
+1. Call x_search to find what's trending in meme / crypto-twitter / AI-agent / Solana culture in the last 14 days. PREFER posts that have an attached image — the visual IS the meme.
 2. Filter the results HARD. The post you anchor on MUST be:
    ✓ Organic cultural content — a joke, image, observation, video clip, screenshot, take, format, character
+   ✓ Has at least one attached image (we'll use it as the token logo)
    ✗ NOT a token shill post (no "$TICKER buy now", "CA:", contract addresses, pump.fun links, dexscreener links, "send it" calls, "fair launch live")
    ✗ NOT from a memecoin alpha account, pump caller, or known shill account
    ✗ NOT a screenshot of a token chart or transaction
@@ -38,7 +45,11 @@ YOU HAVE THE x_search TOOL. USE IT. Steps:
    The cleanest signal: would this post still be funny/interesting if crypto didn't exist? If yes → eligible. If no → skip.
 3. From the eligible posts, pick the ONE with strongest meme potential — high engagement, memeable visual, fresh angle, no existing token wrapper around it.
 4. Build OUR concept ON TOP of that exact post: name, ticker, theme, visual direction.
-5. Cite the post: originXUrl = the EXACT https://x.com/<handle>/status/<id> URL from your search, originXAuthor = @handle. MUST come from real search results, never fabricated.
+5. Cite the post:
+   - originXUrl = the EXACT https://x.com/<handle>/status/<id> URL from your search
+   - originXAuthor = @handle
+   - originImageUrl = the DIRECT image URL of the FIRST image attached to that post. For X this looks like https://pbs.twimg.com/media/<id>?format=jpg&name=large or https://pbs.twimg.com/media/<id>.jpg. MUST be a real URL from your search — never fabricate. If the post has no image, set this to null AND prefer a different post that does have one.
+   All three MUST come from real search results.
 
 DOUBLE CHECK before returning: re-read the cited post. Does its body mention a ticker, contract address, "CA", pump.fun URL, dexscreener, or token launch? If YES, throw it out and pick a different post. We do NOT want our token's Twitter button on Pump.fun pointing at someone else's coin promo — that looks like impersonation.
 
@@ -63,7 +74,8 @@ Output schema:
   "launchStyle": "one of: fair-launch | hype-raid | stealth | community-led",
   "reasoning": "1-2 sentences on why this concept fits X right now",
   "originXUrl": "https://x.com/<handle>/status/<id>  OR  null",
-  "originXAuthor": "@handle  OR  null"
+  "originXAuthor": "@handle  OR  null",
+  "originImageUrl": "https://pbs.twimg.com/media/<id>?format=jpg&name=large  OR  null"
 }`;
 
   // Inject a tiny salt so the model doesn't keep returning the same concept.
@@ -128,6 +140,19 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
     if (/^@[A-Za-z0-9_]{1,15}$/.test(a)) originXAuthor = a;
   }
 
+  // originImageUrl is optional. Whitelist X/Twitter image hosts so the model
+  // can't slip in arbitrary URLs (which we'd later proxy server-side).
+  // pbs.twimg.com is the canonical X media CDN; video_thumb is for video posts.
+  let originImageUrl: string | undefined;
+  if (typeof data.originImageUrl === "string") {
+    const u = data.originImageUrl.trim();
+    if (
+      /^https?:\/\/pbs\.twimg\.com\/(?:media|tweet_video_thumb|amplify_video_thumb|ext_tw_video_thumb)\/[^\s]+/.test(u)
+    ) {
+      originImageUrl = u;
+    }
+  }
+
   return {
     idea: data.idea as string,
     tokenName: data.tokenName as string,
@@ -138,5 +163,6 @@ export function parseAutoConcept(raw: string): AutoConceptResult {
     reasoning: data.reasoning as string,
     originXUrl,
     originXAuthor,
+    originImageUrl,
   };
 }

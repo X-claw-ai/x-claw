@@ -147,6 +147,7 @@ export async function POST(req: NextRequest) {
       );
       concept.originXUrl = undefined;
       concept.originXAuthor = undefined;
+      concept.originImageUrl = undefined;
     }
 
     return NextResponse.json<AutoLaunchResponse>({

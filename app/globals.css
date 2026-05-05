@@ -296,3 +296,27 @@ textarea::placeholder { color: rgba(11, 11, 11, 0.42); }
   100% { opacity: 1; transform: translateY(0); }
 }
 .anim-up { animation: fade-in-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Pump.fun-style staggered card reveal — used in the launches gallery
+   and the dashboard token grid. Cards rise + fade in 60ms apart so the
+   list feels alive as the page loads. */
+@keyframes launch-card-rise {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.launch-card-anim {
+  animation: launch-card-rise 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Hover-lift on token cards. Using transform (GPU) keeps it smooth on
+   throwaway-spec laptops. */
+.card-hover { transition: transform 180ms ease, box-shadow 180ms ease; }
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-card-anim { animation: none; }
+  .card-hover:hover { transform: none; box-shadow: none; }
+}
