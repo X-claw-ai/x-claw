@@ -1,20 +1,58 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
 import { XClawWalletProvider } from "@/components/solana/WalletContext";
 
+const TITLE = "KOKi.ai — The Grok-native Meme Coin Launch Agent";
+const DESCRIPTION =
+  "KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch → Monitor.";
+
 export const metadata: Metadata = {
-  title: "KOKi.ai — The Grok-native Meme Coin Launch Agent",
-  description:
-    "KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch → Monitor.",
-  metadataBase: new URL("https://koki.ai"),
-  openGraph: {
-    title: "KOKi.ai — The Grok-native Meme Coin Launch Agent",
-    description:
-      "Real-time X memes → autonomous Pump.fun launches.",
-    type: "website",
+  title: TITLE,
+  description: DESCRIPTION,
+  metadataBase: new URL("https://kokiai.app"),
+  applicationName: "KOKi.ai",
+  authors: [{ name: "KOKi.ai contributors" }],
+  generator: "Next.js",
+  keywords: [
+    "Solana",
+    "Pump.fun",
+    "memecoin",
+    "Grok",
+    "xAI",
+    "AI agent",
+    "launch agent",
+    "X-native",
+    "open source",
+  ],
+  category: "finance",
+  alternates: {
+    canonical: "https://kokiai.app",
   },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: "website",
+    url: "https://kokiai.app",
+    siteName: "KOKi.ai",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E55B14",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

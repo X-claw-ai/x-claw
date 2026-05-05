@@ -1,0 +1,15 @@
+# KOKi.ai — security policy (RFC 9116)
+#
+# If you find a security issue, please report it privately first
+# instead of opening a public issue or tweeting it. We will respond
+# within 72 hours.
+
+Contact: mailto:security@kokiai.app
+Expires: 2027-05-04T00:00:00Z
+Preferred-Languages: en, ko
+Canonical: https://kokiai.app/.well-known/security.txt
+Policy: https://github.com/X-claw-ai/x-claw/blob/main/SECURITY.md
+Acknowledgments: https://github.com/X-claw-ai/x-claw/blob/main/SECURITY.md
+Encryption: https://github.com/X-claw-ai/x-claw
+
+# Source: https://github.com/X-claw-ai/x-claw (MIT, public)
