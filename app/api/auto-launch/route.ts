@@ -48,18 +48,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Use the flagship Grok model — fast variants don't reliably support
+    // search_parameters yet, so they 400 and we fall through to mock.
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
       maxTokens: 800,
       temperature: 0.85,
-      model: "fast",
+      // model: undefined → router picks XAI_MODEL (grok-4-latest) by default
       feature: "auto-launch",
       walletPubkey,
-      // Grok Live X Search — let the model actually browse X for the
-      // viral post that anchors the concept and cite its URL.
       liveSearch: {
-        mode: "on",
+        mode: "auto", // "auto" lets the model choose to search instead of forcing it
         sources: ["x"],
         maxResults: 12,
       },
@@ -88,8 +88,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    // On parse / network failure, return a deterministic fallback so the
-    // user still gets a usable concept and can retry from the UI.
+    console.error(`[auto-launch] LLM call failed → falling back: ${msg}`);
     return NextResponse.json<AutoLaunchResponse>({
       ok: true,
       concept: fallbackConcept(),

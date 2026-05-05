@@ -26,25 +26,46 @@ export async function callXAIImage(req: XAIImageRequest): Promise<XAIImageRespon
   const key = process.env.XAI_API_KEY;
   if (!key) throw new Error("XAI_API_KEY not set");
 
-  const model = req.model || DEFAULT_MODEL;
+  // Try the requested/default model first, then fall through to known
+  // alternate model IDs so an account with one variant provisioned still
+  // works without manual env tweaking.
+  const candidateModels: string[] = [];
+  if (req.model) candidateModels.push(req.model);
+  candidateModels.push(DEFAULT_MODEL, "grok-2-image", "grok-2-image-1212");
+  const tried = new Set<string>();
 
-  const res = await fetch(`${XAI_BASE_URL}/images/generations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model,
-      prompt: req.prompt,
-      n: req.n ?? 1,
-      response_format: req.responseFormat ?? "b64_json",
-    }),
-  });
+  let res: Response | undefined;
+  let lastErr = "";
+  let modelUsed = "";
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`xAI image API ${res.status}: ${text.slice(0, 300)}`);
+  for (const m of candidateModels) {
+    if (tried.has(m)) continue;
+    tried.add(m);
+    modelUsed = m;
+    res = await fetch(`${XAI_BASE_URL}/images/generations`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: m,
+        prompt: req.prompt,
+        n: req.n ?? 1,
+        response_format: req.responseFormat ?? "b64_json",
+      }),
+    });
+    if (res.ok) break;
+    lastErr = await res.text().catch(() => "");
+    // 404 / 400 model-not-found → try next candidate. Other errors → stop.
+    const looksLikeModelMiss = /model|not.*found|invalid/i.test(lastErr) && (res.status === 404 || res.status === 400);
+    if (!looksLikeModelMiss) break;
+    console.warn(`[xaiImage] model ${m} rejected (${res.status}): ${lastErr.slice(0, 160)} — trying next candidate`);
+  }
+
+  if (!res || !res.ok) {
+    console.error(`[xaiImage] all candidates exhausted: ${lastErr.slice(0, 400)}`);
+    throw new Error(`xAI image API: ${lastErr.slice(0, 300)}`);
   }
 
   const data = (await res.json()) as {
@@ -71,7 +92,7 @@ export async function callXAIImage(req: XAIImageRequest): Promise<XAIImageRespon
   return {
     imageDataUrl: dataUrl,
     provider: "xai",
-    model,
+    model: modelUsed,
     revisedPrompt: first.revised_prompt,
   };
 }
