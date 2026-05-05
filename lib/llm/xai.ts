@@ -44,22 +44,36 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   if (req.responseFormat === "json") {
     body.response_format = { type: "json_object" };
   }
-  // ─── Live Search migration note ──────────────────────────────────────
-  // xAI deprecated the search_parameters API in May 2026. Calls now return
-  // HTTP 410 with: "Live search is deprecated. Please switch to the Agent
-  // Tools API: https://docs.x.ai/docs/guides/tools/overview"
+  // ─── Agent Tools API (replaced deprecated Live Search) ──────────────
+  // xAI deprecated `search_parameters` in May 2026. The replacement is
+  // their Agent Tools API — server-side built-in tools that the model
+  // invokes during generation. We use the `x_search` tool which performs
+  // keyword/semantic/user search + thread fetch on X.
   //
-  // We KEEP the field on LLMRequest so callers don't have to change yet,
-  // but we no longer attach search_parameters to the outgoing request —
-  // there's no point round-tripping a guaranteed 410. originXUrl stays
-  // null on auto-concept output, and the Pump.fun token Twitter button
-  // falls back to the ticker-search URL (still coin-specific).
+  // Reference: https://docs.x.ai/docs/guides/tools/x-search
+  // Built-in tools run on xAI's servers; we just provide tool config.
+  // Citations come back the same way Live Search returned them.
   //
-  // TODO: re-implement via Agent Tools API. Likely shape (OpenAI-compatible
-  // tool use): pass `tools: [{type:"function", function:{name:"x_search",...}}]`
-  // and handle tool_calls in the response. Confirm exact shape from xAI docs.
+  // X Search requires a search-capable model. The recommended model per
+  // xAI docs is `grok-4.3`. Older `grok-4-latest` / `grok-4-0709` may
+  // not support the new tools schema. Operators can pin the auto-concept
+  // call to a specific model via XAI_MODEL_AUTO_CONCEPT.
   if (req.liveSearch) {
-    // Intentionally no-op until Agent Tools migration lands.
+    const xSearchTool: Record<string, unknown> = { type: "x_search" };
+    // Optional sub-parameters (date range / handle filters / image+video
+    // understanding) — only attach when the caller actually set them.
+    const ls = req.liveSearch;
+    if (ls.fromDate) xSearchTool.from_date = ls.fromDate;
+    if (ls.toDate) xSearchTool.to_date = ls.toDate;
+    if (ls.allowedXHandles && ls.allowedXHandles.length > 0) {
+      xSearchTool.allowed_x_handles = ls.allowedXHandles.slice(0, 10);
+    }
+    if (ls.excludedXHandles && ls.excludedXHandles.length > 0) {
+      xSearchTool.excluded_x_handles = ls.excludedXHandles.slice(0, 10);
+    }
+    if (ls.enableImageUnderstanding) xSearchTool.enable_image_understanding = true;
+    if (ls.enableVideoUnderstanding) xSearchTool.enable_video_understanding = true;
+    body.tools = [xSearchTool];
   }
 
   let res = await fetch(`${BASE}/chat/completions`, {
@@ -71,19 +85,18 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
     body: JSON.stringify(body),
   });
 
-  // Self-healing retry: if the request was rejected with search_parameters
-  // attached, ALWAYS retry once without them on any 4xx. xAI's error text
-  // varies (sometimes "search not enabled", sometimes just "Bad Request"
-  // or "invalid request"), so a regex-narrow check was missing real cases
-  // and forcing a hard provider-level fallback to OpenAI.
+  // Self-healing retry: if Agent Tools were rejected (model doesn't support,
+  // wrong endpoint, payload-shape mismatch, etc.), retry once without `tools`
+  // on any 4xx so the agent stays functional. Keeps Auto-pilot working even
+  // if x_search availability changes again.
   let searchRejection: { status: number; error: string } | undefined;
-  if (!res.ok && body.search_parameters && res.status >= 400 && res.status < 500) {
+  if (!res.ok && body.tools && res.status >= 400 && res.status < 500) {
     const errText = await res.text().catch(() => "");
     console.warn(
-      `[xai] retrying without search_parameters — original ${res.status}: ${errText.slice(0, 300)}`,
+      `[xai] retrying without tools — original ${res.status}: ${errText.slice(0, 300)}`,
     );
     searchRejection = { status: res.status, error: errText.slice(0, 500) };
-    delete body.search_parameters;
+    delete body.tools;
     res = await fetch(`${BASE}/chat/completions`, {
       method: "POST",
       headers: {

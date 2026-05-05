@@ -66,36 +66,40 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Live Search (search_parameters) requires a tier/feature that not all
-    // xAI accounts have, and when it 400s we end up returning the mock
-    // "Grok Cat" concept. Default OFF; opt-in via XAI_LIVE_SEARCH.
-    // Accept any truthy variant so a typo'd "On" / "true" / "1" still works.
+    // X Search via Agent Tools API (replaced deprecated `search_parameters`).
+    // Default OFF for the same reason — not every xAI account/model supports
+    // it, and a 4xx here triggers a fallback to OpenAI which can't search X.
+    // Opt-in via XAI_LIVE_SEARCH env. Lenient parsing: any truthy variant
+    // ("on" / "true" / "1" / "yes") enables it.
     const liveRaw = (process.env.XAI_LIVE_SEARCH || "").trim().toLowerCase();
     const wantLiveSearch = ["on", "true", "1", "yes", "y", "enable", "enabled"].includes(liveRaw);
 
-    // grok-4-latest sometimes silently no-ops search_parameters. Allow operator
-    // to override the search-call model via XAI_MODEL_AUTO_CONCEPT
-    // (e.g. "grok-3-latest" which is the canonical Live-Search-enabled model).
-    const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT;
+    // X Search requires an Agent-Tools-capable model. Per xAI docs the
+    // canonical search-enabled model is `grok-4.3`. Default to that for
+    // auto-concept calls so X Search actually fires. Operators can override
+    // via XAI_MODEL_AUTO_CONCEPT for testing.
+    const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
+
+    // 30-day window keeps results recent — meme-coin attention cycles are
+    // measured in hours, so anything older isn't actionable.
+    const today = new Date();
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
       maxTokens: 800,
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
-      ...(searchModel ? { model: searchModel } : {}),
-      // model: undefined → router picks XAI_MODEL (grok-4-latest) by default
+      model: searchModel,
       feature: "auto-launch",
       walletPubkey,
       ...(wantLiveSearch
         ? {
             liveSearch: {
-              // "on" = always search, don't let Grok decide it can skip.
-              // "auto" lets Grok skip search and just imagine concepts —
-              // which means originXUrl never gets populated.
-              mode: "on",
-              sources: ["x"] as const,
-              maxResults: 12,
+              fromDate: isoDate(monthAgo),
+              toDate: isoDate(today),
+              enableImageUnderstanding: true,
             },
           }
         : {}),
