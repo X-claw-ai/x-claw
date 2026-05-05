@@ -6,6 +6,13 @@ import {
   type AutoConceptResult,
 } from "@/lib/llm/promptAutoConcept";
 
+// Live X Search via the Responses API can take 20-40s end-to-end
+// (Grok decides to search → x_search runs → Grok summarizes results).
+// Vercel's default function timeout is 10s on Hobby — way too short.
+// Bump to the platform max so x_search has room to actually finish.
+export const maxDuration = 60;
+export const runtime = "nodejs";
+
 interface AutoLaunchResponse {
   ok: boolean;
   concept?: AutoConceptResult;

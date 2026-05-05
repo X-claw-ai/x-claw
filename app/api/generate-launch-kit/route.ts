@@ -5,6 +5,12 @@ import { buildLaunchKitMessages } from "@/lib/llm/promptLaunchKit";
 import { parseLaunchKit, LaunchKitParseError } from "@/lib/llm/parseLaunchKit";
 import type { ConceptInput } from "@/lib/types";
 
+// Launch kit generation does a lot of writing (10 tweets, 20 raid replies,
+// 5 DM templates, telegram, dexscreener copy, 7-day plan). 30s+ on grok-4
+// is normal — bump the function timeout off the 10s default.
+export const maxDuration = 60;
+export const runtime = "nodejs";
+
 // ─────────────────────────────────────────────────────────────────────────
 // POST /api/generate-launch-kit
 //
@@ -20,8 +26,6 @@ import type { ConceptInput } from "@/lib/types";
 //
 // Hard rule: this server NEVER signs anything. It only prepares drafts.
 // ─────────────────────────────────────────────────────────────────────────
-
-export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   let body: Partial<ConceptInput> = {};
