@@ -13,6 +13,10 @@ interface AutoLaunchResponse {
   model?: string;
   fallbackReason?: string;
   error?: string;
+  /** Debug: did we ASK xAI to do Live Search this call? */
+  liveSearchRequested?: boolean;
+  /** Debug: citation URLs xAI returned (empty array = search likely no-op'd). */
+  citations?: string[];
 }
 
 /**
@@ -53,11 +57,17 @@ export async function POST(req: NextRequest) {
     // "Grok Cat" concept. Default OFF; opt-in via XAI_LIVE_SEARCH=on.
     const wantLiveSearch = process.env.XAI_LIVE_SEARCH === "on";
 
+    // grok-4-latest sometimes silently no-ops search_parameters. Allow operator
+    // to override the search-call model via XAI_MODEL_AUTO_CONCEPT
+    // (e.g. "grok-3-latest" which is the canonical Live-Search-enabled model).
+    const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT;
+
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages(),
       responseFormat: "json",
       maxTokens: 800,
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
+      ...(searchModel ? { model: searchModel } : {}),
       // model: undefined → router picks XAI_MODEL (grok-4-latest) by default
       feature: "auto-launch",
       walletPubkey,
@@ -95,6 +105,8 @@ export async function POST(req: NextRequest) {
       concept,
       provider: llmRes.provider,
       model: llmRes.model,
+      liveSearchRequested: wantLiveSearch,
+      citations: llmRes.citations ?? [],
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
