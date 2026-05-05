@@ -8,8 +8,8 @@ Contact: mailto:security@kokiai.app
 Expires: 2027-05-04T00:00:00Z
 Preferred-Languages: en, ko
 Canonical: https://kokiai.app/.well-known/security.txt
-Policy: https://github.com/koki-ai/koki/blob/main/SECURITY.md
-Acknowledgments: https://github.com/koki-ai/koki/blob/main/SECURITY.md
-Encryption: https://github.com/koki-ai/koki
+Policy: https://github.com/koki-ai-agent/Koki/blob/main/SECURITY.md
+Acknowledgments: https://github.com/koki-ai-agent/Koki/blob/main/SECURITY.md
+Encryption: https://github.com/koki-ai-agent/Koki
 
-# Source: https://github.com/koki-ai/koki (MIT, public)
+# Source: https://github.com/koki-ai-agent/Koki (MIT, public)
