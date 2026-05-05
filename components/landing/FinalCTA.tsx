@@ -31,7 +31,7 @@ export default function FinalCTA() {
             <ArrowRight className="h-5 w-5" />
           </Link>
           <Link href="/dashboard" className="btn btn-secondary !py-3.5 !px-6 !text-base">
-            Open the Radar
+            See agent launches
           </Link>
         </div>
       </div>

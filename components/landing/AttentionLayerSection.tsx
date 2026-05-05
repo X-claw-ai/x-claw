@@ -22,12 +22,12 @@ export default function AttentionLayerSection() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/dashboard" className="btn btn-primary !py-3 !px-5">
-              Open the Meme Radar
+            <Link href="/launch" className="btn btn-primary !py-3 !px-5">
+              Try Auto-pilot
               <ArrowRight className="h-4 w-4" />
             </Link>
             <span className="text-[12px] font-bold text-ink-1000/72">
-              Real-time trends connect once X API is wired.
+              Live X search via Grok’s x_search tool.
             </span>
           </div>
         </div>

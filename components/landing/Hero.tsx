@@ -35,7 +35,7 @@ export default function Hero() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link href="/dashboard" className="btn btn-secondary !py-3 !px-5">
-            See the radar
+            See agent launches
           </Link>
         </div>
 

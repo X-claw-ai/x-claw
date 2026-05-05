@@ -5,15 +5,15 @@ import CommandCenter from "@/components/dashboard/CommandCenter";
 
 // KOKi Command Center.
 //
-// Four-section dashboard mirroring the agent loop:
-//   01 Attention Signals · 02 Community Momentum · 03 On-chain Intelligence · 04 Launch Execution
+// Pump.fun-style gallery of every memecoin the KOKi agent has shipped,
+// plus a top-line stats strip. Replaces the older 4-phase command center.
 export default function DashboardPage() {
   return (
     <>
       <PageHeader
         eyebrow="Command Center"
         title="KOKi"
-        description="X attention · community momentum · on-chain intelligence · launch execution. One agent, four engines."
+        description="Every memecoin the KOKi agent has shipped. Real launches on Solana mainnet, the meme art that went on-chain, and quick links to the live monitor on Pump.fun."
         actions={
           <Link
             href="/launch"
