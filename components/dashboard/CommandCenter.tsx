@@ -44,7 +44,6 @@ export default function CommandCenter() {
   const liveLaunches = launches.filter(
     (l) => !l.mock && l.status === "launched",
   );
-  const lastLaunch = liveLaunches[0];
 
   async function handleClearAll() {
     const count = launches.length;
@@ -71,20 +70,6 @@ export default function CommandCenter() {
 
   return (
     <div className="space-y-10 pb-16">
-      {/* Top stats */}
-      <section className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Stat label="Engines" value="4" sub="Online" tone="good" />
-          <Stat
-            label="Real launches"
-            value={hydrated ? String(liveLaunches.length) : "—"}
-            sub={lastLaunch ? `Last: ${lastLaunch.ticker}` : "None yet"}
-          />
-          <Stat label="Provider" value="KOKi" sub="xAI Grok · primary" />
-          <Stat label="Network" value="Solana" sub="Mainnet" />
-        </div>
-      </section>
-
       {/* Token gallery */}
       <section className="mx-auto max-w-6xl px-6">
         <div className="flex items-end justify-between gap-4 mb-6 flex-wrap">
@@ -288,49 +273,6 @@ function SkeletonGrid() {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-/* ─────────── stat tiles ─────────── */
-
-function Stat({
-  label,
-  value,
-  sub,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  tone?: "neutral" | "good" | "info";
-}) {
-  const isEmph = tone === "good";
-  return (
-    <div className={`card !p-5 md:!p-6 ${isEmph ? "card-emph" : ""}`}>
-      <div
-        className={`eyebrow !text-[10px] ${
-          isEmph ? "text-koki-500" : "text-ink-1000/70"
-        }`}
-      >
-        {label}
-      </div>
-      <div
-        className={`mt-2.5 text-[28px] md:text-[32px] font-black tabular-nums tracking-tight ${
-          isEmph ? "text-koki-500" : "text-ink-1000"
-        }`}
-      >
-        {value}
-      </div>
-      {sub && (
-        <div
-          className={`mt-1 text-[12px] font-bold ${
-            isEmph ? "text-koki-500/80" : "text-ink-1000/65"
-          }`}
-        >
-          {sub}
-        </div>
-      )}
     </div>
   );
 }
