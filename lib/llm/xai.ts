@@ -57,19 +57,20 @@ export async function callXAI(req: LLMRequest): Promise<LLMResponse> {
   // Reference: https://docs.x.ai/docs/guides/tools/overview
   if (req.liveSearch) {
     const ls = req.liveSearch;
-    // Build the live_search config. xAI accepts the same field names that
-    // worked under search_parameters: mode, sources, max_search_results,
-    // return_citations. We map our friendlier camelCase fields onto them.
+    // Fields go FLAT on the tool object — not nested under live_search.
+    // Confirmed by xAI's 422: "tools[0]: missing field `sources`" when we
+    // had everything wrapped in a sub-object.
     const sources = (ls.sources || ["x"]).map((s) => ({ type: s }));
-    const liveSearchConfig: Record<string, unknown> = {
-      mode: ls.mode || "on",
+    const liveSearchTool: Record<string, unknown> = {
+      type: "live_search",
       sources,
+      mode: ls.mode || "on",
       max_search_results: ls.maxResults || 10,
       return_citations: true,
     };
-    if (ls.fromDate) liveSearchConfig.from_date = ls.fromDate;
-    if (ls.toDate) liveSearchConfig.to_date = ls.toDate;
-    body.tools = [{ type: "live_search", live_search: liveSearchConfig }];
+    if (ls.fromDate) liveSearchTool.from_date = ls.fromDate;
+    if (ls.toDate) liveSearchTool.to_date = ls.toDate;
+    body.tools = [liveSearchTool];
   }
 
   let res = await fetch(`${BASE}/chat/completions`, {
