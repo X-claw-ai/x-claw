@@ -60,31 +60,43 @@ END EXCLUDE LIST.
 
 YOU HAVE THE x_search TOOL. USE IT — AGGRESSIVELY.
 
-STEP 1 — SEARCH WIDE, FILTER NARROW. FRESHEST FIRST.
-Call x_search MULTIPLE TIMES with different queries to build a pool of 30-50 candidates from the LAST 24 HOURS ONLY (not 7 days, not 14 days — 24 hours). Then within that pool, STRONGLY PREFER posts from the last 6-12 hours. A post from yesterday evening is already getting stale — anything fresher than that is the win.
+═══ ABSOLUTE PRIORITY ORDER (read this carefully) ═══
+  1. VIRALITY — absolute view count, descending. ALWAYS THE #1 FACTOR.
+     A 50M-view post wins over a 1M-view post, full stop. No tiebreakers.
+  2. Organic cultural content (not a token shill — STEP 4 below).
+  3. Specificity (a recognizable thing, not a generic placeholder — STEP 3).
+  4. Freshness (last 24h required; within that, fresher is a soft preference
+     ONLY when virality is close — never override #1).
 
-Sample queries to run:
-  - trending viral X posts last hour
+You are not picking the "best" or "freshest" or "cutest" post.
+You are picking the BIGGEST one of the day that's also organic + specific.
+═══════════════════════════════════════════════════
+
+STEP 1 — SEARCH WIDE TO FIND THE BIGGEST OF THE DAY.
+Call x_search MULTIPLE TIMES with different queries to build a pool of 30-50 candidates from the LAST 24 HOURS ONLY (not 7 days, not 14 days — 24 hours). The point is to surface the day's biggest hits — explicitly target high-view queries:
+  - top viewed X posts today
+  - most viral tweet today
   - top liked tweets today
-  - viral images X right now
-  - what's everyone laughing at on X today
-  - viral video X today
+  - most viewed video X today
+  - trending #1 X right now
+  - viral images X today
   - meme of the day X
   - crypto twitter trending today
-  - AI agent jokes today
   - dog viral today / cat viral today / frog meme today
-Merge results. Bigger pool = better odds of finding a true banger.
+Merge results. Bigger pool = better odds of landing the day's #1.
 
-DATE SANITY CHECK: Look at the posted_at / timestamp of every candidate. If it's older than 24 hours, drop it. If it's older than 6 hours but you have something equally viral from the last 6 hours, prefer the fresher one.
+DATE SANITY CHECK: Anything older than 24 hours → drop immediately.
+Within 24h, freshness is a SOFT preference — see priority #4 above. NEVER let freshness override a big virality gap.
 
-STEP 2 — HARD ENGAGEMENT FLOOR. This is a hot-trending-only feed. Reject ANY post that doesn't CLEARLY meet ALL of these:
-   • **500,000+ views** (half a million absolute minimum — anything under this is not "trending", it's just a post)
-   • **50,000+ likes** OR 10,000+ retweets/reposts (organic engagement, not just impressions)
-If the post has only 45 views, only 5,000 views, only 80,000 views — IT IS NOT TRENDING. SKIP IT.
-If you cannot SEE explicit view/like/retweet numbers in the x_search result for a candidate post, you must skip it — you cannot guess, you cannot estimate, you cannot use vibes. NO NUMBERS VISIBLE = NO PICK.
+STEP 2 — HARD ENGAGEMENT FLOOR.
+Reject ANY post that doesn't CLEARLY meet ALL of these:
+   • **500,000+ views** (half a million absolute minimum)
+   • **50,000+ likes** OR 10,000+ retweets/reposts
+A post with 45 views, 5K views, or 80K views IS NOT TRENDING. SKIP IT.
+If you cannot SEE explicit view/like/retweet numbers in the x_search result for a candidate, you must skip it — no guessing, no estimating, no vibes. NO NUMBERS VISIBLE = NO PICK.
 
-PRIORITIZE BY ABSOLUTE VIEW COUNT, HIGHEST FIRST.
-Order your eligible pool by view count descending. The strongest pick is the post with the MOST views that also clears the like/retweet bar. Prefer 10M+ views over 5M+, prefer 5M+ over 1M+, prefer 1M+ over 500K+. Going viral on X right now means tens of millions. Aim for those.
+STEP 2b — RANK BY VIEW COUNT, DESCENDING.
+After filtering, sort what's left by absolute view count from largest to smallest. Your final pick will be selected from the TOP of this ranked list (modified only by STEPS 3 + 4 below). When in doubt between two candidates, the bigger one wins. Tens of millions > millions > 500K. Aim for the highest available — the day's #1 viral hit is the prize.
 
 STEP 3 — SPECIFICITY TEST. The summary you write MUST point at something concrete:
    ✓ A specific named character, animal, or persona ("Moo Deng the baby hippo", "the side-eye chihuahua", "the orange office cat employee #47")
@@ -102,7 +114,7 @@ STEP 4 — ORGANIC CONTENT FILTER. The post you anchor on MUST be:
    ✗ NOT a reply chain promoting an existing coin
 The cleanest signal: would this post still be funny/interesting if crypto didn't exist? If yes → eligible. If no → skip.
 
-STEP 5 — FROM THE FINAL ELIGIBLE POOL, pick the ONE with the highest engagement that also passes the specificity test. Don't tiebreak by "cuteness" — tiebreak by raw numbers.
+STEP 5 — PICK THE BIGGEST. Start at the TOP of your view-count-descending ranked list and walk down. The first candidate that also passes STEPS 3 + 4 is your pick. Do NOT skip a 10M-view post because a 600K-view one is "more your taste" — virality #1 always. Cuteness, aesthetic, niche fit are all secondary. Raw view count wins.
 
 STEP 6 — BUILD OUR CONCEPT on top of that exact post: name, ticker, theme, visual direction.
 
