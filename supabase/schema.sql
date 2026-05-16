@@ -184,6 +184,20 @@ create index if not exists launches_v1_wallet_idx on public.launches_v1 (wallet_
 create index if not exists launches_v1_created_idx on public.launches_v1 (created_at desc);
 create index if not exists launches_v1_source_x_url_idx on public.launches_v1 (source_x_url) where source_x_url is not null;
 
+-- Short-term X-post URL reservations. /api/auto-launch writes here the
+-- INSTANT Grok returns a concept URL — solves a race where 20 concurrent
+-- callers all anchor on the same hot post in the gap between "got concept"
+-- and "launch committed to launches_v1". 30-min TTL: if the launch
+-- completes the row in launches_v1 takes over (permanent exclusion);
+-- if the user abandons, the reservation expires.
+create table if not exists public.reserved_x_urls (
+  x_url text primary key,
+  wallet_pubkey text,
+  reserved_at timestamptz not null default now(),
+  expires_at timestamptz not null default (now() + interval '30 minutes')
+);
+create index if not exists reserved_x_urls_expires_idx on public.reserved_x_urls (expires_at);
+
 -- Cached Real-time Meme Radar signals (Detect → Analyze inputs).
 create table if not exists public.radar_signals (
   id uuid primary key default uuid_generate_v4(),

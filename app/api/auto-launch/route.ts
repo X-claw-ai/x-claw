@@ -87,9 +87,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Build the exclude list BEFORE the LLM call so it goes into the
-  // system prompt verbatim. Every URL here is guaranteed to be a real
-  // X post (we wrote it ourselves on a previous successful launch).
-  const excludeXUrls = await fetchUsedSourceXUrls();
+  // system prompt verbatim. UNION of: already-launched URLs (permanent
+  // exclusion) and reserved URLs (30-min TTL — a concurrent Auto-pilot
+  // call just picked this and hasn't finished signing yet).
+  const excludeXUrls = await fetchUnavailableXUrls();
 
   try {
     // X Search via Agent Tools API (replaced deprecated `search_parameters`).
@@ -141,10 +142,10 @@ export async function POST(req: NextRequest) {
     const concept = parseAutoConcept(llmRes.content);
 
     // Hard dedup check — if Grok ignored the exclude list and re-picked a
-    // URL that's already in launches_v1, refuse to anchor on it. Drop the
-    // X attribution; the wizard will use a safe ticker-search Pump.fun URL
-    // as the token's Twitter link instead. Better an unattributed launch
-    // than a duplicate.
+    // URL that's already taken (launched OR reserved), refuse to anchor on
+    // it. Drop the X attribution; the wizard will use a safe ticker-search
+    // Pump.fun URL as the token's Twitter link instead. Better an
+    // unattributed launch than a duplicate.
     const excludeSet = new Set(excludeXUrls);
     if (concept.originXUrl && excludeSet.has(concept.originXUrl)) {
       console.warn(
@@ -153,6 +154,16 @@ export async function POST(req: NextRequest) {
       concept.originXUrl = undefined;
       concept.originXAuthor = undefined;
       concept.originImageUrl = undefined;
+    }
+
+    // Reserve the URL IMMEDIATELY so the next concurrent caller (within
+    // the next 30 minutes) won't see it as available. The reservation is
+    // fire-and-forget — we don't await it before returning the response.
+    // If the user completes their launch, /api/launches POST writes the
+    // URL into launches_v1 (permanent). If they abandon, the 30-min TTL
+    // sweeps it.
+    if (concept.originXUrl) {
+      void reserveXUrl(concept.originXUrl, walletPubkey);
     }
 
     // If the model forgot to populate originXUrl in JSON but a citation is
@@ -223,30 +234,97 @@ export async function POST(req: NextRequest) {
 // ── Dedup helper ───────────────────────────────────────────────────────
 
 /**
- * Pull the X-post URLs that previous KOKi launches have already anchored on.
- * Newest-first, capped at RECENT_LAUNCHES_FOR_EXCLUDE. Empty array when
- * Supabase isn't configured (dev) — in that case dedup is best-effort and
- * the LLM is the only gate.
+ * Pull X-post URLs that are off-limits for the next Auto-pilot pick. This is
+ * the UNION of two tables:
  *
- * NULLs are skipped because the legacy launches table is brand-new with
- * source_x_url and most pre-migration rows haven't been backfilled.
+ *   1. launches_v1.source_x_url — posts that previous launches already
+ *      anchored on. PERMANENT exclusion (a token is a token).
+ *
+ *   2. reserved_x_urls (expires_at > now()) — posts that another concurrent
+ *      Auto-pilot call has just picked but hasn't been signed-and-launched
+ *      yet. SHORT-TERM exclusion (30 min TTL). Solves the race condition
+ *      where 20 users hit /api/auto-launch in the same second and Grok
+ *      hands them all the same hot post.
+ *
+ * Newest-first within each pool, capped at RECENT_LAUNCHES_FOR_EXCLUDE total
+ * to keep the prompt size sane. Empty array when Supabase isn't configured
+ * (dev) — in that case dedup is best-effort and the LLM is the only gate.
  */
-async function fetchUsedSourceXUrls(): Promise<string[]> {
+async function fetchUnavailableXUrls(): Promise<string[]> {
   const sb = getSupabaseAdmin();
   if (!sb) return [];
-  try {
-    const { data, error } = await sb
+
+  // Run the two queries in parallel — they don't depend on each other.
+  const [launchedRes, reservedRes] = await Promise.all([
+    sb
       .from("launches_v1")
       .select("source_x_url")
       .not("source_x_url", "is", null)
       .order("created_at", { ascending: false })
-      .limit(RECENT_LAUNCHES_FOR_EXCLUDE);
-    if (error || !data) return [];
-    return (data as Array<{ source_x_url: string | null }>)
-      .map((r) => r.source_x_url)
-      .filter((u): u is string => typeof u === "string" && u.length > 0);
+      .limit(RECENT_LAUNCHES_FOR_EXCLUDE),
+    sb
+      .from("reserved_x_urls")
+      .select("x_url")
+      .gt("expires_at", new Date().toISOString())
+      .order("reserved_at", { ascending: false })
+      .limit(RECENT_LAUNCHES_FOR_EXCLUDE),
+  ]);
+
+  const out = new Set<string>();
+  if (!launchedRes.error && launchedRes.data) {
+    for (const r of launchedRes.data as Array<{ source_x_url: string | null }>) {
+      if (typeof r.source_x_url === "string" && r.source_x_url.length > 0) {
+        out.add(r.source_x_url);
+      }
+    }
+  }
+  if (!reservedRes.error && reservedRes.data) {
+    for (const r of reservedRes.data as Array<{ x_url: string | null }>) {
+      if (typeof r.x_url === "string" && r.x_url.length > 0) {
+        out.add(r.x_url);
+      }
+    }
+  }
+
+  // Newest entries first is preferable for prompt-size truncation, so emit
+  // reserved (very recent) before launched (older). Both pools are already
+  // ordered newest-first within themselves, so a stable iteration order
+  // mostly preserves that.
+  return Array.from(out);
+}
+
+/**
+ * Reserve an X-post URL so concurrent Auto-pilot calls can't anchor on it
+ * before the user finishes signing. 30-minute TTL; if the launch doesn't
+ * complete in time, the reservation naturally expires.
+ *
+ * Idempotent via ON CONFLICT — if the URL is already reserved (race we
+ * couldn't prevent), the upsert just refreshes the timestamp. The DB
+ * primary key prevents two different users from both 'owning' the same
+ * reservation row.
+ *
+ * Fire-and-forget: failure here doesn't break the user's launch flow,
+ * it just means concurrent users might pick the same post. The
+ * post-LLM excludeSet check on the next caller will still catch
+ * duplicates once launches_v1 has the row.
+ */
+async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+  try {
+    await sb
+      .from("reserved_x_urls")
+      .upsert(
+        {
+          x_url: xUrl,
+          wallet_pubkey: walletPubkey ?? null,
+          reserved_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        },
+        { onConflict: "x_url", ignoreDuplicates: false },
+      );
   } catch {
-    return [];
+    /* best-effort — don't block the user response on a reservation failure */
   }
 }
 
