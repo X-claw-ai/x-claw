@@ -106,11 +106,11 @@ export default function WalletTrackingAgent({
         <div className="flex items-center gap-2">
           <Eye className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">Wallet Tracking Agent</h2>
-          <Badge tone="live">Live, On-chain</Badge>
+          <Badge tone="live">Live, Onchain</Badge>
         </div>
         <p className="text-sm text-ink-300/72 max-w-2xl">
-          Pull a public Solana wallet's on-chain footprint and let Grok turn
-          the raw data into an X-native intelligence brief. Read-only, KOKi
+          Pull a public Solana wallet's onchain footprint and let Grok turn
+          the raw data into an X native intelligence brief. Read-only, KOKi
           never asks for private keys.
         </p>
 

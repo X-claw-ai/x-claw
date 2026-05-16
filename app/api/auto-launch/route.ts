@@ -330,16 +330,16 @@ async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Prom
   }
 }
 
-/** Deterministic, X-native concept used when LLM is unavailable. */
+/** Deterministic, X native concept used when LLM is unavailable. */
 function fallbackConcept(): AutoConceptResult {
   return {
-    idea: "Grok-native meme cat that watches X timelines 24/7. The patron saint of the AI agent era.",
+    idea: "Grok native meme cat that watches X timelines 24/7. The patron saint of the AI agent era.",
     tokenName: "Grok Cat",
     ticker: "GROKCAT",
-    theme: "AI cat archetype, neon-on-dark, X-native posting energy",
-    audience: "AI-curious crypto natives, Grok power users, cat-meme posters",
+    theme: "AI cat archetype, neon-on-dark, X native posting energy",
+    audience: "AI curious crypto natives, Grok power users, cat-meme posters",
     launchStyle: "hype-raid",
     reasoning:
-      "Cat memes are perennially X-native; the AI-agent overlay matches the cultural moment without overclaiming.",
+      "Cat memes are perennially X native; the AI agent overlay matches the cultural moment without overclaiming.",
   };
 }

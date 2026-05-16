@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Show the orange chip against the dark footer. */}
           <KokiLogo height={40} className="rounded-md overflow-hidden" />
           <p className="mt-4 text-ink-300/72 leading-relaxed max-w-xs font-medium">
-            Grok-native Meme Coin Launch Agent. Detect → Analyze → Generate → Launch → Monitor. From meme idea to Pump.fun launch.
+            Grok native Meme Coin Launch Agent. Detect → Analyze → Generate → Launch → Monitor. From meme idea to Pump.fun launch.
           </p>
         </div>
         <div>
@@ -23,7 +23,7 @@ export default function Footer() {
         <div>
           <div className="eyebrow !text-[10px] mb-4">Disclaimers</div>
           <p className="text-ink-300/72 leading-relaxed max-w-sm font-medium">
-            koki.ai is an independent open-source project. Not affiliated with
+            koki.ai is an independent open source project. Not affiliated with
             xAI, X, Grok, Pump.fun, PumpPortal, or Solana. Memecoin launches
             involve risk. Nothing here is financial advice.
           </p>

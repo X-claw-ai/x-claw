@@ -8,7 +8,7 @@ import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 
 // Landing-page social proof: a live preview of the public 'All Launches'
 // board. Shows the freshest 8 KOKi-shipped tokens with image, ticker,
-// market cap, and bonding-curve progress straight from Pump.fun. The CTA
+// market cap, and bonding curve progress straight from Pump.fun. The CTA
 // links to /launches for the full board.
 //
 // Pulls from the same /api/launches (no wallet param) endpoint the
@@ -61,7 +61,7 @@ export default function LiveLaunchesSection() {
             </h2>
             <p className="mt-4 text-ink-300/80 text-base md:text-lg leading-snug max-w-xl font-medium">
               Every memecoin shipped through the KOKi agent, across all
-              wallets, with live market cap and bonding-curve progress
+              wallets, with live market cap and bonding curve progress
               straight from Pump.fun.
             </p>
           </div>

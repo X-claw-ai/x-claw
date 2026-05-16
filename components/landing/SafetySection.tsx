@@ -4,7 +4,7 @@ const PILLARS = [
   {
     icon: Cpu,
     title: "Agent prepares",
-    body: "Grok drafts the launch kit, on-chain metadata, and the unsigned transaction.",
+    body: "Grok drafts the launch kit, onchain metadata, and the unsigned transaction.",
   },
   {
     icon: UserCheck,

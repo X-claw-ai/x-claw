@@ -133,7 +133,7 @@ export default function PumpLaunchWizard() {
   const [generatingLogo, setGeneratingLogo] = useState(false);
   const [logoProvider, setLogoProvider] = useState<string | null>(null);
 
-  // Real-time Meme Radar prefill: when the user lands here from a radar
+  // Live Meme Radar prefill: when the user lands here from a radar
   // card, we hydrate the concept from /lib/memeRadar.ts and remember which
   // meme it came from so the UI can show the source banner.
   const [fromMeme, setFromMeme] = useState<RadarMeme | null>(null);
@@ -230,7 +230,7 @@ export default function PumpLaunchWizard() {
       kit?.imagePrompt ||
       `Square logo for a Solana memecoin "${concept.tokenName || "Token"}" ($${
         concept.ticker || "TOKEN"
-      }). Theme: ${concept.theme || "X-native meme aesthetic"}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness.`;
+      }). Theme: ${concept.theme || "X native meme aesthetic"}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness.`;
 
     setGeneratingLogo(true);
     try {
@@ -707,7 +707,7 @@ function ConceptStep({
           <Textarea
             value={concept.idea}
             onChange={(e) => setField("idea", e.target.value)}
-            placeholder="X-native community token for Grok-curious crypto builders"
+            placeholder="X native community token for Grok-curious crypto builders"
           />
         </Field>
         <Field label="Token name">
@@ -745,7 +745,7 @@ function ConceptStep({
           <Input
             value={concept.audience}
             onChange={(e) => setField("audience", e.target.value)}
-            placeholder="X-native crypto builders"
+            placeholder="X native crypto builders"
           />
         </Field>
         <Field label="Launch style">
@@ -926,7 +926,7 @@ function ReviewStep({
               maxLength={6}
             />
           </Field>
-          <Field label="Short description (used as on-chain description)" className="sm:col-span-2">
+          <Field label="Short description (used as onchain description)" className="sm:col-span-2">
             <Textarea value={kit.shortDescription} onChange={(e) => setKit({ ...kit, shortDescription: e.target.value })} />
           </Field>
           <Field label="Long description" className="sm:col-span-2">
@@ -1174,7 +1174,7 @@ function SignStep({
         <div>
           <div className="font-semibold">This launches a real token on Solana mainnet.</div>
           <div className="mt-1 text-amber-200/80">
-            Once signed and confirmed, the token is created on-chain and cannot be undone. Verify name, ticker, description, and links one more time below.
+            Once signed and confirmed, the token is created onchain and cannot be undone. Verify name, ticker, description, and links one more time below.
           </div>
         </div>
       </div>
@@ -1276,7 +1276,7 @@ function LaunchProgress({ phase, error }: { phase: LaunchPhase; error: string | 
             <div className="font-semibold">Launch failed</div>
             <div className="mt-1 text-red-200/80">{error}</div>
             <div className="mt-1 text-red-200/60">
-              No funds moved if the wallet rejected the signature. If the tx was submitted but failed on-chain, your wallet will only be charged the priority fee.
+              No funds moved if the wallet rejected the signature. If the tx was submitted but failed onchain, your wallet will only be charged the priority fee.
             </div>
           </div>
         </div>
@@ -1330,7 +1330,7 @@ function DashboardStep({
           <ProviderBadge meta={providerMeta} />
         </div>
         <p className="mt-2 text-sm text-ink-300/72 max-w-2xl">
-          Your token is live on Solana. The metadata + image are stored on IPFS and the bonding-curve trading is now active on Pump.fun.
+          Your token is live on Solana. The metadata + image are stored on IPFS and the bonding curve trading is now active on Pump.fun.
         </p>
 
         <div className="mt-4 grid sm:grid-cols-2 gap-3">
@@ -1399,7 +1399,7 @@ function DashboardStep({
 /* ───────────── Helpers ───────────── */
 
 /**
- * Banner shown when the wizard was opened from a Real-time Meme Radar
+ * Banner shown when the wizard was opened from a Live Meme Radar
  * card. Surfaces the source meme, its trend score, and the readiness pill
  * so the user knows the form was prefilled from a live signal.
  */
@@ -1423,7 +1423,7 @@ function RadarSourceBanner({ meme }: { meme: RadarMeme }) {
           <Badge tone="neutral">Trend {meme.scores.trend}</Badge>
         </div>
         <p className="mt-1.5 text-xs text-ink-300/72 leading-relaxed">
-          Form prefilled from a Real-time Meme Radar signal. Edit any field
+          Form prefilled from a Live Meme Radar signal. Edit any field
           before generating, or proceed if it looks good.
         </p>
       </div>

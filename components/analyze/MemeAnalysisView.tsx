@@ -190,7 +190,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
             ["Community fit", a.criteria.communityFit],
             ["Ticker strength", a.criteria.tickerStrength],
             ["Narrative", a.criteria.narrativeStrength],
-            ["On-chain", a.criteria.onchainRelevance],
+            ["Onchain", a.criteria.onchainRelevance],
             ["Launch timing", a.criteria.launchTiming],
             ["Saturation risk", a.criteria.saturationRisk],
             ["Brand/legal risk", a.criteria.brandLegalRisk],

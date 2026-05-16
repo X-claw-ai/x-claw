@@ -6,7 +6,7 @@ import { ImageResponse } from "next/og";
 // emits <meta property="og:image"> + <meta name="twitter:image">.
 
 export const runtime = "edge";
-export const alt = "KOKi.ai, Grok-native meme coin launch agent";
+export const alt = "KOKi.ai, Grok native meme coin launch agent";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -97,7 +97,7 @@ export default function OpengraphImage() {
               display: "flex",
             }}
           >
-            Grok-native meme coin launch agent. From X-native meme to Pump.fun in one signature.
+            Grok native meme coin launch agent. From X native meme to Pump.fun in one signature.
           </div>
         </div>
 

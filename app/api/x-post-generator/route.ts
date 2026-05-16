@@ -124,7 +124,7 @@ function localStub(req: XPostRequest): ResponseShape {
   const t = req.topic;
   return {
     posts: [
-      `${t}, short take from an X-native builder. (Set XAI_API_KEY to get a real draft.)`,
+      `${t}, short take from an X native builder. (Set XAI_API_KEY to get a real draft.)`,
       `On ${t}: ship the workflow first, the discourse second.`,
       `If ${t} matters to you, it deserves more than a hot take. Build something.`,
       `${t} thread incoming once Grok is wired up. For now, this is a stub.`,

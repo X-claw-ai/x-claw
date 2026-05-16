@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Server-side proxy that fetches a Pump.fun token's live state
-// (market cap, bonding-curve progress, holders, etc.) so the gallery
+// (market cap, bonding curve progress, holders, etc.) so the gallery
 // cards can show real numbers without each browser hitting Pump.fun's
 // frontend API directly (which blocks cross-origin requests).
 //

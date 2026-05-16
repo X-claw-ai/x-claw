@@ -14,7 +14,7 @@ export default function LaunchByMintPage({
       <PageHeader
         eyebrow="Monitor, Phase 05"
         title="Post-launch monitor"
-        description="Live on-chain monitoring + Grok-recommended next actions. Supply, top holders, creator wallet activity, and ready-to-post content all in one view."
+        description="Live onchain monitoring + Grok-recommended next actions. Supply, top holders, creator wallet activity, and ready-to-post content all in one view."
         breadcrumbs={[
           { href: "/", label: "KOKi" },
           { href: "/launches", label: "Launches" },

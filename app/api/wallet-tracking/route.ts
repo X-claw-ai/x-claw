@@ -9,11 +9,11 @@ import { RPC_URL } from "@/lib/solana/connection";
 //
 // Body: { address: string }
 //
-// 1. Pull a real on-chain snapshot from the configured Solana RPC.
+// 1. Pull a real onchain snapshot from the configured Solana RPC.
 //    (No keys, no signing, strictly read-only public state.)
 // 2. Optionally pass the snapshot to Grok for a natural-language brief.
 //    If no LLM provider is configured, we still return the structured snapshot
-//    so the UI can render the on-chain data without the AI summary.
+//    so the UI can render the onchain data without the AI summary.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const runtime = "nodejs";
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Step 1, on-chain snapshot
+  // Step 1, onchain snapshot
   let report;
   try {
     report = await buildWalletReport(body.address.trim(), RPC_URL);

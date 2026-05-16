@@ -61,11 +61,11 @@ export default function Hero() {
           <div className="eyebrow !text-[10px] mb-5">The agent loop</div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { k: "Detect", d: "Real-time meme radar across X" },
-              { k: "Analyze", d: "10-criteria readiness scoring" },
+              { k: "Detect", d: "Live meme radar across X" },
+              { k: "Analyze", d: "Ten signal readiness scoring" },
               { k: "Generate", d: "Full launch kit, 30+ assets" },
               { k: "Launch", d: "Direct Pump.fun execution" },
-              { k: "Monitor", d: "On-chain + X engagement" },
+              { k: "Monitor", d: "Onchain + X engagement" },
             ].map((s, i) => (
               <div key={s.k} className="card !p-4">
                 <div className="eyebrow !text-[9px] opacity-70">Phase 0{i + 1}</div>

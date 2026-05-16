@@ -4,7 +4,7 @@ import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
 import { XClawWalletProvider } from "@/components/solana/WalletContext";
 
-const TITLE = "KOKi.ai, The Grok-native Meme Coin Launch Agent";
+const TITLE = "KOKi.ai, The Grok native Meme Coin Launch Agent";
 const DESCRIPTION =
   "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to Pump.fun launch.";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "xAI",
     "AI agent",
     "launch agent",
-    "X-native",
+    "X native",
     "open source",
   ],
   category: "finance",

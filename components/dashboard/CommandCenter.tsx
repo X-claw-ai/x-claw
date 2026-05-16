@@ -12,7 +12,7 @@ import {
 } from "@/lib/storage/launches";
 import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 
-// Pump.fun-style dashboard: AI-agent-launched tokens are the primary
+// Pump.fun-style dashboard: AI agent-launched tokens are the primary
 // content. Top stats stay for quick context, everything else (the old
 // Attention / Community / Execution phases) was either redundant with
 // the /launch wizard or repeated info already on this page.
@@ -51,7 +51,7 @@ export default function CommandCenter() {
     if (count === 0) return;
     const ok = window.confirm(
       `Clear all ${count} launch record${count === 1 ? "" : "s"} from your KOKi history?\n\n` +
-        "On-chain tokens themselves stay live on Solana, this only wipes " +
+        "Onchain tokens themselves stay live on Solana, this only wipes " +
         "what KOKi displays in your dashboard.",
     );
     if (!ok) return;
@@ -95,7 +95,7 @@ export default function CommandCenter() {
                 disabled={clearing}
                 className="btn btn-secondary !py-2.5 !px-3 !text-xs disabled:opacity-50"
                 aria-label="Clear all launch history"
-                title="Admin: clear all launch history (on-chain tokens stay live)"
+                title="Admin: clear all launch history (onchain tokens stay live)"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 {clearing ? "Clearing…" : "Clear all"}

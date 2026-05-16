@@ -13,7 +13,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow="Your KOKi agent"
         title="My Launches"
-        description="Every memecoin you've shipped through the KOKi agent. Real launches on Solana mainnet, the meme art that went on-chain, and quick links to the live monitor on Pump.fun."
+        description="Every memecoin you've shipped through the KOKi agent. Real launches on Solana mainnet, the meme art that went onchain, and quick links to the live monitor on Pump.fun."
         actions={
           <Link
             href="/launch"

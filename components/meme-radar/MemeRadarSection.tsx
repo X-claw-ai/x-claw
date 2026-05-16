@@ -27,7 +27,7 @@ export default function MemeRadarSection({
             <div>
               <div className="flex items-center gap-2">
                 <div className="text-[18px] font-black text-ink-300 tracking-tight">
-                  Real-time Meme Radar
+                  Live Meme Radar
                 </div>
                 {memes.length === 0 ? (
                   <Badge tone="soon">Pipeline</Badge>
@@ -65,16 +65,16 @@ function EmptyState() {
         <span className="absolute inset-0 rounded-full border border-[var(--border-strong)] animate-ping opacity-40" />
       </div>
       <div className="text-display text-display-sm text-balance max-w-md mx-auto">
-        Real-time trends are connecting.
+        Live trends are connecting.
       </div>
       <p className="mt-3 text-[14px] text-ink-300/72 max-w-md mx-auto leading-relaxed font-medium">
-        Once X API + Grok trend search + on-chain indexers are wired in,
+        Once X API + Grok trend search + onchain indexers are wired in,
         live trending memes appear here ready to be turned into launches.
       </p>
       <div className="mt-7 flex items-center justify-center gap-2 flex-wrap">
         <Badge tone="info">Pipeline, X API</Badge>
         <Badge tone="info">Pipeline, Grok search</Badge>
-        <Badge tone="info">Pipeline, On-chain</Badge>
+        <Badge tone="info">Pipeline, Onchain</Badge>
       </div>
       <p className="mt-7 text-[11px] text-ink-300/55 font-bold">
         In the meantime, you can launch from your own idea via the Launch wizard.

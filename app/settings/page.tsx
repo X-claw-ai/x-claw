@@ -46,7 +46,7 @@ export default function SettingsPage() {
             <h2 className="text-base font-semibold">Clear local data</h2>
           </div>
           <p className="text-sm text-ink-300/72">
-            Wipe locally stored launch history. This does NOT touch on-chain
+            Wipe locally stored launch history. This does NOT touch onchain
             tokens, only your browser's history list.
           </p>
           <Button variant="danger">Clear (mock)</Button>

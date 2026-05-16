@@ -47,7 +47,7 @@ export default function MemeCard({ meme, compact = false }: Props) {
         {!compact && (
           <>
             <ScorePill label="MC fit" value={meme.scores.memeCoinFit} />
-            <ScorePill label="On-chain" value={meme.scores.onchainRelevance} />
+            <ScorePill label="Onchain" value={meme.scores.onchainRelevance} />
             <ScorePill label="Timing" value={meme.scores.launchTiming} />
           </>
         )}

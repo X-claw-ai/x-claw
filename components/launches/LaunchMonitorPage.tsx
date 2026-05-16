@@ -130,7 +130,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
       {/* 03, Intelligence (most useful immediately after launch) */}
       <PhaseHeader
         index="03"
-        name="On-chain Intelligence"
+        name="Onchain Intelligence"
         tag="Supply, holders, creator wallet activity"
         icon={LineChart}
       />
@@ -161,7 +161,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
             <div className="text-sm font-semibold">Wallet tracker</div>
           </div>
           <p className="text-xs text-ink-300/65 mb-4">
-            Paste any wallet address to track its on-chain activity.
+            Paste any wallet address to track its onchain activity.
           </p>
           <WalletTrackingAgent />
         </div>
@@ -189,7 +189,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               ? `${tokenName} (${ticker}), post-launch update for X. Mint ${mint}.`
               : `Memecoin update for ${ticker}`
           }
-          defaultAudience="X-native crypto and meme coin community"
+          defaultAudience="X native crypto and meme coin community"
         />
       </div>
 

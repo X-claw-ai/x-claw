@@ -101,7 +101,7 @@ export default function XPostGeneratorAgent({
             <Textarea
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., Why on-chain agents need a Grok-native OS"
+              placeholder="e.g., Why onchain agents need a Grok native OS"
             />
           </Field>
           <Field label="Tone">
@@ -117,7 +117,7 @@ export default function XPostGeneratorAgent({
             <Input
               value={audience}
               onChange={(e) => setAudience(e.target.value)}
-              placeholder="X-native crypto and AI builders"
+              placeholder="X native crypto and AI builders"
             />
           </Field>
           <Field label="Number of standalone posts" hint="1–10">

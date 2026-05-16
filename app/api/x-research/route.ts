@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 //
 // REAL INTEGRATION (later):
 //   • X API v2 (recent search, trends, account lookup).
-//   • Combine with on-chain context from Solana RPC (or an indexer like
+//   • Combine with onchain context from Solana RPC (or an indexer like
 //     Helius / Birdeye / Dexscreener).
 //   • Cache results for 5–15 minutes per query to respect rate limits.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,22 +21,22 @@ export async function POST(req: Request) {
     );
   }
 
-  const topic = body.topic ?? "X-native crypto builders";
+  const topic = body.topic ?? "X native crypto builders";
 
   return NextResponse.json({
     ok: true,
     mock: true,
     topic,
     trendingNarratives: [
-      "On-chain agent OS",
-      "User-approved on-chain execution",
-      "X-native marketing workflows",
+      "Onchain agent OS",
+      "User-approved onchain execution",
+      "X native marketing workflows",
     ],
     relatedAccounts: [
       { handle: "@xai", note: "AI infra context" },
       { handle: "@solana", note: "Chain context" },
       { handle: "@dexscreener", note: "Market context" },
     ],
-    notes: "Replace with X API + on-chain indexer responses.",
+    notes: "Replace with X API + onchain indexer responses.",
   });
 }

@@ -17,7 +17,7 @@ const ENGINES: Engine[] = [
     name: "Attention",
     insight: "Memes are born on X. The agent watches first.",
     capabilities: [
-      "Real-time Meme Radar",
+      "Live Meme Radar",
       "Meme idea generation",
       "Narrative hooks, viral angles",
       "10 X launch posts per kit",
@@ -43,7 +43,7 @@ const ENGINES: Engine[] = [
   {
     num: "03",
     name: "Intelligence",
-    insight: "Alpha is on-chain. Read wallets, holders, liquidity, volume.",
+    insight: "Alpha is onchain. Read wallets, holders, liquidity, volume.",
     capabilities: [
       "Wallet tracking",
       "Holder analytics",
@@ -77,11 +77,11 @@ export default function EnginesSection() {
         <div className="max-w-3xl">
           <div className="eyebrow">Four engines, one agent</div>
           <h2 className="mt-3 text-display text-display-md text-balance">
-            X attention, community, on-chain, <span className="stamp">launch</span>.
+            X attention, community, onchain, <span className="stamp">launch</span>.
           </h2>
           <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
             Memecoins are born on X. Communities move on X. Alpha flows from
-            on-chain to X. KOKi is the first to wire all four into a single
+            onchain to X. KOKi is the first to wire all four into a single
             autonomous launch agent.
           </p>
         </div>

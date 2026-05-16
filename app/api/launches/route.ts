@@ -136,7 +136,7 @@ export async function GET(req: NextRequest) {
 /**
  * DELETE ?wallet=<pubkey>, clear all launch history rows for a wallet.
  *
- * On-chain tokens themselves are immutable, this only removes the rows
+ * Onchain tokens themselves are immutable, this only removes the rows
  * KOKi has tracked. The user's dashboard goes back to an empty state.
  *
  * Without Supabase, this still returns ok:true so the client can clear
