@@ -6,7 +6,7 @@ import { XClawWalletProvider } from "@/components/solana/WalletContext";
 
 const TITLE = "KOKi.ai, The Grok-native Meme Coin Launch Agent";
 const DESCRIPTION =
-  "KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch → Monitor.";
+  "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to Pump.fun launch.";
 
 export const metadata: Metadata = {
   title: TITLE,

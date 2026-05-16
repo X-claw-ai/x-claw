@@ -24,7 +24,18 @@ export default function Hero() {
           <span className="stamp">Launch.</span> Repeat.
         </h1>
 
-        <p className="mt-8 text-ink-300/80 text-lg md:text-xl leading-snug max-w-2xl font-medium text-balance">
+        {/* Positioning statement, the one-liner that explains what KOKi
+            actually does. Bigger and brighter than a subline because this
+            is the elevator pitch every visitor should read. */}
+        <p className="mt-9 text-ink-300 text-xl md:text-2xl leading-snug max-w-3xl font-bold text-balance">
+          An autonomous AI agent that detects viral memes on{" "}
+          <span className="text-koki-500">@X</span> and,{" "}
+          <span className="text-koki-500">with one click</span>, creates
+          everything from token concepts and launch kits to{" "}
+          <span className="text-koki-500">Pump.fun launch</span>.
+        </p>
+
+        <p className="mt-5 text-ink-400 text-base md:text-lg leading-snug max-w-2xl font-medium text-balance">
           Grok picks the next meme on X, drafts the launch kit, and ships it to
           Pump.fun. You sign once. Done.
         </p>
