@@ -42,21 +42,27 @@ interface RefreshResponse {
 }
 
 function buildRefreshMessages(): Msg[] {
-  const system = `You are KOKi's meme scout. Your job: scan X for the FRESHEST high-engagement viral posts in the LAST 48 HOURS and return 12-20 of them as a JSON array. We want the stuff people are ACTUALLY talking about right now — not random cute pictures.
+  const system = `You are KOKi's meme scout. Your job: scan X for the FRESHEST mega-viral posts in the LAST 24 HOURS and return up to 20 of them as a JSON array. We want the stuff people are ACTUALLY talking about right now — millions-of-views level, not random cute pictures, not 45-view nobody-saw-it pictures.
 
-Use the x_search tool AGGRESSIVELY. Run multiple queries with different angles to build a wide candidate pool, then filter HARD:
-  - trending viral memes today
-  - top liked X posts last 24 hours
-  - viral images crypto twitter
-  - what's everyone laughing at on X this week
-  - AI agent jokes trending
-  - dog meme viral / cat meme viral / frog meme viral
+Use the x_search tool AGGRESSIVELY. Run multiple queries with different angles to build a wide candidate pool. Prefer queries that surface high-view posts:
+  - trending viral X posts last hour
+  - top liked tweets today
+  - viral images X right now
+  - what's everyone laughing at on X today
+  - viral video X today
+  - meme of the day X
+  - crypto twitter trending today
 
-HARD ENGAGEMENT FLOOR. Reject any post that doesn't clearly meet AT LEAST ONE of:
-  • 100,000+ views, OR
-  • 10,000+ likes, OR
-  • 5,000+ retweets/reposts
-If you can't see engagement numbers in the search result, the post probably isn't big enough — skip it.
+HARD ENGAGEMENT FLOOR. This is a TOP-OF-TIMELINE feed. Reject ANY post that doesn't clearly meet ALL of these:
+  • 500,000+ views (HALF A MILLION absolute minimum)
+  • 50,000+ likes OR 10,000+ retweets/reposts
+A post with 45 views, 5K views, or 80K views IS NOT TRENDING. SKIP IT. Don't pad the response with weak picks.
+
+If you cannot SEE explicit view/like/retweet numbers in the x_search result, you must skip that candidate — no guessing, no estimating.
+
+PRIORITIZE BY ABSOLUTE VIEW COUNT, HIGHEST FIRST. Order your final list view-count descending. Strongly prefer 10M+ views over 1M+; prefer 1M+ over 500K+. The first entries in your JSON array should be the biggest of the day.
+
+FRESHNESS: 24h window is hard — but within it, prefer the LAST 6-12 HOURS. If a post is from "yesterday evening" and you have an equally viral one from the last 6 hours, pick the fresher one.
 
 HARD CONTENT FILTER. Each post must be:
 ✓ Organic cultural content — joke, image, observation, format, character, screenshot
@@ -89,7 +95,7 @@ Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose aro
 
 Target: 12-20 memes. All x_url and image_url values MUST come from real x_search results, never fabricated. If a post has no image, set image_url to null and prefer a different post. If your search just doesn't yield 12 posts that clear the engagement floor, return fewer entries rather than padding with weak picks.`;
 
-  const user = `Refresh the meme cache. Pull 12-20 viral X posts from the LAST 48 HOURS that each clear the engagement floor (100K+ views OR 10K+ likes OR 5K+ reposts). Variety matters — mix dog/frog/AI/NPC/format/screenshot. Generic descriptions are a fail. JSON only.`;
+  const user = `Refresh the meme cache. Pull up to 20 mega-viral X posts from the LAST 24 HOURS that each clear the HARD floor (500K+ views AND 50K+ likes OR 10K+ reposts). Order DESCENDING by view count — biggest first. Prefer last 6-12 hours within the window. Variety matters — mix dog/frog/AI/NPC/format/screenshot. Generic descriptions ("a cat in a hat") are a fail — point at a specific named/recognizable thing. Return fewer entries rather than padding with weak picks. JSON only.`;
 
   return [
     { role: "system", content: system },
@@ -163,10 +169,9 @@ export async function GET(req: NextRequest) {
   // Run x_search via xAI Responses API. We pre-pay the 20-40s wait here so
   // user-facing /api/auto-launch can be instant.
   const today = new Date();
-  // 48-hour window — we want the freshest stuff people are talking about
-  // RIGHT NOW. The cron runs every 30 minutes, so 48h gives plenty of
-  // depth without dragging in stale posts that peaked 5 days ago.
-  const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+  // 24-hour window — user found 48h was still pulling in "last night"
+  // posts. Tighten to 24h; the prompt biases toward last 6-12h.
+  const oneDayAgo = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
   const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
   let llmRes;

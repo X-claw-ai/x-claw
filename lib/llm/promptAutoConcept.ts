@@ -60,23 +60,31 @@ END EXCLUDE LIST.
 
 YOU HAVE THE x_search TOOL. USE IT — AGGRESSIVELY.
 
-STEP 1 — SEARCH WIDE, FILTER NARROW.
-Call x_search MULTIPLE TIMES with different queries to build a pool of 20-40 candidates from the LAST 48 HOURS ONLY (not 7 days, not 14 days — 48 hours, otherwise it isn't fresh). Run searches like:
-  - trending viral memes today
-  - top liked X posts last 24 hours
-  - what's everyone laughing at on X this week
-  - viral images crypto twitter
-  - AI agent jokes trending
-  - solana culture viral
-  - dog meme viral / cat meme viral / frog meme viral
-Then merge the results. Bigger pool = better odds of finding a true banger.
+STEP 1 — SEARCH WIDE, FILTER NARROW. FRESHEST FIRST.
+Call x_search MULTIPLE TIMES with different queries to build a pool of 30-50 candidates from the LAST 24 HOURS ONLY (not 7 days, not 14 days — 24 hours). Then within that pool, STRONGLY PREFER posts from the last 6-12 hours. A post from yesterday evening is already getting stale — anything fresher than that is the win.
 
-STEP 2 — HARD ENGAGEMENT FLOOR. Reject any post that doesn't clearly meet AT LEAST ONE of these:
-   • 100,000+ views, OR
-   • 10,000+ likes, OR
-   • 5,000+ retweets/reposts, OR
-   • is currently a top reply on a thread that itself has those numbers
-If you can't see numbers in the search result, the post probably isn't big enough — skip it. We want stuff people are ACTUALLY talking about, not a random post that happens to be cute.
+Sample queries to run:
+  - trending viral X posts last hour
+  - top liked tweets today
+  - viral images X right now
+  - what's everyone laughing at on X today
+  - viral video X today
+  - meme of the day X
+  - crypto twitter trending today
+  - AI agent jokes today
+  - dog viral today / cat viral today / frog meme today
+Merge results. Bigger pool = better odds of finding a true banger.
+
+DATE SANITY CHECK: Look at the posted_at / timestamp of every candidate. If it's older than 24 hours, drop it. If it's older than 6 hours but you have something equally viral from the last 6 hours, prefer the fresher one.
+
+STEP 2 — HARD ENGAGEMENT FLOOR. This is a hot-trending-only feed. Reject ANY post that doesn't CLEARLY meet ALL of these:
+   • **500,000+ views** (half a million absolute minimum — anything under this is not "trending", it's just a post)
+   • **50,000+ likes** OR 10,000+ retweets/reposts (organic engagement, not just impressions)
+If the post has only 45 views, only 5,000 views, only 80,000 views — IT IS NOT TRENDING. SKIP IT.
+If you cannot SEE explicit view/like/retweet numbers in the x_search result for a candidate post, you must skip it — you cannot guess, you cannot estimate, you cannot use vibes. NO NUMBERS VISIBLE = NO PICK.
+
+PRIORITIZE BY ABSOLUTE VIEW COUNT, HIGHEST FIRST.
+Order your eligible pool by view count descending. The strongest pick is the post with the MOST views that also clears the like/retweet bar. Prefer 10M+ views over 5M+, prefer 5M+ over 1M+, prefer 1M+ over 500K+. Going viral on X right now means tens of millions. Aim for those.
 
 STEP 3 — SPECIFICITY TEST. The summary you write MUST point at something concrete:
    ✓ A specific named character, animal, or persona ("Moo Deng the baby hippo", "the side-eye chihuahua", "the orange office cat employee #47")

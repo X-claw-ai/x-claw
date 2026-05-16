@@ -107,12 +107,14 @@ export async function POST(req: NextRequest) {
     // via XAI_MODEL_AUTO_CONCEPT for testing.
     const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
 
-    // 48-HOUR window. The user explicitly wants the FRESHEST viral content
-    // ("최신 소식, 조회수 엄청 많고 반응 핫한"), so a wide 14-day window pulls
-    // back posts that already peaked days ago. 48 hours forces Grok to dig
-    // into right-now-trending content.
+    // 24-HOUR window. The user kept catching "yesterday evening" posts
+    // in the 48h window — too stale. Tighten to last 24h and let the
+    // system prompt push toward the last 6-12h when results are dense
+    // enough. xAI's `from_date` is day-granular so we always pass
+    // yesterday-or-newer here; the FRESHNESS bias is enforced by the
+    // prompt itself.
     const today = new Date();
-    const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
@@ -130,9 +132,9 @@ export async function POST(req: NextRequest) {
       ...(wantLiveSearch || true
         ? {
             liveSearch: {
-              fromDate: isoDate(twoDaysAgo),
+              fromDate: isoDate(oneDayAgo),
               toDate: isoDate(today),
-              maxResults: 30, // bigger pool = better odds of clearing the engagement floor
+              maxResults: 40, // bigger pool — most candidates will fail the 500K-view floor
               enableImageUnderstanding: true,
             },
           }
