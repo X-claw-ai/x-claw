@@ -1,9 +1,13 @@
-// xAI image generation (Aurora — grok-2-image).
+// xAI image generation (Aurora).
 //
 // OpenAI-compatible /v1/images/generations endpoint. Reuses the same
 // XAI_API_KEY the text models use, so no extra env is needed.
+//
+// IMPORTANT: grok-2-image and grok-2-image-1212 were deprecated by xAI on
+// 2026-02-24. The current image model is the next-gen Aurora variant.
+// Override via XAI_IMAGE_MODEL if xAI ships a new ID we don't know yet.
 
-const DEFAULT_MODEL = process.env.XAI_IMAGE_MODEL || "grok-2-image-1212";
+const DEFAULT_MODEL = process.env.XAI_IMAGE_MODEL || "grok-image-2";
 const XAI_BASE_URL = process.env.XAI_BASE_URL || "https://api.x.ai/v1";
 
 export interface XAIImageRequest {
@@ -31,7 +35,19 @@ export async function callXAIImage(req: XAIImageRequest): Promise<XAIImageRespon
   // works without manual env tweaking.
   const candidateModels: string[] = [];
   if (req.model) candidateModels.push(req.model);
-  candidateModels.push(DEFAULT_MODEL, "grok-2-image", "grok-2-image-1212");
+  // Walk newest-known → older. The legacy 'grok-2-image' family was
+  // killed on 2026-02-24, kept at the end purely as a probe in case
+  // xAI brings it back or the account still has access.
+  candidateModels.push(
+    DEFAULT_MODEL,
+    "grok-image-2",
+    "grok-image-1",
+    "grok-image",
+    "aurora-1",
+    "aurora",
+    "grok-2-image-1212",
+    "grok-2-image",
+  );
   const tried = new Set<string>();
 
   let res: Response | undefined;
