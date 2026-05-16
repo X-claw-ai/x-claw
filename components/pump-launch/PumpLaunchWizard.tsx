@@ -1127,6 +1127,8 @@ function WalletStep({
         )}
       </div>
 
+      {!connected && <MobilePhantomDeepLink />}
+
       <div className="flex items-start gap-2 text-xs text-ink-300/65">
         <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-amber-300" />
         Mainnet uses real SOL. Make sure your wallet has at least 0.05 SOL before launching.
@@ -1135,6 +1137,70 @@ function WalletStep({
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack}>Back</Button>
         <Button onClick={onNext} disabled={!connected}>Continue</Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * MOBILE: Phantom + Solflare apps aren't browser extensions, so the
+ * standard wallet-adapter Connect button can't see them. This block
+ * detects mobile + missing Phantom injection, and shows a deep-link
+ * that opens the current site INSIDE Phantom's (or Solflare's) in-app
+ * browser, where the injected provider is available and the normal
+ * Connect flow works.
+ *
+ * Phantom URL scheme: https://phantom.app/ul/browse/<encoded-url>?ref=<encoded-ref>
+ * Solflare URL scheme: https://solflare.com/ul/v1/browse/<encoded-url>?ref=<encoded-ref>
+ */
+function MobilePhantomDeepLink() {
+  // Only render on the client and only on a mobile UA where Phantom
+  // hasn't injected window.solana yet (i.e. user is in Safari/Chrome,
+  // not already inside Phantom's in-app browser).
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ua = navigator.userAgent || "";
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(ua);
+    const hasPhantom =
+      typeof (window as unknown as { solana?: { isPhantom?: boolean } }).solana !==
+        "undefined" &&
+      Boolean(
+        (window as unknown as { solana?: { isPhantom?: boolean } }).solana?.isPhantom,
+      );
+    setShow(isMobile && !hasPhantom);
+  }, []);
+
+  if (!show) return null;
+
+  const here = typeof window !== "undefined" ? window.location.href : "";
+  const encoded = encodeURIComponent(here);
+  const phantomLink = `https://phantom.app/ul/browse/${encoded}?ref=${encoded}`;
+  const solflareLink = `https://solflare.com/ul/v1/browse/${encoded}?ref=${encoded}`;
+
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 space-y-2">
+      <div className="text-xs font-bold text-ink-300">
+        On mobile? Open this page inside your wallet app:
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <a
+          href={phantomLink}
+          className="inline-flex items-center justify-center gap-1.5 rounded-md bg-koki-500 text-[#0B0E11] px-3 py-2 text-xs font-extrabold hover:bg-koki-400"
+        >
+          Open in Phantom
+        </a>
+        <a
+          href={solflareLink}
+          className="inline-flex items-center justify-center gap-1.5 rounded-md border border-[var(--border-strong)] text-ink-300 px-3 py-2 text-xs font-extrabold hover:bg-[var(--surface-2)]"
+        >
+          Open in Solflare
+        </a>
+      </div>
+      <div className="text-[10px] text-ink-400">
+        Phantom and Solflare on mobile don&apos;t inject into Safari or Chrome. The
+        deep link opens this page in the wallet app&apos;s built-in browser, where
+        Connect Wallet works.
       </div>
     </div>
   );
