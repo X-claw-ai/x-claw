@@ -5,11 +5,15 @@ import {
   parseAutoConcept,
   type AutoConceptResult,
 } from "@/lib/llm/promptAutoConcept";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
-// Live X Search via the Responses API takes 30-90s end-to-end (Grok
-// plans → x_search runs → Grok summarizes results). On Vercel Pro plan
-// functions can run up to 300s; we set 180 so we have plenty of margin
-// without holding the lambda open longer than necessary.
+// Auto-pilot has two paths:
+//   1. FAST PATH (default) — read pre-warmed memes from public.cached_memes
+//      (refreshed every 30min by /api/cron/refresh-memes). Call Grok with
+//      that pool + ask it to pick + draft a concept. End-to-end ~10s.
+//   2. LIVE PATH (fallback) — if cache is empty or expired (e.g. first
+//      deploy, cron hasn't run yet), fall back to live x_search. That's
+//      the old 30-90s call. The 180s ceiling stays for this safety net.
 export const maxDuration = 180;
 export const runtime = "nodejs";
 
@@ -70,6 +74,35 @@ export async function POST(req: NextRequest) {
       model: "deterministic",
       fallbackReason: "no LLM provider configured (set XAI_API_KEY)",
     });
+  }
+
+  // ── FAST PATH: pre-warmed meme cache ─────────────────────────────────
+  // /api/cron/refresh-memes already paid the 30-90s x_search cost. Read
+  // the freshest rows and ask Grok to pick + draft a concept (5-10s, no
+  // search tool needed since the source posts are already on the table).
+  const cached = await readCachedMemes();
+  if (cached.length > 0) {
+    try {
+      const concept = await buildConceptFromCache(cached, walletPubkey);
+      return NextResponse.json<AutoLaunchResponse>({
+        ok: true,
+        concept,
+        provider: "xai-cache",
+        model: "grok-4.3",
+        liveSearchRequested: false,
+        citations: cached.map((m) => m.x_url),
+        debug: {
+          liveSearchEnvRaw: "cache",
+          hasXaiKey: Boolean(process.env.XAI_API_KEY),
+          providerAttempts: [],
+        },
+      });
+    } catch (err) {
+      console.warn(
+        `[auto-launch] cache path failed → live fallback: ${(err as Error).message}`,
+      );
+      // fall through to live x_search below
+    }
   }
 
   try {
@@ -179,6 +212,106 @@ export async function POST(req: NextRequest) {
       fallbackReason: msg,
     });
   }
+}
+
+// ── Cache helpers ──────────────────────────────────────────────────────
+
+interface CachedMeme {
+  x_url: string;
+  x_author: string;
+  image_url: string | null;
+  summary: string;
+  meme_angle: string | null;
+  engagement_score: number | null;
+}
+
+/** Read the freshest cached memes from Supabase. Empty array = cache miss. */
+async function readCachedMemes(): Promise<CachedMeme[]> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return [];
+  try {
+    const { data, error } = await sb
+      .from("cached_memes")
+      .select("x_url, x_author, image_url, summary, meme_angle, engagement_score")
+      .gt("expires_at", new Date().toISOString())
+      .order("engagement_score", { ascending: false, nullsFirst: false })
+      .limit(20);
+    if (error || !data) return [];
+    return data as CachedMeme[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Ask Grok to pick the strongest meme from the cached pool and draft a full
+ * memecoin concept around it. No x_search call — the candidate posts are
+ * already on the table, so this completes in 5-10s vs. 30-90s for live.
+ */
+async function buildConceptFromCache(
+  pool: CachedMeme[],
+  walletPubkey: string | undefined,
+): Promise<AutoConceptResult> {
+  const candidates = pool
+    .map(
+      (m, i) =>
+        `${i + 1}. ${m.x_author}\n   URL: ${m.x_url}\n   Image: ${m.image_url ?? "none"}\n   Summary: ${m.summary}\n   Angle: ${m.meme_angle ?? "n/a"}`,
+    )
+    .join("\n\n");
+
+  const system = `You are KOKi, the Grok-native meme coin launch agent. You'll be handed a curated list of viral X posts (already filtered for shill content and organic appeal). PICK the single strongest one and build a memecoin concept around it.
+
+Hard rules:
+- Safe and inoffensive. No real-person names. No politics. No copyrighted IP. No "guaranteed", "100x", "moon", "to-the-moon", or pump-promise language.
+- No partnership claims with X / xAI / Grok / Pump.fun / Solana — use "X-native" / "Solana-native" framing instead.
+- Ticker: 3-6 uppercase letters/numbers, memorable, NOT a real major ticker.
+- originXUrl + originXAuthor + originImageUrl MUST be copied verbatim from the candidate you picked. Never fabricate.
+- Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.
+
+Output schema:
+{
+  "idea": "1-2 sentence pitch of the token's narrative",
+  "tokenName": "TitleCase or single word — specific, not generic",
+  "ticker": "3-6 uppercase chars",
+  "theme": "short visual/narrative theme",
+  "audience": "the 2-3 X-native audiences this resonates with",
+  "launchStyle": "one of: fair-launch | hype-raid | stealth | community-led",
+  "reasoning": "1-2 sentences on why this concept fits X right now",
+  "originXUrl": "<copied from chosen candidate>",
+  "originXAuthor": "<copied from chosen candidate>",
+  "originImageUrl": "<copied from chosen candidate, or null>"
+}`;
+
+  const salt = Math.random().toString(36).slice(2, 8);
+  const user = `Pick ONE of these viral X posts and build a memecoin concept on top of it. Variety matters — go for the post that's most visually memorable, not the safest.\n\nCANDIDATES:\n\n${candidates}\n\nOutput JSON only. (request_id: ${salt})`;
+
+  const llmRes = await callLLM({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+    responseFormat: "json",
+    maxTokens: 600,
+    temperature: 0.9,
+    model: "grok-4.3",
+    feature: "auto-launch-cache",
+    walletPubkey,
+  });
+
+  const concept = parseAutoConcept(llmRes.content);
+
+  // Defensive: re-validate that the picked URLs actually exist in the pool we
+  // showed the model. If Grok hallucinated, fall back to the highest-ranked
+  // candidate's URLs.
+  const urlSet = new Set(pool.map((m) => m.x_url));
+  if (concept.originXUrl && !urlSet.has(concept.originXUrl)) {
+    const top = pool[0];
+    concept.originXUrl = top.x_url;
+    concept.originXAuthor = top.x_author;
+    concept.originImageUrl = top.image_url ?? undefined;
+  }
+
+  return concept;
 }
 
 /** Deterministic, X-native concept used when LLM is unavailable. */

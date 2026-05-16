@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/refresh-memes",
+      "schedule": "*/30 * * * *"
+    }
+  ],
+  "functions": {
+    "app/api/cron/refresh-memes/route.ts": {
+      "maxDuration": 180
+    },
+    "app/api/auto-launch/route.ts": {
+      "maxDuration": 180
+    },
+    "app/api/generate-launch-kit/route.ts": {
+      "maxDuration": 120
+    }
+  }
+}

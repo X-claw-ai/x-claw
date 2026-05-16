@@ -307,31 +307,9 @@ export default function PumpLaunchWizard() {
         ? `${c.idea}\n\nInspired by ${c.originXAuthor || "an X post"} — ${c.originXUrl}`
         : c.idea;
 
-      // Step 1: try to fetch the actual X post image FIRST. If Grok returned
-      // an originImageUrl, that's the real viral meme art — way better than
-      // an AI-generated approximation. Server-side proxy validates the host
-      // and returns a base64 data URL we can ship straight to Pump.fun IPFS.
-      let xImageDataUrl: string | null = null;
-      let xImageProvider: string | null = null;
-      if (c.originImageUrl) {
-        try {
-          const imgRes = await fetch(
-            `/api/fetch-x-image?url=${encodeURIComponent(c.originImageUrl)}`,
-          );
-          const imgData = (await imgRes.json()) as {
-            ok: boolean;
-            imageDataUrl?: string;
-            error?: string;
-          };
-          if (imgData.ok && imgData.imageDataUrl) {
-            xImageDataUrl = imgData.imageDataUrl;
-            xImageProvider = "x-post (original meme)";
-          }
-        } catch {
-          // Network error — fall back to AI generation below.
-        }
-      }
-
+      // Seed the concept BEFORE waiting on the parallel branches. The Review
+      // step's metadata (name/ticker/twitter URL) renders immediately while
+      // image + launch-kit are still generating.
       const seeded: ConceptInput = {
         ...DEFAULT,
         idea: ideaWithOrigin,
@@ -340,33 +318,76 @@ export default function PumpLaunchWizard() {
         theme: c.theme,
         audience: c.audience,
         launchStyle: c.launchStyle,
-        // Default the Pump.fun "twitter" field to the original meme URL so
-        // the on-chain token page links back to the source post. If Live
-        // Search didn't find one (originXUrl null), fall back to an X search
-        // URL for $TICKER — at least it's a link ABOUT this coin (people
-        // tagging it on X), not a generic project page. User can override on
-        // the Review step.
         twitterUrl: c.originXUrl ?? tickerSearchUrl(c.ticker),
-        // Pre-fill the logo with the real X post image when we managed to
-        // fetch it. Wizard's Review step then shows the original meme art
-        // as the token's eventual logo — no AI gen needed.
-        logoDataUrl: xImageDataUrl,
+        logoDataUrl: null, // filled in by whichever image branch wins below
       };
       setConcept(seeded);
       setOriginX(c.originXUrl ? { url: c.originXUrl, author: c.originXAuthor } : null);
       setAutoReasoning(c.reasoning);
-      if (xImageProvider) setLogoProvider(xImageProvider);
 
-      // Chain: launch-kit (text) → (logo image only if we don't already have
-      // the X image) — both run in series so Review lands ready-to-ship.
-      await runGenerate(seeded);
+      // ── Parallel fan-out ────────────────────────────────────────────────
+      // All three branches are independent — fire them at once instead of
+      // chaining. The slowest (usually launch-kit, 15-30s) becomes the wall
+      // clock, saving 15-40s vs. the old sequential flow.
+      //   1. fetch-x-image — pull the real viral meme art (1-5s)
+      //   2. runGenerate   — write the full launch kit (15-30s)
+      //   3. runGenerateLogo — Aurora fallback, only used if (1) returned nothing
 
-      if (!xImageDataUrl) {
-        // No real X image → fall back to AI-generated logo so Pump.fun still
-        // has SOMETHING visual at upload time.
-        const logoPrompt = `Square logo for a Solana memecoin "${seeded.tokenName}" ($${seeded.ticker}). Theme: ${seeded.theme}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness, no copyrighted IP.`;
-        await runGenerateLogo(logoPrompt);
+      // 1. Real X meme image (preferred logo source).
+      const xImagePromise: Promise<string | null> = c.originImageUrl
+        ? fetch(`/api/fetch-x-image?url=${encodeURIComponent(c.originImageUrl)}`)
+            .then((r) => r.json())
+            .then((d: { ok: boolean; imageDataUrl?: string }) =>
+              d.ok && d.imageDataUrl ? d.imageDataUrl : null,
+            )
+            .catch(() => null)
+        : Promise.resolve(null);
+
+      // 2. Launch kit (text). Runs in parallel — uses the seeded concept.
+      const kitPromise = runGenerate(seeded);
+
+      // 3. Aurora logo (backup). Always runs so we have a fallback ready by
+      // the time the X-image branch resolves. If X image succeeds we discard
+      // this result; the credits are the tradeoff for never adding a
+      // sequential 10-20s wait after fetch-x-image fails.
+      const logoPrompt = `Square logo for a Solana memecoin "${seeded.tokenName}" ($${seeded.ticker}). Theme: ${seeded.theme}. Style: vector clean lines, bold meme aesthetic, no text, no real-person likeness, no copyrighted IP.`;
+      const auroraPromise: Promise<string | null> = (async () => {
+        try {
+          const r = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: logoPrompt,
+              walletPubkey: publicKey ? publicKey.toBase58() : undefined,
+              feature: "auto-pilot-fallback-logo",
+              ticker: seeded.ticker,
+            }),
+          });
+          const d = (await r.json()) as { ok: boolean; imageDataUrl?: string };
+          return d.ok && d.imageDataUrl ? d.imageDataUrl : null;
+        } catch {
+          return null;
+        }
+      })();
+
+      // Pick the image as soon as it's available: prefer the real X meme,
+      // fall back to Aurora. Both promises run concurrently; we don't have
+      // to wait on both — the moment X image returns (and is truthy) we
+      // commit it, and the Aurora result quietly settles unused.
+      const xImageDataUrl = await xImagePromise;
+      if (xImageDataUrl) {
+        setField("logoDataUrl", xImageDataUrl);
+        setLogoProvider("x-post (original meme)");
+      } else {
+        const auroraData = await auroraPromise;
+        if (auroraData) {
+          setField("logoDataUrl", auroraData);
+          setLogoProvider("aurora");
+        }
       }
+
+      // Make sure the kit promise also lands before we mark auto-pilot done.
+      await kitPromise;
     } catch (err) {
       setFallbackReason(err instanceof Error ? err.message : "Auto-pilot failed");
     } finally {
