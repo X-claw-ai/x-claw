@@ -120,7 +120,10 @@ export async function POST(req: NextRequest) {
     const llmRes = await callLLM({
       messages: buildAutoConceptMessages({ excludeXUrls: excludeXUrls }),
       responseFormat: "json",
-      maxTokens: 800,
+      // 1500 (was 800) to give Grok room to emit the full JSON shape after
+      // walking 30-50 candidates through the priority order. Truncated JSON
+      // = parseAutoConcept throws = mock fallback. Reproduced once in prod.
+      maxTokens: 1500,
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
       model: searchModel,
       feature: "auto-launch",
@@ -141,7 +144,18 @@ export async function POST(req: NextRequest) {
         : {}),
     });
 
-    const concept = parseAutoConcept(llmRes.content);
+    let concept: AutoConceptResult;
+    try {
+      concept = parseAutoConcept(llmRes.content);
+    } catch (parseErr) {
+      // Surface the actual Grok output so we can see WHY parse failed
+      // (truncated? prose explanation? missing fields?). Without this log
+      // the 200-with-mock looked like a successful run from outside.
+      console.error(
+        `[auto-launch] parseAutoConcept failed: ${(parseErr as Error).message}\nraw Grok content (first 1500 chars):\n${(llmRes.content || "").slice(0, 1500)}`,
+      );
+      throw parseErr;
+    }
 
     // Hard dedup check, if Grok ignored the exclude list and re-picked a
     // URL that's already taken (launched OR reserved), refuse to anchor on
