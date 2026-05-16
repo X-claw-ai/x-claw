@@ -7,13 +7,14 @@ import FinalCTA from "@/components/landing/FinalCTA";
 
 // KOKi, single-product memecoin launch agent.
 //
-// Pump.fun-style ordering: live token gallery first (above the fold so
-// visitors see real shipped coins immediately), THEN the explanation
-// of what KOKi is. Lets the product prove itself before the pitch.
+// Hero-first ordering: headline + one-line pitch sets the frame above
+// the fold, THEN live token gallery as immediate social proof, THEN the
+// deeper sections. The visitor reads what the product IS before seeing
+// what it ships.
 //
 // Sections (top → bottom):
-//   1. LiveLaunches      , live mcap + bonding from Pump.fun (social proof)
-//   2. Hero              , headline + tagline + 4-phase strip
+//   1. Hero              , headline + tagline + 4-phase strip
+//   2. LiveLaunches      , live mcap + bonding from Pump.fun (social proof)
 //   3. Attention Layer   , "Most launch tools wait for an idea"
 //   4. Engines           , Attention / Community / Intelligence / Execution
 //   5. Safety            , Agent prepares, User approves, Wallet signs, Launches
@@ -21,8 +22,8 @@ import FinalCTA from "@/components/landing/FinalCTA";
 export default function LandingPage() {
   return (
     <>
-      <LiveLaunchesSection />
       <Hero />
+      <LiveLaunchesSection />
       <AttentionLayerSection />
       <EnginesSection />
       <SafetySection />
