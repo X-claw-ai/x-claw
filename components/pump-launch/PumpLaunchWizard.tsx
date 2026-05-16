@@ -516,6 +516,16 @@ export default function PumpLaunchWizard() {
         metadataUri: result.metadataUri,
         devBuyInSol: result.devBuyInSol,
         walletPubkey: publicKey.toBase58(),
+        // Track the X post we anchored on so /api/auto-launch can hard-exclude
+        // it from future Grok picks. originX comes from the Auto-pilot path;
+        // manual launches and Radar-prefilled launches that have a concept
+        // twitterUrl pointing at a real X status get tracked too.
+        sourceXUrl:
+          originX?.url ??
+          (typeof concept?.twitterUrl === "string" &&
+          /^https?:\/\/(?:x\.com|twitter\.com)\/[^/\s]+\/status\/\d+/.test(concept.twitterUrl)
+            ? concept.twitterUrl.replace("twitter.com", "x.com")
+            : undefined),
       });
 
       setLaunchPhase("done");

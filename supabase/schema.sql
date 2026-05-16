@@ -173,10 +173,16 @@ create table if not exists public.launches_v1 (
   metadata_uri text,
   dev_buy_sol numeric,
   mock boolean not null default false,
+  -- URL of the viral X post this token was anchored on (Auto-pilot or manual
+  -- input). /api/auto-launch reads this to build a HARD-EXCLUDE LIST so no
+  -- two KOKi-shipped tokens ever come from the same source post — strict
+  -- dedup across all wallets.
+  source_x_url text,
   created_at timestamptz not null default now()
 );
 create index if not exists launches_v1_wallet_idx on public.launches_v1 (wallet_pubkey);
 create index if not exists launches_v1_created_idx on public.launches_v1 (created_at desc);
+create index if not exists launches_v1_source_x_url_idx on public.launches_v1 (source_x_url) where source_x_url is not null;
 
 -- Cached Real-time Meme Radar signals (Detect → Analyze inputs).
 create table if not exists public.radar_signals (

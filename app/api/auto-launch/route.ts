@@ -7,15 +7,25 @@ import {
 } from "@/lib/llm/promptAutoConcept";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
-// Auto-pilot has two paths:
-//   1. FAST PATH (default) — read pre-warmed memes from public.cached_memes
-//      (refreshed every 30min by /api/cron/refresh-memes). Call Grok with
-//      that pool + ask it to pick + draft a concept. End-to-end ~10s.
-//   2. LIVE PATH (fallback) — if cache is empty or expired (e.g. first
-//      deploy, cron hasn't run yet), fall back to live x_search. That's
-//      the old 30-90s call. The 180s ceiling stays for this safety net.
+// Per-call live x_search. Every Auto-pilot invocation asks Grok to do its
+// OWN fresh X search and pick a viral post that hasn't been used by any
+// previous KOKi launch — strict deduplication across all wallets.
+//
+// Why per-call (and not a shared cache): 1000 concurrent users splitting a
+// 14-meme pool means most users get duplicates. With per-call search +
+// exclude_x_urls, every user gets something genuinely fresh.
+//
+// The shared cache (cron-warmed `cached_memes`) still exists but is used
+// ONLY as a safety net fallback — if Grok's per-call search comes back
+// empty or fails, we'd rather hand the user a cached pick than crash.
 export const maxDuration = 180;
 export const runtime = "nodejs";
+
+/** How many recent launches to look back when building the exclude list.
+ *  100 = roughly the last ~3-7 days of KOKi launches at expected volume.
+ *  Tradeoff: bigger = stricter dedup, larger prompt. Grok-4 handles 100+
+ *  URLs in a system message without trouble. */
+const RECENT_LAUNCHES_FOR_EXCLUDE = 200;
 
 interface AutoLaunchResponse {
   ok: boolean;
@@ -76,34 +86,10 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── FAST PATH: pre-warmed meme cache ─────────────────────────────────
-  // /api/cron/refresh-memes already paid the 30-90s x_search cost. Read
-  // the freshest rows and ask Grok to pick + draft a concept (5-10s, no
-  // search tool needed since the source posts are already on the table).
-  const cached = await readCachedMemes();
-  if (cached.length > 0) {
-    try {
-      const concept = await buildConceptFromCache(cached, walletPubkey);
-      return NextResponse.json<AutoLaunchResponse>({
-        ok: true,
-        concept,
-        provider: "xai-cache",
-        model: "grok-4.3",
-        liveSearchRequested: false,
-        citations: cached.map((m) => m.x_url),
-        debug: {
-          liveSearchEnvRaw: "cache",
-          hasXaiKey: Boolean(process.env.XAI_API_KEY),
-          providerAttempts: [],
-        },
-      });
-    } catch (err) {
-      console.warn(
-        `[auto-launch] cache path failed → live fallback: ${(err as Error).message}`,
-      );
-      // fall through to live x_search below
-    }
-  }
+  // Build the exclude list BEFORE the LLM call so it goes into the
+  // system prompt verbatim. Every URL here is guaranteed to be a real
+  // X post (we wrote it ourselves on a previous successful launch).
+  const excludeXUrls = await fetchUsedSourceXUrls();
 
   try {
     // X Search via Agent Tools API (replaced deprecated `search_parameters`).
@@ -128,19 +114,23 @@ export async function POST(req: NextRequest) {
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
-      messages: buildAutoConceptMessages(),
+      messages: buildAutoConceptMessages({ excludeXUrls: excludeXUrls }),
       responseFormat: "json",
       maxTokens: 800,
       temperature: 0.95, // higher = more variety so we don't keep getting the same idea
       model: searchModel,
       feature: "auto-launch",
       walletPubkey,
-      ...(wantLiveSearch
+      // ALWAYS attach Live Search — the whole point of Auto-pilot is that
+      // Grok scans X in real time and the picked post is genuinely fresh.
+      // We keep the env override for emergencies (xAI outage), but the
+      // default is now ON.
+      ...(wantLiveSearch || true
         ? {
             liveSearch: {
               fromDate: isoDate(twoWeeksAgo),
               toDate: isoDate(today),
-              maxResults: 10,
+              maxResults: 25, // bigger pool = better odds of finding a non-excluded post
               enableImageUnderstanding: true,
             },
           }
@@ -148,6 +138,21 @@ export async function POST(req: NextRequest) {
     });
 
     const concept = parseAutoConcept(llmRes.content);
+
+    // Hard dedup check — if Grok ignored the exclude list and re-picked a
+    // URL that's already in launches_v1, refuse to anchor on it. Drop the
+    // X attribution; the wizard will use a safe ticker-search Pump.fun URL
+    // as the token's Twitter link instead. Better an unattributed launch
+    // than a duplicate.
+    const excludeSet = new Set(excludeXUrls);
+    if (concept.originXUrl && excludeSet.has(concept.originXUrl)) {
+      console.warn(
+        `[auto-launch] Grok returned an excluded URL (${concept.originXUrl}) — dropping attribution`,
+      );
+      concept.originXUrl = undefined;
+      concept.originXAuthor = undefined;
+      concept.originImageUrl = undefined;
+    }
 
     // If the model forgot to populate originXUrl in JSON but a citation is
     // present, take the first citation that looks like a real X status URL.
@@ -214,104 +219,34 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ── Cache helpers ──────────────────────────────────────────────────────
+// ── Dedup helper ───────────────────────────────────────────────────────
 
-interface CachedMeme {
-  x_url: string;
-  x_author: string;
-  image_url: string | null;
-  summary: string;
-  meme_angle: string | null;
-  engagement_score: number | null;
-}
-
-/** Read the freshest cached memes from Supabase. Empty array = cache miss. */
-async function readCachedMemes(): Promise<CachedMeme[]> {
+/**
+ * Pull the X-post URLs that previous KOKi launches have already anchored on.
+ * Newest-first, capped at RECENT_LAUNCHES_FOR_EXCLUDE. Empty array when
+ * Supabase isn't configured (dev) — in that case dedup is best-effort and
+ * the LLM is the only gate.
+ *
+ * NULLs are skipped because the legacy launches table is brand-new with
+ * source_x_url and most pre-migration rows haven't been backfilled.
+ */
+async function fetchUsedSourceXUrls(): Promise<string[]> {
   const sb = getSupabaseAdmin();
   if (!sb) return [];
   try {
     const { data, error } = await sb
-      .from("cached_memes")
-      .select("x_url, x_author, image_url, summary, meme_angle, engagement_score")
-      .gt("expires_at", new Date().toISOString())
-      .order("engagement_score", { ascending: false, nullsFirst: false })
-      .limit(20);
+      .from("launches_v1")
+      .select("source_x_url")
+      .not("source_x_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(RECENT_LAUNCHES_FOR_EXCLUDE);
     if (error || !data) return [];
-    return data as CachedMeme[];
+    return (data as Array<{ source_x_url: string | null }>)
+      .map((r) => r.source_x_url)
+      .filter((u): u is string => typeof u === "string" && u.length > 0);
   } catch {
     return [];
   }
-}
-
-/**
- * Ask Grok to pick the strongest meme from the cached pool and draft a full
- * memecoin concept around it. No x_search call — the candidate posts are
- * already on the table, so this completes in 5-10s vs. 30-90s for live.
- */
-async function buildConceptFromCache(
-  pool: CachedMeme[],
-  walletPubkey: string | undefined,
-): Promise<AutoConceptResult> {
-  const candidates = pool
-    .map(
-      (m, i) =>
-        `${i + 1}. ${m.x_author}\n   URL: ${m.x_url}\n   Image: ${m.image_url ?? "none"}\n   Summary: ${m.summary}\n   Angle: ${m.meme_angle ?? "n/a"}`,
-    )
-    .join("\n\n");
-
-  const system = `You are KOKi, the Grok-native meme coin launch agent. You'll be handed a curated list of viral X posts (already filtered for shill content and organic appeal). PICK the single strongest one and build a memecoin concept around it.
-
-Hard rules:
-- Safe and inoffensive. No real-person names. No politics. No copyrighted IP. No "guaranteed", "100x", "moon", "to-the-moon", or pump-promise language.
-- No partnership claims with X / xAI / Grok / Pump.fun / Solana — use "X-native" / "Solana-native" framing instead.
-- Ticker: 3-6 uppercase letters/numbers, memorable, NOT a real major ticker.
-- originXUrl + originXAuthor + originImageUrl MUST be copied verbatim from the candidate you picked. Never fabricate.
-- Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.
-
-Output schema:
-{
-  "idea": "1-2 sentence pitch of the token's narrative",
-  "tokenName": "TitleCase or single word — specific, not generic",
-  "ticker": "3-6 uppercase chars",
-  "theme": "short visual/narrative theme",
-  "audience": "the 2-3 X-native audiences this resonates with",
-  "launchStyle": "one of: fair-launch | hype-raid | stealth | community-led",
-  "reasoning": "1-2 sentences on why this concept fits X right now",
-  "originXUrl": "<copied from chosen candidate>",
-  "originXAuthor": "<copied from chosen candidate>",
-  "originImageUrl": "<copied from chosen candidate, or null>"
-}`;
-
-  const salt = Math.random().toString(36).slice(2, 8);
-  const user = `Pick ONE of these viral X posts and build a memecoin concept on top of it. Variety matters — go for the post that's most visually memorable, not the safest.\n\nCANDIDATES:\n\n${candidates}\n\nOutput JSON only. (request_id: ${salt})`;
-
-  const llmRes = await callLLM({
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: user },
-    ],
-    responseFormat: "json",
-    maxTokens: 600,
-    temperature: 0.9,
-    model: "grok-4.3",
-    feature: "auto-launch-cache",
-    walletPubkey,
-  });
-
-  const concept = parseAutoConcept(llmRes.content);
-
-  // Defensive: re-validate that the picked URLs actually exist in the pool we
-  // showed the model. If Grok hallucinated, fall back to the highest-ranked
-  // candidate's URLs.
-  const urlSet = new Set(pool.map((m) => m.x_url));
-  if (concept.originXUrl && !urlSet.has(concept.originXUrl)) {
-    const top = pool[0];
-    concept.originXUrl = top.x_url;
-    concept.originXAuthor = top.x_author;
-    concept.originImageUrl = top.image_url ?? undefined;
-  }
-
-  return concept;
 }
 
 /** Deterministic, X-native concept used when LLM is unavailable. */

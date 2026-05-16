@@ -30,8 +30,33 @@ export interface AutoConceptResult {
   originImageUrl?: string;
 }
 
-export function buildAutoConceptMessages(): Msg[] {
+export interface AutoConceptPromptOptions {
+  /**
+   * X-post URLs that previous KOKi launches have already anchored on. The
+   * model MUST NOT pick any of these — every KOKi-shipped token must come
+   * from a different X post. Passed verbatim into the system prompt as a
+   * hard-exclude list.
+   */
+  excludeXUrls?: string[];
+}
+
+export function buildAutoConceptMessages(opts: AutoConceptPromptOptions = {}): Msg[] {
+  const exclude = (opts.excludeXUrls ?? []).filter(Boolean);
+  // Truncate to keep prompt size sane. 200 URLs ≈ 12-14 KB which is fine
+  // for grok-4.3's window but bloats every call — cap at 200 of the most
+  // recent (the caller is responsible for ordering newest-first).
+  const excludeList = exclude.slice(0, 200);
+
+  const excludeBlock =
+    excludeList.length === 0
+      ? "(no previous launches yet — full freedom)"
+      : excludeList.map((u) => `- ${u}`).join("\n");
+
   const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: pick ONE concrete memecoin concept that's resonating on X RIGHT NOW — built on top of an ORGANIC cultural meme, not someone else's already-launched token.
+
+⛔ HARD-EXCLUDE LIST — these X posts have ALREADY been used as the origin of a previous KOKi launch. They are PERMANENTLY OFF-LIMITS. If your search returns any of these, IGNORE that result and search for something different. Never pick from this list. Never pick anything visually identical to these (same office cats, same dog at the same location, etc. — the post must be a different post about a different scene).
+${excludeBlock}
+END EXCLUDE LIST.
 
 YOU HAVE THE x_search TOOL. USE IT. Steps:
 1. Call x_search to find what's trending in meme / crypto-twitter / AI-agent / Solana culture in the last 14 days. PREFER posts that have an attached image — the visual IS the meme.

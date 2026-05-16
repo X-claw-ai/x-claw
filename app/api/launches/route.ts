@@ -13,6 +13,13 @@ interface LaunchInsert {
   metadataUri?: string;
   devBuyInSol?: number;
   mock?: boolean;
+  /**
+   * URL of the originating viral X post that inspired this token, when
+   * known. Recorded so /api/auto-launch can hard-exclude it from future
+   * Grok picks — no two KOKi-shipped tokens should ever come from the
+   * same X post (deduplication across all wallets).
+   */
+  sourceXUrl?: string;
 }
 
 /**
@@ -61,6 +68,7 @@ export async function POST(req: NextRequest) {
         metadata_uri: body.metadataUri ?? null,
         dev_buy_sol: body.devBuyInSol ?? null,
         mock: body.mock ?? false,
+        source_x_url: body.sourceXUrl ?? null,
       },
       { onConflict: "mint_pubkey" },
     )

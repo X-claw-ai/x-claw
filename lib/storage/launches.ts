@@ -18,6 +18,12 @@ export interface SavedLaunch extends LaunchRecord {
   devBuyInSol?: number;
   /** signer wallet pubkey at time of launch */
   walletPubkey?: string;
+  /**
+   * URL of the viral X post this token was anchored on, when the launch
+   * came from Auto-pilot. Persisted server-side so /api/auto-launch can
+   * exclude this URL from future Grok picks (global dedup).
+   */
+  sourceXUrl?: string;
 }
 
 export function readLaunches(): SavedLaunch[] {
@@ -61,6 +67,9 @@ export function saveLaunch(rec: SavedLaunch) {
         metadataUri: rec.metadataUri,
         devBuyInSol: rec.devBuyInSol,
         mock: rec.mock ?? false,
+        // Anchor X-post URL — lets /api/auto-launch hard-exclude this on
+        // future Grok picks so no two KOKi tokens come from the same post.
+        sourceXUrl: rec.sourceXUrl,
       }),
     }).catch(() => {
       /* ignore — localStorage already has the record */
