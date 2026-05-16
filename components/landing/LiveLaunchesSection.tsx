@@ -54,9 +54,6 @@ export default function LiveLaunchesSection() {
       <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 md:pt-20 md:pb-24">
         <div className="flex items-end justify-between gap-4 mb-10 flex-wrap">
           <div>
-            <div className="eyebrow !text-[10px] mb-2">
-              Live, KOKi-shipped tokens
-            </div>
             <h2 className="text-display text-display-md text-balance">
               Real launches.
               <br />
