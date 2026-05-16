@@ -45,7 +45,7 @@ export default function LiveLaunchesSection() {
   }, []);
 
   // Hide the section entirely when there's nothing to show. The landing
-  // page shouldn't tease an empty board — it's better to skip the section
+  // page shouldn't tease an empty board, it's better to skip the section
   // than to render a "no launches yet" tile that signals dead product.
   if (items !== null && items.length === 0) return null;
 
@@ -63,8 +63,8 @@ export default function LiveLaunchesSection() {
               <span className="opacity-60">Real wallets. Real markets.</span>
             </h2>
             <p className="mt-4 text-ink-300/80 text-base md:text-lg leading-snug max-w-xl font-medium">
-              Every memecoin shipped through the KOKi agent — across all
-              wallets — with live market cap and bonding-curve progress
+              Every memecoin shipped through the KOKi agent, across all
+              wallets, with live market cap and bonding-curve progress
               straight from Pump.fun.
             </p>
           </div>
@@ -169,7 +169,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
-            {stats ? formatMcUsd(stats.marketCapUsd) : "—"}
+            {stats ? formatMcUsd(stats.marketCapUsd) : "-"}
           </span>
         </div>
         {stats && stats.bondingProgress !== null && (

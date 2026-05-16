@@ -3,7 +3,7 @@ import { Rocket } from "lucide-react";
 import PageHeader from "@/components/shell/PageHeader";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 
-// "My Launches" — wallet-scoped Pump.fun-style gallery of every memecoin
+// "My Launches", wallet-scoped Pump.fun-style gallery of every memecoin
 // THIS user has shipped via the KOKi agent. Mirrors the public /launches
 // view, but filtered to the connected wallet's own history. Stats card
 // strip stays at the top for at-a-glance context.

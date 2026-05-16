@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // IPFS upload. Done server-side because:
 //   1. The browser would hit CORS on pbs.twimg.com.
 //   2. Doing the fetch on the server lets us validate the URL host before
-//      ever touching it — the client can't trick us into proxying arbitrary
+//      ever touching it, the client can't trick us into proxying arbitrary
 //      content from the open web.
 //
 // Used by the auto-pilot flow: when Grok's x_search returns an originImageUrl,
@@ -21,7 +21,7 @@ const ALLOWED_HOSTS = new Set([
   "video.twimg.com",
 ]);
 
-// Cap response size — Pump.fun IPFS rejects huge files anyway, and we don't
+// Cap response size, Pump.fun IPFS rejects huge files anyway, and we don't
 // want to blow up the lambda memory if Grok hands us a giant URL.
 const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 

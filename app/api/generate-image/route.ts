@@ -7,7 +7,7 @@ interface GenerateImageBody {
   prompt: string;
   walletPubkey?: string;
   feature?: string; // for usage tracking, e.g. "auto-launch" / "manual-logo"
-  /** Optional ticker — used when both real image APIs fail, so the
+  /** Optional ticker, used when both real image APIs fail, so the
    *  visual fallback at least shows the user the ticker on an orange tile. */
   ticker?: string;
 }
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-/** Visible SVG placeholder — orange tile with ticker in heavy black type. */
+/** Visible SVG placeholder, orange tile with ticker in heavy black type. */
 function renderSvgFallback(ticker: string): string {
   const safeTicker = ticker.replace(/[<>&"']/g, "");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">

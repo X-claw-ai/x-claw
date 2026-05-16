@@ -2,7 +2,7 @@ import PageHeader from "@/components/shell/PageHeader";
 import LaunchMonitorPage from "@/components/launches/LaunchMonitorPage";
 import { PhaseProgress } from "@/components/ui/PhaseProgress";
 
-// /launches/[mint] — Phase 05 (Monitor) of the agent loop.
+// /launches/[mint], Phase 05 (Monitor) of the agent loop.
 export default function LaunchByMintPage({
   params,
 }: {

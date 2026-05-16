@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 // MVP: issues a mock session token for a wallet address. No verification.
 //
 // REAL INTEGRATION (later):
-//   • Sign-In With Solana (SIWS) — server issues a nonce, client signs it,
+//   • Sign-In With Solana (SIWS), server issues a nonce, client signs it,
 //     server verifies signature and address, then sets an httpOnly session
 //     cookie. Use a JWT or opaque token tied to user/wallet pair.
 //   • Mirror with EIP-4361 if you add EVM chains later.

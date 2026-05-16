@@ -9,14 +9,14 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 // Per-call live x_search. Every Auto-pilot invocation asks Grok to do its
 // OWN fresh X search and pick a viral post that hasn't been used by any
-// previous KOKi launch — strict deduplication across all wallets.
+// previous KOKi launch, strict deduplication across all wallets.
 //
 // Why per-call (and not a shared cache): 1000 concurrent users splitting a
 // 14-meme pool means most users get duplicates. With per-call search +
 // exclude_x_urls, every user gets something genuinely fresh.
 //
 // The shared cache (cron-warmed `cached_memes`) still exists but is used
-// ONLY as a safety net fallback — if Grok's per-call search comes back
+// ONLY as a safety net fallback, if Grok's per-call search comes back
 // empty or fails, we'd rather hand the user a cached pick than crash.
 export const maxDuration = 180;
 export const runtime = "nodejs";
@@ -62,7 +62,7 @@ interface AutoLaunchResponse {
  * paste straight into its form, then immediately generate the launch kit.
  *
  * Body (optional):
- *   { walletPubkey?: string }   — for usage tracking only
+ *   { walletPubkey?: string }  , for usage tracking only
  */
 export async function POST(req: NextRequest) {
   let walletPubkey: string | undefined;
@@ -88,13 +88,13 @@ export async function POST(req: NextRequest) {
 
   // Build the exclude list BEFORE the LLM call so it goes into the
   // system prompt verbatim. UNION of: already-launched URLs (permanent
-  // exclusion) and reserved URLs (30-min TTL — a concurrent Auto-pilot
+  // exclusion) and reserved URLs (30-min TTL, a concurrent Auto-pilot
   // call just picked this and hasn't finished signing yet).
   const excludeXUrls = await fetchUnavailableXUrls();
 
   try {
     // X Search via Agent Tools API (replaced deprecated `search_parameters`).
-    // Default OFF for the same reason — not every xAI account/model supports
+    // Default OFF for the same reason, not every xAI account/model supports
     // it, and a 4xx here triggers a fallback to OpenAI which can't search X.
     // Opt-in via XAI_LIVE_SEARCH env. Lenient parsing: any truthy variant
     // ("on" / "true" / "1" / "yes") enables it.
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
 
     // 24-HOUR window. The user kept catching "yesterday evening" posts
-    // in the 48h window — too stale. Tighten to last 24h and let the
+    // in the 48h window, too stale. Tighten to last 24h and let the
     // system prompt push toward the last 6-12h when results are dense
     // enough. xAI's `from_date` is day-granular so we always pass
     // yesterday-or-newer here; the FRESHNESS bias is enforced by the
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       model: searchModel,
       feature: "auto-launch",
       walletPubkey,
-      // ALWAYS attach Live Search — the whole point of Auto-pilot is that
+      // ALWAYS attach Live Search, the whole point of Auto-pilot is that
       // Grok scans X in real time and the picked post is genuinely fresh.
       // We keep the env override for emergencies (xAI outage), but the
       // default is now ON.
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
             liveSearch: {
               fromDate: isoDate(oneDayAgo),
               toDate: isoDate(today),
-              maxResults: 40, // bigger pool — most candidates will fail the 500K-view floor
+              maxResults: 40, // bigger pool, most candidates will fail the 500K-view floor
               enableImageUnderstanding: true,
             },
           }
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     const concept = parseAutoConcept(llmRes.content);
 
-    // Hard dedup check — if Grok ignored the exclude list and re-picked a
+    // Hard dedup check, if Grok ignored the exclude list and re-picked a
     // URL that's already taken (launched OR reserved), refuse to anchor on
     // it. Drop the X attribution; the wizard will use a safe ticker-search
     // Pump.fun URL as the token's Twitter link instead. Better an
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
     const excludeSet = new Set(excludeXUrls);
     if (concept.originXUrl && excludeSet.has(concept.originXUrl)) {
       console.warn(
-        `[auto-launch] Grok returned an excluded URL (${concept.originXUrl}) — dropping attribution`,
+        `[auto-launch] Grok returned an excluded URL (${concept.originXUrl}), dropping attribution`,
       );
       concept.originXUrl = undefined;
       concept.originXAuthor = undefined;
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
 
     // Reserve the URL IMMEDIATELY so the next concurrent caller (within
     // the next 30 minutes) won't see it as available. The reservation is
-    // fire-and-forget — we don't await it before returning the response.
+    // fire-and-forget, we don't await it before returning the response.
     // If the user completes their launch, /api/launches POST writes the
     // URL into launches_v1 (permanent). If they abandon, the 30-min TTL
     // sweeps it.
@@ -185,17 +185,17 @@ export async function POST(req: NextRequest) {
     // contract, pump.fun link, dexscreener, base58 mint address, "$TICKER"
     // mentions, "fair launch live"), the post probably already has its own
     // coin and our token's Twitter button would point at that coin's
-    // promo — bad look. Drop the originXUrl in that case so the token
+    // promo, bad look. Drop the originXUrl in that case so the token
     // falls back to the safe ticker-search URL on Pump.fun.
     //
     // We only see what the model wrote in `idea` / `reasoning` though, not
-    // the post body itself — so check those fields and the URL itself for
+    // the post body itself, so check those fields and the URL itself for
     // the shill signal. Conservative: when in doubt, drop the link.
     const shillSignal = /\b(?:CA|contract)\s*[:=]?\s*[1-9A-HJ-NP-Za-km-z]{32,}|pump\.fun\/coin|dexscreener|0x[0-9a-f]{40}|fair\s*launch\s*live|sending\s+it\s+now|buy\s+now\s+\$[A-Z]{2,8}/i;
     const ideaBlob = `${concept.idea} ${concept.reasoning} ${concept.originXUrl ?? ""}`;
     if (concept.originXUrl && shillSignal.test(ideaBlob)) {
       console.warn(
-        `[auto-launch] dropping originXUrl — looks like a token-shill post: ${concept.originXUrl}`,
+        `[auto-launch] dropping originXUrl, looks like a token-shill post: ${concept.originXUrl}`,
       );
       concept.originXUrl = undefined;
       concept.originXAuthor = undefined;
@@ -239,10 +239,10 @@ export async function POST(req: NextRequest) {
  * Pull X-post URLs that are off-limits for the next Auto-pilot pick. This is
  * the UNION of two tables:
  *
- *   1. launches_v1.source_x_url — posts that previous launches already
+ *   1. launches_v1.source_x_url, posts that previous launches already
  *      anchored on. PERMANENT exclusion (a token is a token).
  *
- *   2. reserved_x_urls (expires_at > now()) — posts that another concurrent
+ *   2. reserved_x_urls (expires_at > now()), posts that another concurrent
  *      Auto-pilot call has just picked but hasn't been signed-and-launched
  *      yet. SHORT-TERM exclusion (30 min TTL). Solves the race condition
  *      where 20 users hit /api/auto-launch in the same second and Grok
@@ -250,13 +250,13 @@ export async function POST(req: NextRequest) {
  *
  * Newest-first within each pool, capped at RECENT_LAUNCHES_FOR_EXCLUDE total
  * to keep the prompt size sane. Empty array when Supabase isn't configured
- * (dev) — in that case dedup is best-effort and the LLM is the only gate.
+ * (dev), in that case dedup is best-effort and the LLM is the only gate.
  */
 async function fetchUnavailableXUrls(): Promise<string[]> {
   const sb = getSupabaseAdmin();
   if (!sb) return [];
 
-  // Run the two queries in parallel — they don't depend on each other.
+  // Run the two queries in parallel, they don't depend on each other.
   const [launchedRes, reservedRes] = await Promise.all([
     sb
       .from("launches_v1")
@@ -300,7 +300,7 @@ async function fetchUnavailableXUrls(): Promise<string[]> {
  * before the user finishes signing. 30-minute TTL; if the launch doesn't
  * complete in time, the reservation naturally expires.
  *
- * Idempotent via ON CONFLICT — if the URL is already reserved (race we
+ * Idempotent via ON CONFLICT, if the URL is already reserved (race we
  * couldn't prevent), the upsert just refreshes the timestamp. The DB
  * primary key prevents two different users from both 'owning' the same
  * reservation row.
@@ -326,7 +326,7 @@ async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Prom
         { onConflict: "x_url", ignoreDuplicates: false },
       );
   } catch {
-    /* best-effort — don't block the user response on a reservation failure */
+    /* best-effort, don't block the user response on a reservation failure */
   }
 }
 

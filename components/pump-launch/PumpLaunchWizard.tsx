@@ -61,7 +61,7 @@ const DEFAULT: ConceptInput = {
   audience: "",
   launchStyle: "fair-launch",
   websiteUrl: "",
-  // Empty by default — server-side guard in /api/pump-launch will inject a
+  // Empty by default, server-side guard in /api/pump-launch will inject a
   // coin-specific X search URL ($TICKER) at submit time if user skipped this.
   twitterUrl: "",
   telegramUrl: "",
@@ -123,7 +123,7 @@ export default function PumpLaunchWizard() {
   const [launchResult, setLaunchResult] = useState<RealLaunchResult | null>(null);
   const [devBuySol, setDevBuySol] = useState<number>(0);
 
-  // Auto-pilot mode — Grok invents the concept itself
+  // Auto-pilot mode, Grok invents the concept itself
   const [autoPiloting, setAutoPiloting] = useState(false);
   const [autoReasoning, setAutoReasoning] = useState<string | null>(null);
   // Origin X post that anchored the auto-pilot concept (Live Search citation)
@@ -255,14 +255,14 @@ export default function PumpLaunchWizard() {
         setLogoProvider(data.provider ? `${data.provider}${data.model ? ` · ${data.model}` : ""}` : null);
       }
     } catch {
-      // silent — user can retry or upload manually
+      // silent, user can retry or upload manually
     } finally {
       setGeneratingLogo(false);
     }
   }
 
   /**
-   * Auto-pilot — Grok invents the concept itself, then immediately runs
+   * Auto-pilot, Grok invents the concept itself, then immediately runs
    * launch-kit generation. The user lands on Step 2 (Review) with everything
    * filled in. They can still edit before signing.
    */
@@ -304,7 +304,7 @@ export default function PumpLaunchWizard() {
         originImageUrl?: string;
       };
       const ideaWithOrigin = c.originXUrl
-        ? `${c.idea}\n\nInspired by ${c.originXAuthor || "an X post"} — ${c.originXUrl}`
+        ? `${c.idea}\n\nInspired by ${c.originXAuthor || "an X post"}, ${c.originXUrl}`
         : c.idea;
 
       // Seed the concept BEFORE waiting on the parallel branches. The Review
@@ -326,12 +326,12 @@ export default function PumpLaunchWizard() {
       setAutoReasoning(c.reasoning);
 
       // ── Parallel fan-out ────────────────────────────────────────────────
-      // All three branches are independent — fire them at once instead of
+      // All three branches are independent, fire them at once instead of
       // chaining. The slowest (usually launch-kit, 15-30s) becomes the wall
       // clock, saving 15-40s vs. the old sequential flow.
-      //   1. fetch-x-image — pull the real viral meme art (1-5s)
-      //   2. runGenerate   — write the full launch kit (15-30s)
-      //   3. runGenerateLogo — Aurora fallback, only used if (1) returned nothing
+      //   1. fetch-x-image, pull the real viral meme art (1-5s)
+      //   2. runGenerate  , write the full launch kit (15-30s)
+      //   3. runGenerateLogo, Aurora fallback, only used if (1) returned nothing
 
       // 1. Real X meme image (preferred logo source).
       const xImagePromise: Promise<string | null> = c.originImageUrl
@@ -343,7 +343,7 @@ export default function PumpLaunchWizard() {
             .catch(() => null)
         : Promise.resolve(null);
 
-      // 2. Launch kit (text). Runs in parallel — uses the seeded concept.
+      // 2. Launch kit (text). Runs in parallel, uses the seeded concept.
       const kitPromise = runGenerate(seeded);
 
       // 3. Aurora logo (backup). Always runs so we have a fallback ready by
@@ -372,7 +372,7 @@ export default function PumpLaunchWizard() {
 
       // Pick the image as soon as it's available: prefer the real X meme,
       // fall back to Aurora. Both promises run concurrently; we don't have
-      // to wait on both — the moment X image returns (and is truthy) we
+      // to wait on both, the moment X image returns (and is truthy) we
       // commit it, and the Aurora result quietly settles unused.
       const xImageDataUrl = await xImagePromise;
       if (xImageDataUrl) {
@@ -411,7 +411,7 @@ export default function PumpLaunchWizard() {
     setLaunchPhase("preparing");
 
     try {
-      // 1. Generate mint keypair locally — never leaves the browser.
+      // 1. Generate mint keypair locally, never leaves the browser.
       const mintKeypair = Keypair.generate();
 
       setLaunchPhase("uploading");
@@ -448,7 +448,7 @@ export default function PumpLaunchWizard() {
       const txBytes = base64ToBytes(data.txBase64);
       const tx = VersionedTransaction.deserialize(txBytes);
 
-      // SIGN ORDER MATTERS — per Phantom security review (William @ Phantom):
+      // SIGN ORDER MATTERS, per Phantom security review (William @ Phantom):
       //   "Phantom Lighthouse may flag transactions when the signature order
       //    isn't correct. To avoid the warning, use this order:
       //      let signedTx = await signer.signTransaction(tx);   // wallet first
@@ -459,7 +459,7 @@ export default function PumpLaunchWizard() {
 
       setLaunchPhase("signing-wallet");
 
-      // 4. Wallet (Phantom/Solflare) signs FIRST — user sees the popup
+      // 4. Wallet (Phantom/Solflare) signs FIRST, user sees the popup
       const signedTx = await signTransaction(tx);
 
       setLaunchPhase("signing-mint");
@@ -653,7 +653,7 @@ function ConceptStep({
             </div>
             <div className="text-[12px] font-medium opacity-85 mt-0.5">
               {autoPiloting
-                ? "Scanning X in real time, picking a meme, drafting the kit, and prepping a one-signature launch — give it a moment."
+                ? "Scanning X in real time, picking a meme, drafting the kit, and prepping a one-signature launch, give it a moment."
                 : "Auto-pilot picks a meme, drafts the kit, hands you a signature-ready launch."}
             </div>
             {autoReasoning && (
@@ -696,7 +696,7 @@ function ConceptStep({
       <div className="card p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Rocket className="h-5 w-5 text-ink-300" />
-          <h2 className="text-lg font-semibold">Or — manual concept</h2>
+          <h2 className="text-lg font-semibold">Or, manual concept</h2>
         </div>
         <p className="text-sm text-ink-300/72">
           Describe the project yourself. The agent drafts launch materials. You review everything before any signature.
@@ -780,7 +780,7 @@ function ConceptStep({
             placeholder="https://t.me/yourproject"
           />
         </Field>
-        <Field label="Logo / mascot" hint="Generate with Grok Aurora — or upload your own. Either way it ships to Pump.fun IPFS at launch." className="sm:col-span-2">
+        <Field label="Logo / mascot" hint="Generate with Grok Aurora, or upload your own. Either way it ships to Pump.fun IPFS at launch." className="sm:col-span-2">
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
@@ -910,7 +910,7 @@ function ReviewStep({
         {fallbackReason && (
           <div className="card p-3 text-xs text-amber-200 border-amber-300/30">
             {isMock
-              ? `LLM unavailable — using local mock generator. Reason: ${fallbackReason}`
+              ? `LLM unavailable, using local mock generator. Reason: ${fallbackReason}`
               : `Note: ${fallbackReason}`}
           </div>
         )}
@@ -1183,15 +1183,15 @@ function SignStep({
         <SummaryRow label="Name" value={kit.tokenName} />
         <SummaryRow label="Ticker" value={kit.ticker} />
         <SummaryRow label="Description" value={kit.shortDescription} wide />
-        <SummaryRow label="Twitter" value={kit.pumpMetadata.twitter || "—"} />
-        <SummaryRow label="Telegram" value={kit.pumpMetadata.telegram || "—"} />
-        <SummaryRow label="Website" value={kit.pumpMetadata.website || "—"} />
+        <SummaryRow label="Twitter" value={kit.pumpMetadata.twitter || "-"} />
+        <SummaryRow label="Telegram" value={kit.pumpMetadata.telegram || "-"} />
+        <SummaryRow label="Website" value={kit.pumpMetadata.website || "-"} />
       </div>
 
       <div className="card p-4">
         <Field
           label="Initial dev buy (in SOL)"
-          hint="Optional — buy a small amount of your own token at creation. Leave 0 for none. Hard-capped at 10 SOL server-side."
+          hint="Optional, buy a small amount of your own token at creation. Leave 0 for none. Hard-capped at 10 SOL server-side."
         >
           <Input
             type="number"
@@ -1338,7 +1338,7 @@ function DashboardStep({
           <SummaryRow label="Mint address" value={result.mintPubkey} />
           <SummaryRow label="Tx signature" value={result.signature} wide />
           <SummaryRow label="Initial dev buy" value={`${result.devBuyInSol} SOL`} />
-          <SummaryRow label="Metadata URI" value={result.metadataUri || "—"} />
+          <SummaryRow label="Metadata URI" value={result.metadataUri || "-"} />
         </div>
 
         <div className="mt-4 flex items-center gap-2 flex-wrap">
@@ -1437,7 +1437,7 @@ function ProviderBadge({ meta }: { meta: ProviderMeta | null }) {
     xai: { text: `Generated by Grok · ${meta.model}`, tone: "live" },
     anthropic: { text: `Generated by Claude · ${meta.model} (fallback)`, tone: "neutral" },
     openai: { text: `Generated by OpenAI · ${meta.model} (fallback)`, tone: "neutral" },
-    mock: { text: "Generated by mock — set XAI_API_KEY for Grok", tone: "mock" },
+    mock: { text: "Generated by mock, set XAI_API_KEY for Grok", tone: "mock" },
   };
   const l = labels[meta.provider];
   return <Badge tone={l.tone}>{l.text}</Badge>;
@@ -1449,7 +1449,7 @@ function shortAddr(addr: string, head = 4, tail = 4): string {
 }
 
 function base64ToBytes(b64: string): Uint8Array {
-  // This wizard is a "use client" component — atob is always available in
+  // This wizard is a "use client" component, atob is always available in
   // the browser. We deliberately don't import Buffer here so the bundle
   // doesn't pull a polyfill into client code.
   const bin = atob(b64);

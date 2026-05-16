@@ -10,7 +10,7 @@ import { RPC_URL } from "@/lib/solana/connection";
 // Body: { address: string }
 //
 // 1. Pull a real on-chain snapshot from the configured Solana RPC.
-//    (No keys, no signing — strictly read-only public state.)
+//    (No keys, no signing, strictly read-only public state.)
 // 2. Optionally pass the snapshot to Grok for a natural-language brief.
 //    If no LLM provider is configured, we still return the structured snapshot
 //    so the UI can render the on-chain data without the AI summary.
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Step 1 — on-chain snapshot
+  // Step 1, on-chain snapshot
   let report;
   try {
     report = await buildWalletReport(body.address.trim(), RPC_URL);
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Step 2 — Grok summary (optional)
+  // Step 2, Grok summary (optional)
   const provider = getActiveProvider();
   if (!provider) {
     return NextResponse.json({
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.4,
       maxTokens: 1200,
-      model: "fast", // Wallet brief is short — use grok-4-fast-reasoning
+      model: "fast", // Wallet brief is short, use grok-4-fast-reasoning
     });
     let parsed: SummaryShape | null = null;
     try {

@@ -18,8 +18,8 @@ import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 // the /launch wizard or repeated info already on this page.
 // Comma-separated list of admin wallet pubkeys allowed to wipe history.
 // Set NEXT_PUBLIC_KOKI_ADMIN_WALLETS in Vercel to your own wallet pubkey
-// so only you see the dashboard "Clear all" button. Other users — even when
-// connected — never see it. (Server-side DELETE is still wallet-scoped, so
+// so only you see the dashboard "Clear all" button. Other users, even when
+// connected, never see it. (Server-side DELETE is still wallet-scoped, so
 // this is purely UI hardening.)
 const ADMIN_WALLETS = new Set(
   (process.env.NEXT_PUBLIC_KOKI_ADMIN_WALLETS || "")
@@ -51,7 +51,7 @@ export default function CommandCenter() {
     if (count === 0) return;
     const ok = window.confirm(
       `Clear all ${count} launch record${count === 1 ? "" : "s"} from your KOKi history?\n\n` +
-        "On-chain tokens themselves stay live on Solana — this only wipes " +
+        "On-chain tokens themselves stay live on Solana, this only wipes " +
         "what KOKi displays in your dashboard.",
     );
     if (!ok) return;
@@ -82,7 +82,7 @@ export default function CommandCenter() {
               Tokens shipped by KOKi agents
             </h2>
             <p className="text-[13px] text-ink-300/70 mt-1 font-medium max-w-xl">
-              Every memecoin launched through the KOKi agent — name, ticker,
+              Every memecoin launched through the KOKi agent, name, ticker,
               mint, and the meme art that shipped to Pump.fun. Click any card
               to open the live monitor.
             </p>
@@ -158,12 +158,12 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
           try {
             window.localStorage.setItem(cacheKey, url);
           } catch {
-            /* quota — ignore */
+            /* quota, ignore */
           }
         }
       })
       .catch(() => {
-        /* network — fallback handled by render below */
+        /* network, fallback handled by render below */
       });
 
     return () => {
@@ -211,18 +211,18 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
           </span>
         </div>
         <div className="text-[10px] text-ink-300/55 font-mono truncate">
-          {shortAddr(launch.mintPubkey || "—")}
+          {shortAddr(launch.mintPubkey || "-")}
         </div>
 
         {/* Live market cap from Pump.fun. Always show the row so the user
-            can see when data hasn't arrived yet — much better debug than
+            can see when data hasn't arrived yet, much better debug than
             the row silently disappearing on API failure. */}
         <div className="flex items-baseline justify-between gap-2 pt-1">
           <span className="text-[10px] font-bold text-ink-300/55 uppercase tracking-wider">
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
-            {stats ? formatMcUsd(stats.marketCapUsd) : "—"}
+            {stats ? formatMcUsd(stats.marketCapUsd) : "-"}
           </span>
         </div>
         {stats && stats.bondingProgress !== null && (
@@ -325,7 +325,7 @@ function BondingBar({
 }
 
 function shortAddr(addr: string): string {
-  if (!addr) return "—";
+  if (!addr) return "-";
   if (addr.length <= 12) return addr;
   return `${addr.slice(0, 5)}…${addr.slice(-5)}`;
 }

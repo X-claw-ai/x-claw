@@ -14,7 +14,7 @@ const META: Record<Phase, { num: string; label: string; href?: string }> = {
 };
 
 /**
- * 5-step linear progress strip — Detect → Analyze → Generate → Launch → Monitor.
+ * 5-step linear progress strip, Detect → Analyze → Generate → Launch → Monitor.
  * Style: black hairline, cream tiles, active = solid black tile with orange text.
  */
 export function PhaseProgress({

@@ -4,7 +4,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-app">
-      {/* Decorative giant paw watermark — orange glow on dark canvas */}
+      {/* Decorative giant paw watermark, orange glow on dark canvas */}
       <svg
         viewBox="0 0 32 32"
         className="absolute -right-20 -bottom-32 w-[640px] h-[640px] opacity-[0.06] pointer-events-none"

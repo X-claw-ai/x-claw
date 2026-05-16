@@ -19,10 +19,10 @@ import XPostGeneratorAgent from "@/components/x-post-generator/XPostGeneratorAge
 import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
 
 // Per-token monitor page. Mirrors the agent loop:
-//   01 Attention   — generate post-launch X content for THIS token
-//   02 Community   — point to launch wizard if you need a fresh kit
-//   03 Intelligence — token supply + top holders + creator wallet activity
-//   04 Execution   — links to Pump.fun, Solscan, the original launch tx
+//   01 Attention  , generate post-launch X content for THIS token
+//   02 Community  , point to launch wizard if you need a fresh kit
+//   03 Intelligence, token supply + top holders + creator wallet activity
+//   04 Execution  , links to Pump.fun, Solscan, the original launch tx
 
 export default function LaunchMonitorPage({ mint }: { mint: string }) {
   const [hydrated, setHydrated] = useState(false);
@@ -36,7 +36,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
   }, [mint]);
 
   const tokenName = record?.tokenName || "Unknown token";
-  const ticker = record?.ticker || "—";
+  const ticker = record?.ticker || "-";
   const isMock = record?.mock ?? false;
 
   const pumpUrl = record?.pumpUrl || `https://pump.fun/coin/${mint}`;
@@ -104,10 +104,10 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         </div>
       </div>
 
-      {/* 05 — Monitor: suggested next actions (from Grok) */}
+      {/* 05, Monitor: suggested next actions (from Grok) */}
       <PhaseHeader
         index="05"
-        name="Monitor — Suggested actions"
+        name="Monitor, Suggested actions"
         tag="Grok-recommended next moves for your launch"
         icon={LineChart}
       />
@@ -127,7 +127,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         }
       />
 
-      {/* 03 — Intelligence (most useful immediately after launch) */}
+      {/* 03, Intelligence (most useful immediately after launch) */}
       <PhaseHeader
         index="03"
         name="On-chain Intelligence"
@@ -167,7 +167,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         </div>
       )}
 
-      {/* 01 — Attention (post-launch promo) */}
+      {/* 01, Attention (post-launch promo) */}
       <PhaseHeader
         index="01"
         name="Attention"
@@ -181,19 +181,19 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         </div>
         <p className="text-xs text-ink-300/65 mb-4">
           Pre-filled to write about this token. Generate updates, milestone
-          posts, and reply hooks. Drafts only — you confirm before posting.
+          posts, and reply hooks. Drafts only, you confirm before posting.
         </p>
         <XPostGeneratorAgent
           defaultTopic={
             record
-              ? `${tokenName} (${ticker}) — post-launch update for X. Mint ${mint}.`
+              ? `${tokenName} (${ticker}), post-launch update for X. Mint ${mint}.`
               : `Memecoin update for ${ticker}`
           }
           defaultAudience="X-native crypto and meme coin community"
         />
       </div>
 
-      {/* 02 — Community */}
+      {/* 02, Community */}
       <PhaseHeader
         index="02"
         name="Community"
@@ -206,7 +206,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
             Need fresh raid replies, TG announcements, or DMs?
           </div>
           <p className="text-xs text-ink-300/65 mt-1">
-            The launch wizard's kit generator works on any concept — start a
+            The launch wizard's kit generator works on any concept, start a
             new flow if you need updated community materials.
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
         </Link>
       </div>
 
-      {/* 04 — Execution recap */}
+      {/* 04, Execution recap */}
       <PhaseHeader
         index="04"
         name="Execution recap"
@@ -264,7 +264,7 @@ function PhaseHeader({
         Phase {index}
       </div>
       <div className="text-base font-semibold text-ink-300">{name}</div>
-      <div className="text-xs text-ink-300/65">— {tag}</div>
+      <div className="text-xs text-ink-300/65">- {tag}</div>
     </div>
   );
 }

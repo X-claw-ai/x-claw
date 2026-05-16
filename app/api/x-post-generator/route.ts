@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.8,
       maxTokens: 2000,
-      model: "fast", // X posts are quick generations — use grok-4-fast-reasoning
+      model: "fast", // X posts are quick generations, use grok-4-fast-reasoning
     });
     const parsed = parseResponse(llm.content);
     return NextResponse.json({
@@ -124,14 +124,14 @@ function localStub(req: XPostRequest): ResponseShape {
   const t = req.topic;
   return {
     posts: [
-      `${t} — short take from an X-native builder. (Set XAI_API_KEY to get a real draft.)`,
+      `${t}, short take from an X-native builder. (Set XAI_API_KEY to get a real draft.)`,
       `On ${t}: ship the workflow first, the discourse second.`,
       `If ${t} matters to you, it deserves more than a hot take. Build something.`,
       `${t} thread incoming once Grok is wired up. For now, this is a stub.`,
       `Builders > spectators. ${t} is no exception.`,
     ],
     thread: {
-      hook: `A short builder thread on ${t} — auto-generated stub until XAI_API_KEY is set.`,
+      hook: `A short builder thread on ${t}, auto-generated stub until XAI_API_KEY is set.`,
       body: [
         `Why ${t} matters: it's a workflow, not a vibe.`,
         `What KOKi does about it: agents prepare, you confirm, workflows execute.`,

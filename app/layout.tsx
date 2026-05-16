@@ -4,7 +4,7 @@ import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
 import { XClawWalletProvider } from "@/components/solana/WalletContext";
 
-const TITLE = "KOKi.ai — The Grok-native Meme Coin Launch Agent";
+const TITLE = "KOKi.ai, The Grok-native Meme Coin Launch Agent";
 const DESCRIPTION =
   "KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches. Detect → Analyze → Generate → Launch → Monitor.";
 

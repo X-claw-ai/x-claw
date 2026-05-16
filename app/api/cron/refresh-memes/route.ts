@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { Msg } from "@/lib/llm/types";
 
 // ─────────────────────────────────────────────────────────────────────────
-// /api/cron/refresh-memes — pre-warmed x_search cache
+// /api/cron/refresh-memes, pre-warmed x_search cache
 //
 // Runs every 30 minutes via Vercel Cron. Hits xAI's expensive `x_search`
 // tool once, pulls the freshest viral X memes that would make good
@@ -17,7 +17,7 @@ import type { Msg } from "@/lib/llm/types";
 //
 // Quality preservation: this runs the SAME flagship model (grok-4-latest)
 // and the SAME x_search tool the synchronous path used to use, so output
-// fidelity is identical — we're just pre-paying the 20-40s wait.
+// fidelity is identical, we're just pre-paying the 20-40s wait.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const runtime = "nodejs";
@@ -45,12 +45,12 @@ function buildRefreshMessages(): Msg[] {
   const system = `You are KOKi's meme scout. Your job: scan X for the BIGGEST mega-viral posts of the day and return up to 20 of them as a JSON array, ordered by absolute view count from largest to smallest.
 
 ═══ ABSOLUTE PRIORITY ORDER ═══
-  1. VIRALITY — raw view count, descending. ALWAYS #1.
+  1. VIRALITY, raw view count, descending. ALWAYS #1.
      50M views > 10M > 1M > 500K. Take the biggest you can find.
   2. Organic cultural content (not a token shill).
   3. Specificity (a named/recognizable thing, not a placeholder).
   4. Freshness (last 24h required; within that, fresher only as soft
-     tiebreaker — never override #1).
+     tiebreaker, never override #1).
 ═══════════════════════════════
 
 
@@ -68,26 +68,26 @@ HARD ENGAGEMENT FLOOR. This is a TOP-OF-TIMELINE feed. Reject ANY post that does
   • 50,000+ likes OR 10,000+ retweets/reposts
 A post with 45 views, 5K views, or 80K views IS NOT TRENDING. SKIP IT. Don't pad the response with weak picks.
 
-If you cannot SEE explicit view/like/retweet numbers in the x_search result, you must skip that candidate — no guessing, no estimating.
+If you cannot SEE explicit view/like/retweet numbers in the x_search result, you must skip that candidate, no guessing, no estimating.
 
 PRIORITIZE BY ABSOLUTE VIEW COUNT, HIGHEST FIRST. Order your final list view-count descending. Strongly prefer 10M+ views over 1M+; prefer 1M+ over 500K+. The first entries in your JSON array should be the biggest of the day.
 
-FRESHNESS: 24h window is hard — but within it, prefer the LAST 6-12 HOURS. If a post is from "yesterday evening" and you have an equally viral one from the last 6 hours, pick the fresher one.
+FRESHNESS: 24h window is hard, but within it, prefer the LAST 6-12 HOURS. If a post is from "yesterday evening" and you have an equally viral one from the last 6 hours, pick the fresher one.
 
 HARD CONTENT FILTER. Each post must be:
-✓ Organic cultural content — joke, image, observation, format, character, screenshot
+✓ Organic cultural content, joke, image, observation, format, character, screenshot
 ✓ Has an attached image (we use it as the eventual token logo)
-✗ NOT a token shill — no "$TICKER buy now", "CA:", pump.fun links, dexscreener links, "fair launch live", "send it"
+✗ NOT a token shill, no "$TICKER buy now", "CA:", pump.fun links, dexscreener links, "fair launch live", "send it"
 ✗ NOT from a memecoin alpha account or pump caller
 ✗ NOT a token chart screenshot or a reply chain promoting an existing coin
 
 Test: would this post still be funny/memorable if crypto didn't exist? If yes → eligible. If no → skip.
 
-SPECIFICITY: the summary must point at something CONCRETE — a named character, a specific event, a recognizable visual, an exact punchline. REJECT generic placeholders like "a dog sitting on a fence" or "a cat with a beautiful coat" — those aren't viral, they're stock photos.
+SPECIFICITY: the summary must point at something CONCRETE, a named character, a specific event, a recognizable visual, an exact punchline. REJECT generic placeholders like "a dog sitting on a fence" or "a cat with a beautiful coat", those aren't viral, they're stock photos.
 
 VARIETY: don't return 20 cats. Mix dog/frog/AI/NPC/format/screenshot/event/character so different users get different vibes.
 
-Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose around it:
+Return STRICT JSON ONLY in this exact shape, no markdown fences, no prose around it:
 
 {
   "memes": [
@@ -105,7 +105,7 @@ Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose aro
 
 Target: 12-20 memes. All x_url and image_url values MUST come from real x_search results, never fabricated. If a post has no image, set image_url to null and prefer a different post. If your search just doesn't yield 12 posts that clear the engagement floor, return fewer entries rather than padding with weak picks.`;
 
-  const user = `Refresh the meme cache. Pull up to 20 mega-viral X posts from the LAST 24 HOURS that each clear the HARD floor (500K+ views AND 50K+ likes OR 10K+ reposts). Order DESCENDING by view count — biggest first. Prefer last 6-12 hours within the window. Variety matters — mix dog/frog/AI/NPC/format/screenshot. Generic descriptions ("a cat in a hat") are a fail — point at a specific named/recognizable thing. Return fewer entries rather than padding with weak picks. JSON only.`;
+  const user = `Refresh the meme cache. Pull up to 20 mega-viral X posts from the LAST 24 HOURS that each clear the HARD floor (500K+ views AND 50K+ likes OR 10K+ reposts). Order DESCENDING by view count, biggest first. Prefer last 6-12 hours within the window. Variety matters, mix dog/frog/AI/NPC/format/screenshot. Generic descriptions ("a cat in a hat") are a fail, point at a specific named/recognizable thing. Return fewer entries rather than padding with weak picks. JSON only.`;
 
   return [
     { role: "system", content: system },
@@ -148,7 +148,7 @@ function parseRefreshOutput(raw: string): CachedMeme[] {
     const memeAngle = typeof m.meme_angle === "string" ? (m.meme_angle as string).trim() : null;
     const score = typeof m.engagement_score === "number" ? m.engagement_score : null;
 
-    // Defensive shill check — never cache a post whose summary mentions token mechanics.
+    // Defensive shill check, never cache a post whose summary mentions token mechanics.
     if (shillSignal.test(`${summary} ${memeAngle ?? ""} ${xUrl}`)) continue;
 
     out.push({ x_url: xUrl, x_author: author, image_url: imageUrl, summary, meme_angle: memeAngle, engagement_score: score });
@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
   // Run x_search via xAI Responses API. We pre-pay the 20-40s wait here so
   // user-facing /api/auto-launch can be instant.
   const today = new Date();
-  // 24-hour window — user found 48h was still pulling in "last night"
+  // 24-hour window, user found 48h was still pulling in "last night"
   // posts. Tighten to 24h; the prompt biases toward last 6-12h.
   const oneDayAgo = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
   const isoDate = (d: Date) => d.toISOString().slice(0, 10);
@@ -196,7 +196,7 @@ export async function GET(req: NextRequest) {
       liveSearch: {
         fromDate: isoDate(twoDaysAgo),
         toDate: isoDate(today),
-        maxResults: 50, // bigger pool — most candidates will fail the engagement floor
+        maxResults: 50, // bigger pool, most candidates will fail the engagement floor
         enableImageUnderstanding: true,
       },
     });
@@ -253,7 +253,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Purge anything older than the new batch — keeps the table bounded.
+  // Purge anything older than the new batch, keeps the table bounded.
   await sb.from("cached_memes").delete().neq("batch_id", batchId);
 
   return NextResponse.json<RefreshResponse>({

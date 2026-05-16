@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// DEPRECATED — multi-vertical model retired. Returns an empty catalog.
+// DEPRECATED, multi-vertical model retired. Returns an empty catalog.
 // /agents redirects to /launch in next.config.mjs. This route stays as a
 // no-op so any external integrations don't 404 abruptly.
 export async function GET() {

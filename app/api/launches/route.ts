@@ -16,14 +16,14 @@ interface LaunchInsert {
   /**
    * URL of the originating viral X post that inspired this token, when
    * known. Recorded so /api/auto-launch can hard-exclude it from future
-   * Grok picks — no two KOKi-shipped tokens should ever come from the
+   * Grok picks, no two KOKi-shipped tokens should ever come from the
    * same X post (deduplication across all wallets).
    */
   sourceXUrl?: string;
 }
 
 /**
- * POST — server-side persist of a real launch.
+ * POST, server-side persist of a real launch.
  * Body: LaunchInsert (camelCase). Server maps to snake_case columns.
  *
  * If Supabase is not configured, returns { ok:true, persisted:false } so
@@ -86,14 +86,14 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * GET — list launches.
+ * GET, list launches.
  *
  * Two modes:
  *   ?wallet=<pubkey>  → only that wallet's launches (used by /dashboard,
  *                       'My Launches', wallet-scoped)
  *   (no wallet)       → ALL launches across all wallets, newest first.
  *                       Used by /launches ('All Launches'), the public
- *                       discovery surface — like Pump.fun's homepage.
+ *                       discovery surface, like Pump.fun's homepage.
  *                       Capped at 200 so the response stays bounded.
  *
  * Without Supabase, returns an empty list (the client will fall back to
@@ -134,9 +134,9 @@ export async function GET(req: NextRequest) {
 }
 
 /**
- * DELETE ?wallet=<pubkey> — clear all launch history rows for a wallet.
+ * DELETE ?wallet=<pubkey>, clear all launch history rows for a wallet.
  *
- * On-chain tokens themselves are immutable — this only removes the rows
+ * On-chain tokens themselves are immutable, this only removes the rows
  * KOKi has tracked. The user's dashboard goes back to an empty state.
  *
  * Without Supabase, this still returns ok:true so the client can clear

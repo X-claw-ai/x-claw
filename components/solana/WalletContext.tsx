@@ -14,7 +14,7 @@ import { RPC_URL } from "@/lib/solana/connection";
 // can call useWallet() / useConnection().
 //
 // KOKi supports Phantom and Solflare on Solana. We deliberately do NOT
-// add custodial / browser-keypair wallets — the user's wallet is the only
+// add custodial / browser-keypair wallets, the user's wallet is the only
 // signer.
 export function XClawWalletProvider({ children }: { children: React.ReactNode }) {
   const wallets = useMemo(

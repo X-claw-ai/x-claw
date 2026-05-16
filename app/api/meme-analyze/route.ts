@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       responseFormat: "json",
       temperature: 0.5,
       maxTokens: 1200,
-      model: "fast", // Analyze is short — use grok-4-fast-reasoning
+      model: "fast", // Analyze is short, use grok-4-fast-reasoning
     });
     let txt = llm.content.trim();
     if (txt.startsWith("```")) {

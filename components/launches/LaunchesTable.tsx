@@ -6,7 +6,7 @@ import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
 
-// Public 'All Launches' gallery — shows every memecoin every KOKi agent
+// Public 'All Launches' gallery, shows every memecoin every KOKi agent
 // has shipped, across all wallets. Hits /api/launches with no `wallet`
 // param; the API returns the global list (filtered to status='launched',
 // mock=false) so this is a real social-proof / discovery surface, not a
@@ -119,7 +119,7 @@ function PublicLaunchCard({
           try {
             window.localStorage.setItem(cacheKey, url);
           } catch {
-            /* quota — ignore */
+            /* quota, ignore */
           }
         }
       })
@@ -177,7 +177,7 @@ function PublicLaunchCard({
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
-            {stats ? formatMcUsd(stats.marketCapUsd) : "—"}
+            {stats ? formatMcUsd(stats.marketCapUsd) : "-"}
           </span>
         </div>
         {stats && stats.bondingProgress !== null && (

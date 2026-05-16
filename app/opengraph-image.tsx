@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 
-// Social-share preview image for koki.ai. Renders at 1200×630 — the
+// Social-share preview image for koki.ai. Renders at 1200×630, the
 // canonical Open Graph size used by X (Twitter), Discord, Telegram,
 // Slack, and most messengers. Next.js auto-discovers this file and
 // emits <meta property="og:image"> + <meta name="twitter:image">.
 
 export const runtime = "edge";
-export const alt = "KOKi.ai — Grok-native meme coin launch agent";
+export const alt = "KOKi.ai, Grok-native meme coin launch agent";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ export default function OpengraphImage() {
           fontFamily: "Inter, sans-serif",
         }}
       >
-        {/* Top — wordmark */}
+        {/* Top, wordmark */}
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div
             style={{
@@ -57,7 +57,7 @@ export default function OpengraphImage() {
           </div>
         </div>
 
-        {/* Middle — headline */}
+        {/* Middle, headline */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div
             style={{
@@ -101,7 +101,7 @@ export default function OpengraphImage() {
           </div>
         </div>
 
-        {/* Bottom — chips */}
+        {/* Bottom, chips */}
         <div
           style={{
             display: "flex",

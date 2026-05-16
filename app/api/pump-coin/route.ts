@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // frontend API directly (which blocks cross-origin requests).
 //
 // We only forward a small, sanitized subset of fields the UI actually
-// needs — keeps the payload tiny and avoids leaking unstable internals.
+// needs, keeps the payload tiny and avoids leaking unstable internals.
 
 export const runtime = "nodejs";
 
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
     try {
       upstream = await fetch(url, {
         headers: {
-          // Pump.fun gates a bare fetch — pretend to be a normal browser
+          // Pump.fun gates a bare fetch, pretend to be a normal browser
           // so we get past the basic UA filter.
           "User-Agent":
             "Mozilla/5.0 (compatible; KOKi-agent/1.0; +https://kokiai.app)",
@@ -136,7 +136,7 @@ export async function GET(req: NextRequest) {
 
   // Pump.fun's bonding curve is "complete" when the token has graduated
   // to Raydium. Until then, market cap rises along the curve. We compute
-  // a 0..1 progress ratio from the virtual reserves — Pump.fun's own UI
+  // a 0..1 progress ratio from the virtual reserves, Pump.fun's own UI
   // does the same thing.
   const mcUsd = numOrNull(raw.usd_market_cap);
   const mcSol = numOrNull(raw.market_cap);

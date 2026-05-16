@@ -104,7 +104,7 @@ export async function POST(req: Request) {
   }
 
   // 2. Upload to Pump.fun IPFS
-  // Guard: never let Pump.fun receive an empty `twitter` field — that
+  // Guard: never let Pump.fun receive an empty `twitter` field, that
   // hides the Twitter button on the token page entirely. If the wizard
   // didn't pass one (e.g. Auto-pilot ran without Live Search and Grok
   // returned no originXUrl, or manual-mode user left it blank), fall back

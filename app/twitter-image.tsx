@@ -1,4 +1,4 @@
-// X / Twitter card image — same content as the OG card. Re-exporting
+// X / Twitter card image, same content as the OG card. Re-exporting
 // the OG component keeps the two in sync. Next.js auto-discovers this
 // file and emits <meta name="twitter:image">.
 

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-// /robots.txt — tells crawlers what they can and can't fetch.
+// /robots.txt, tells crawlers what they can and can't fetch.
 // Public pages OK to index; API and internal routes blocked.
 export default function robots(): MetadataRoute.Robots {
   return {

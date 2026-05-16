@@ -35,7 +35,7 @@ export default function SafetySection() {
           <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium text-balance">
             Memecoin launches go wrong when an agent silently controls funds.
             KOKi is built so that never happens. The agent is powerful because
-            it prepares — not because it holds keys.
+            it prepares, not because it holds keys.
           </p>
         </div>
 
