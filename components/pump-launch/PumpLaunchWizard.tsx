@@ -648,13 +648,13 @@ function ConceptStep({
           <div className="min-w-0">
             <div className="text-[15px] font-black tracking-tight">
               {autoPiloting
-                ? "KOKi agent is on the job."
-                : "Let the KOKi agent pick & ship."}
+                ? "KOKi agent is scanning X right now."
+                : "One click. The day's biggest meme becomes your token."}
             </div>
             <div className="text-[12px] font-medium opacity-85 mt-0.5">
               {autoPiloting
-                ? "Scanning X in real time, picking a meme, drafting the kit, and prepping a one-signature launch, give it a moment."
-                : "Auto-pilot picks a meme, drafts the kit, hands you a signature-ready launch."}
+                ? "Reading X live, locking onto the most viral post of the day, naming it, building the kit, prepping a one-signature launch. Hold tight."
+                : "The KOKi agent reads X in real time, locks onto the most viral meme of the day, picks the name, ticker, and full kit, then ships the token to Pump.fun. You sign once."}
             </div>
             {autoReasoning && (
               <div className="text-[12px] font-bold mt-1.5 opacity-95">
