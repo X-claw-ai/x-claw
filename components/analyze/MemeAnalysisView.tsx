@@ -76,11 +76,11 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
   if (loading) {
     return (
       <div className="card p-12 text-center">
-        <Loader2 className="h-5 w-5 animate-spin mx-auto text-ink-1000" />
-        <div className="mt-4 text-sm text-ink-1000/72">
+        <Loader2 className="h-5 w-5 animate-spin mx-auto text-ink-300" />
+        <div className="mt-4 text-sm text-ink-300/72">
           Analyzing {meme?.name ?? memeId}…
         </div>
-        <div className="mt-1 text-xs text-ink-1000/55">
+        <div className="mt-1 text-xs text-ink-300/55">
           Scoring viral potential, narrative clarity, and saturation risk.
         </div>
       </div>
@@ -108,14 +108,14 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
       <div className="card p-6">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-ink-1000 mb-2">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-ink-300 mb-2">
               Analyze · Phase 02
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="text-display text-3xl md:text-4xl font-semibold tracking-extra-tight text-ink-1000">
+              <h2 className="text-display text-3xl md:text-4xl font-semibold tracking-extra-tight text-ink-300">
                 {meme.name}
               </h2>
-              <span className="text-ink-1000/65 font-mono">${meme.ticker}</span>
+              <span className="text-ink-300/65 font-mono">${meme.ticker}</span>
               <Badge tone={tone}>Launch readiness: {a.launchReadiness}</Badge>
               {data.provider === "xai" ? (
                 <Badge tone="live">Grok · {data.model}</Badge>
@@ -125,7 +125,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
                 <Badge tone="info">{data.provider} · {data.model}</Badge>
               ) : null}
             </div>
-            <p className="mt-4 text-ink-1000 text-base leading-relaxed max-w-3xl">
+            <p className="mt-4 text-ink-300 text-base leading-relaxed max-w-3xl">
               {a.summary}
             </p>
           </div>
@@ -147,18 +147,18 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
 
       {/* Why + Risks */}
       <div className="grid lg:grid-cols-2 gap-4">
-        <Block icon={TrendingUp} title="Why it has potential" iconClass="text-ink-1000">
-          <ul className="space-y-2 text-sm text-ink-1000">
+        <Block icon={TrendingUp} title="Why it has potential" iconClass="text-ink-300">
+          <ul className="space-y-2 text-sm text-ink-300">
             {a.whyItHasPotential.map((b) => (
               <li key={b} className="flex gap-2.5">
-                <span className="text-ink-1000">•</span>
+                <span className="text-ink-300">•</span>
                 <span>{b}</span>
               </li>
             ))}
           </ul>
         </Block>
         <Block icon={AlertTriangle} title="Key risks" iconClass="text-amber-300">
-          <ul className="space-y-2 text-sm text-ink-1000">
+          <ul className="space-y-2 text-sm text-ink-300">
             {a.keyRisks.map((b) => (
               <li key={b} className="flex gap-2.5">
                 <span className="text-amber-300">•</span>
@@ -179,8 +179,8 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
       {/* Criteria scoring grid */}
       <div className="card p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="h-4 w-4 text-ink-1000" />
-          <div className="text-sm font-semibold text-ink-1000">Scoring criteria</div>
+          <Sparkles className="h-4 w-4 text-ink-300" />
+          <div className="text-sm font-semibold text-ink-300">Scoring criteria</div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {[
@@ -228,7 +228,7 @@ function Block({
     <div className="card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Icon className={`h-4 w-4 ${iconClass ?? ""}`} />
-        <div className="text-sm font-semibold text-ink-1000">{title}</div>
+        <div className="text-sm font-semibold text-ink-300">{title}</div>
       </div>
       {children}
     </div>
@@ -247,12 +247,12 @@ function KV({
   return (
     <div className="card p-5">
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-ink-1000" />
-        <div className="text-[10px] uppercase tracking-[0.18em] text-ink-1000/65">
+        <Icon className="h-4 w-4 text-ink-300" />
+        <div className="text-[10px] uppercase tracking-[0.18em] text-ink-300/65">
           {label}
         </div>
       </div>
-      <div className="mt-3 text-sm text-ink-1000 leading-relaxed">{value}</div>
+      <div className="mt-3 text-sm text-ink-300 leading-relaxed">{value}</div>
     </div>
   );
 }
@@ -263,13 +263,13 @@ function Score({ label, value }: { label: string; value: number }) {
   const good = isRisk ? value < 40 : value >= 75;
   const mid = isRisk ? value < 60 : value >= 60;
   const tone = good
-    ? "text-ink-1000 border-koki-500/30"
+    ? "text-ink-300 border-koki-500/30"
     : mid
-    ? "text-ink-1000 border-ink-1000"
+    ? "text-ink-300 border-[var(--border-strong)]"
     : "text-amber-300 border-amber-400/25";
   return (
     <div className={`surface p-3 border ${tone}`}>
-      <div className="text-[10px] uppercase tracking-[0.14em] text-ink-1000/65">
+      <div className="text-[10px] uppercase tracking-[0.14em] text-ink-300/65">
         {label}
       </div>
       <div className="mt-1.5 text-2xl font-semibold tabular-nums tracking-extra-tight">

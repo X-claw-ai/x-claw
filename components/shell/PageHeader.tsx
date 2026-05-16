@@ -15,18 +15,18 @@ export default function PageHeader({
   breadcrumbs?: { href?: string; label: string }[];
 }) {
   return (
-    <header className="border-b-[1.5px] border-ink-1000 bg-koki-500">
+    <header className="border-b border-[var(--border)] bg-bg">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-14">
         {breadcrumbs && (
-          <nav className="text-[11px] font-extrabold text-ink-1000/70 flex items-center gap-1 mb-4 uppercase tracking-[0.08em]">
+          <nav className="text-[11px] font-extrabold text-ink-300/70 flex items-center gap-1 mb-4 uppercase tracking-[0.08em]">
             {breadcrumbs.map((b, i) => (
               <span key={`${b.label}-${i}`} className="flex items-center gap-1">
                 {b.href ? (
-                  <Link href={b.href} className="hover:text-ink-1000 transition-colors">
+                  <Link href={b.href} className="hover:text-ink-300 transition-colors">
                     {b.label}
                   </Link>
                 ) : (
-                  <span className="text-ink-1000">{b.label}</span>
+                  <span className="text-ink-300">{b.label}</span>
                 )}
                 {i < breadcrumbs.length - 1 && (
                   <ChevronRight className="h-3 w-3" />
@@ -42,7 +42,7 @@ export default function PageHeader({
               {title}
             </h1>
             {description && (
-              <p className="mt-3 text-ink-1000/80 text-base md:text-lg max-w-2xl leading-snug font-medium">
+              <p className="mt-3 text-ink-300/80 text-base md:text-lg max-w-2xl leading-snug font-medium">
                 {description}
               </p>
             )}

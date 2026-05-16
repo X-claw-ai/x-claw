@@ -3,26 +3,49 @@
 @tailwind utilities;
 
 /* ── KOKi.ai brand tokens ──────────────────────────────────────────────────
-   Orange canvas, black ink. Heavy display type. A little meme.            */
+   Binance-dark canvas, KOKi orange accent. Trading-desk vibe with
+   memecoin energy.                                                        */
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+
+  /* Brand orange — kept from the previous KOKi palette as the sole
+     warm accent. Reserve it for CTAs, key numbers, and the logomark. */
   --orange: #E55B14;
   --orange-deep: #BF4710;
   --orange-soft: #FF7A2E;
-  --cream: #FFF7ED;
-  --cream-2: #FFEED4;
-  --ink: #0B0B0B;
-  --ink-soft: #2A1408;
 
-  --bg: var(--orange);
-  --surface: var(--cream);
-  --text: var(--ink);
-  --text-muted: rgba(11, 11, 11, 0.62);
-  --text-subtle: rgba(11, 11, 11, 0.42);
-  --border: rgba(11, 11, 11, 0.14);
-  --border-strong: rgba(11, 11, 11, 0.45);
-  --accent: var(--ink);
-  --accent-on: var(--orange);
+  /* Binance-style dark canvas + panels. */
+  --bg: #0B0E11;            /* deep navy, almost-black page bg */
+  --bg-elevated: #181A20;   /* one notch above bg — used for navbar/footer */
+  --surface: #1E2329;       /* card / panel surface */
+  --surface-2: #2B3139;     /* hover / nested panels */
+
+  /* Text */
+  --text: #EAECEF;          /* primary near-white */
+  --text-muted: #B7BDC6;    /* secondary mid-gray */
+  --text-subtle: #848E9C;   /* tertiary low-emphasis */
+
+  /* Borders — light on dark */
+  --border: rgba(234, 236, 239, 0.10);
+  --border-strong: rgba(234, 236, 239, 0.28);
+
+  /* Up / down — Binance-style green/red for prices */
+  --up: #0ECB81;
+  --down: #F6465D;
+
+  /* Legacy aliases kept so old class names compile cleanly. ink/cream
+     map onto their dark-mode equivalents — anything that previously
+     used var(--ink) for a "dark surface" now correctly gets the dark
+     surface; anything that used var(--cream) for "light surface" now
+     gets our actual card surface. */
+  --ink: var(--bg);
+  --ink-soft: var(--bg-elevated);
+  --cream: var(--surface);
+  --cream-2: var(--surface-2);
+
+  /* Accent — orange solid on dark. */
+  --accent: var(--orange);
+  --accent-on: #0B0E11;     /* dark text on the orange button */
 }
 
 html,
@@ -39,14 +62,15 @@ body {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--orange);
+  background: var(--orange);
+  color: #0B0E11;
 }
 
-/* ── Atmospheric paw watermarks (low alpha, decorative) ─────────────────── */
+/* ── Atmospheric glow watermarks (low alpha, decorative) ───────────────── */
 .bg-app {
   background:
-    radial-gradient(60% 40% at 80% 0%, rgba(11, 11, 11, 0.06) 0%, rgba(229, 91, 20, 0) 70%),
+    radial-gradient(60% 40% at 80% 0%, rgba(229, 91, 20, 0.10) 0%, rgba(229, 91, 20, 0) 70%),
+    radial-gradient(50% 35% at 10% 100%, rgba(229, 91, 20, 0.06) 0%, rgba(229, 91, 20, 0) 70%),
     var(--bg);
 }
 
@@ -56,7 +80,7 @@ body {
   font-weight: 900;
   letter-spacing: -0.045em;
   font-feature-settings: "ss01", "cv11";
-  color: var(--ink);
+  color: var(--text);
   line-height: 0.95;
 }
 
@@ -72,55 +96,55 @@ body {
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--text-muted);
 }
 
-/* ── Stamp — black box with orange text, slight tilt ───────────────────── */
+/* ── Stamp — orange inline highlight ───────────────────────────────────── */
 .stamp {
   display: inline-block;
-  background: var(--ink);
-  color: var(--orange);
+  background: var(--orange);
+  color: #0B0E11;
   padding: 0 0.18em;
   border-radius: 6px;
   transform: rotate(-2deg);
 }
 
-/* ── Cards — cream surface with black hairline ─────────────────────────── */
+/* ── Cards — dark panel with subtle border ─────────────────────────────── */
 .surface {
-  background: var(--cream);
-  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
 }
 .card {
-  background: var(--cream);
-  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 1.25rem;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 4px 4px 0 0 var(--ink);
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
 }
 .card-emph {
-  background: var(--ink);
-  color: var(--orange);
-  border-color: var(--ink);
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--orange);
 }
 
-/* ── Glass / inverted (black on orange) ─────────────────────────────────── */
+/* ── Inverted surface — orange accent panel ────────────────────────────── */
 .surface-ink {
-  background: var(--ink);
-  color: var(--orange);
-  border: 1.5px solid var(--ink);
+  background: var(--orange);
+  color: #0B0E11;
+  border: 1px solid var(--orange);
   border-radius: 14px;
 }
 
-/* ── Hairline divider — black ─────────────────────────────────────────── */
+/* ── Hairline divider — light hairline on dark ─────────────────────────── */
 .hairline {
-  height: 1.5px;
-  background: var(--ink);
-  opacity: 0.18;
+  height: 1px;
+  background: var(--border);
 }
 
 /* ── Buttons ───────────────────────────────────────────────────────────── */
@@ -131,40 +155,50 @@ body {
   gap: 0.5rem;
   padding: 0.7rem 1.05rem;
   border-radius: 10px;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.875rem;
   letter-spacing: -0.01em;
-  transition: transform 120ms ease, box-shadow 150ms ease, background 150ms ease, color 150ms ease;
+  transition: transform 120ms ease, box-shadow 150ms ease, background 150ms ease, color 150ms ease, border-color 150ms ease;
   white-space: nowrap;
-  border: 1.5px solid var(--ink);
+  border: 1px solid transparent;
 }
 .btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
+/* Primary — orange solid (the accent CTA color). */
 .btn-primary {
-  background: var(--ink);
-  color: var(--orange);
-  box-shadow: 3px 3px 0 0 rgba(11, 11, 11, 0.0);
+  background: var(--orange);
+  color: #0B0E11;
+  border-color: var(--orange);
 }
 .btn-primary:hover {
-  box-shadow: 3px 3px 0 0 rgba(11, 11, 11, 0.85);
-  transform: translate(-1px, -1px);
+  background: var(--orange-soft);
+  border-color: var(--orange-soft);
+  box-shadow: 0 6px 22px -6px rgba(229, 91, 20, 0.55);
 }
 
+/* Secondary — dark panel surface with hairline border. */
 .btn-secondary {
-  background: var(--cream);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 .btn-secondary:hover {
-  background: var(--cream-2);
+  background: var(--surface-2);
+  border-color: var(--orange);
+  color: var(--orange);
 }
 
+/* Ghost — minimal, hover lifts to surface. */
 .btn-ghost {
-  color: var(--ink);
+  color: var(--text-muted);
   background: transparent;
   border-color: transparent;
 }
-.btn-ghost:hover { background: rgba(11, 11, 11, 0.06); }
+.btn-ghost:hover {
+  background: var(--surface);
+  color: var(--text);
+}
 
 /* ── Pill / Tag ────────────────────────────────────────────────────────── */
 .pill {
@@ -175,16 +209,17 @@ body {
   padding: 0 0.7rem;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  border: 1.5px solid var(--ink);
-  color: var(--ink);
-  background: var(--cream);
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  background: var(--surface);
 }
 .pill-emph {
-  background: var(--ink);
-  color: var(--orange);
+  background: var(--orange);
+  color: #0B0E11;
+  border-color: var(--orange);
 }
 .pill-live::before {
   content: "";
@@ -200,18 +235,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--cream);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--text-muted);
   padding: 6px 11px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 800;
-  border: 1.5px solid var(--ink);
+  font-weight: 700;
+  border: 1px solid var(--border);
   letter-spacing: -0.01em;
 }
 .chip strong {
-  color: var(--orange);
-  background: var(--ink);
+  color: #0B0E11;
+  background: var(--orange);
   padding: 0 5px;
   border-radius: 3px;
   font-weight: 800;
@@ -220,16 +255,20 @@ body {
 /* ── Meme sticker (slight rotation, hand-stuck feel) ───────────────────── */
 .meme-tag {
   display: inline-block;
-  background: var(--cream);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--orange);
   font-weight: 800;
   font-size: 11px;
   padding: 4px 9px;
   border-radius: 4px;
   transform: rotate(3deg);
-  border: 1.5px solid var(--ink);
+  border: 1px solid var(--orange);
   letter-spacing: 0.04em;
 }
+
+/* ── Price up / down — Binance-style green/red indicators ──────────────── */
+.text-up { color: var(--up); }
+.text-down { color: var(--down); }
 
 /* ── Inputs ────────────────────────────────────────────────────────────── */
 .input,
@@ -240,55 +279,67 @@ input[type="search"],
 input[type="url"],
 select,
 textarea {
-  background: var(--cream);
-  border: 1.5px solid var(--ink);
-  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
   border-radius: 10px;
   padding: 0.6rem 0.85rem;
   font-size: 14px;
   font-weight: 500;
   width: 100%;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  background: var(--surface-2);
 }
 .input::placeholder,
 input::placeholder,
-textarea::placeholder { color: rgba(11, 11, 11, 0.42); }
+textarea::placeholder { color: var(--text-subtle); }
 
 /* ── Hide scrollbars on horizontal rails ──────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
-/* ── Focus ring — solid black ─────────────────────────────────────────── */
+/* ── Focus ring — orange ──────────────────────────────────────────────── */
 :where(button, a, input, select, textarea):focus-visible {
-  outline: 2.5px solid var(--ink);
+  outline: 2px solid var(--orange);
   outline-offset: 2px;
   border-radius: 8px;
 }
 
-/* ── Phase progress (5-step, big black stamp dots) ─────────────────────── */
+/* ── Phase progress (5-step, orange stamp dots) ────────────────────────── */
 .phase-step {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-family: 'Inter', sans-serif;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.02em;
   font-size: 13px;
-  color: var(--ink);
+  color: var(--text-muted);
 }
 .phase-step .num {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: var(--cream);
-  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
-.phase-step.is-active .num { background: var(--ink); color: var(--orange); }
-.phase-step.is-done .num { background: var(--ink); color: var(--orange); }
+.phase-step.is-active { color: var(--text); }
+.phase-step.is-active .num { background: var(--orange); color: #0B0E11; border-color: var(--orange); }
+.phase-step.is-done { color: var(--text); }
+.phase-step.is-done .num { background: var(--orange); color: #0B0E11; border-color: var(--orange); }
 
 /* ── Animations ────────────────────────────────────────────────────────── */
 @keyframes fade-in-up {
@@ -309,11 +360,13 @@ textarea::placeholder { color: rgba(11, 11, 11, 0.42); }
 }
 
 /* Hover-lift on token cards. Using transform (GPU) keeps it smooth on
-   throwaway-spec laptops. */
-.card-hover { transition: transform 180ms ease, box-shadow 180ms ease; }
+   throwaway-spec laptops. Soft shadow on dark instead of the previous
+   hard 4-4-0 stamp shadow. */
+.card-hover { transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 4px 4px 0 0 var(--ink);
+  border-color: var(--border-strong);
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.7);
 }
 
 @media (prefers-reduced-motion: reduce) {

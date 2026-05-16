@@ -44,7 +44,7 @@ export function PhaseProgress({
             <Wrap key={p}>
               <div
                 className={cn(
-                  "px-3 py-2.5 text-center border-[1.5px] border-ink-1000 rounded-[10px] transition-all",
+                  "px-3 py-2.5 text-center border border-[var(--border-strong)] rounded-[10px] transition-all",
                   active && "bg-ink-1000",
                   !active && done && "bg-cream-50",
                   !active && !done && "bg-cream-50 hover:bg-cream-100"
@@ -53,7 +53,7 @@ export function PhaseProgress({
                 <div
                   className={cn(
                     "text-[10px] font-extrabold tracking-[0.16em]",
-                    active ? "text-koki-500" : "text-ink-1000/70"
+                    active ? "text-koki-500" : "text-ink-300/70"
                   )}
                 >
                   {m.num}
@@ -61,7 +61,7 @@ export function PhaseProgress({
                 <div
                   className={cn(
                     "mt-0.5 text-[13px] font-black tracking-tight",
-                    active ? "text-koki-500" : "text-ink-1000"
+                    active ? "text-koki-500" : "text-ink-300"
                   )}
                 >
                   {m.label}

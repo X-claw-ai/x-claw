@@ -12,7 +12,7 @@ const NAV = [
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-koki-500/85 border-b-[1.5px] border-ink-1000">
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-bg/85 border-b border-[var(--border)]">
       <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <KokiLogo height={40} bare />
@@ -23,7 +23,7 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="px-3 py-1.5 text-[13px] font-extrabold tracking-tight text-ink-1000/80 hover:text-ink-1000 rounded-md hover:bg-ink-1000/10 transition-colors"
+              className="px-3 py-1.5 text-[13px] font-extrabold tracking-tight text-ink-300/80 hover:text-ink-300 rounded-md hover:bg-ink-1000/10 transition-colors"
             >
               {item.label}
             </Link>

@@ -58,7 +58,7 @@ export default function TokenInfoBlock({ mint }: { mint: string }) {
 
   if (loading) {
     return (
-      <div className="card p-6 text-sm text-ink-1000/65 flex items-center gap-2">
+      <div className="card p-6 text-sm text-ink-300/65 flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
         Reading the mint from Solana...
       </div>
@@ -106,7 +106,7 @@ export default function TokenInfoBlock({ mint }: { mint: string }) {
             href={`https://solscan.io/token/${data.mint}#holders`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-ink-1000/72 hover:text-ink-1000"
+            className="inline-flex items-center gap-1 text-xs text-ink-300/72 hover:text-ink-300"
           >
             All on Solscan
             <ExternalLink className="h-3 w-3" />
@@ -118,18 +118,18 @@ export default function TokenInfoBlock({ mint }: { mint: string }) {
             return (
               <div
                 key={h.address}
-                className="flex items-center gap-3 border-b border-ink-1000/20 pb-2 last:border-b-0 text-sm"
+                className="flex items-center gap-3 border-b border-[var(--border-strong)]/20 pb-2 last:border-b-0 text-sm"
               >
-                <div className="text-[10px] text-ink-1000/65 w-5">#{i + 1}</div>
+                <div className="text-[10px] text-ink-300/65 w-5">#{i + 1}</div>
                 <a
                   href={`https://solscan.io/account/${h.address}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-mono text-xs text-ink-1000 hover:text-ink-1000 truncate flex-1"
+                  className="font-mono text-xs text-ink-300 hover:text-ink-300 truncate flex-1"
                 >
                   {h.address}
                 </a>
-                <div className="tabular-nums text-ink-1000 w-32 text-right">
+                <div className="tabular-nums text-ink-300 w-32 text-right">
                   {formatAmount(h.uiAmount)}
                 </div>
                 <Badge tone={pct > 20 ? "mock" : pct > 5 ? "neutral" : "live"}>
@@ -161,10 +161,10 @@ function Stat({
       : "ring-white/5";
   return (
     <div className={`card p-3 ring-1 ${ring}`}>
-      <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">
+      <div className="text-[10px] uppercase tracking-widest text-ink-300/65">
         {label}
       </div>
-      <div className="mt-1 text-base font-semibold tabular-nums text-ink-1000">
+      <div className="mt-1 text-base font-semibold tabular-nums text-ink-300">
         {value}
       </div>
     </div>

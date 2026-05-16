@@ -25,14 +25,14 @@ const PILLARS = [
 
 export default function SafetySection() {
   return (
-    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
+    <section className="border-t border-[var(--border)] bg-bg">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
         <div className="max-w-3xl">
           <div className="eyebrow">Safety model</div>
           <h2 className="mt-3 text-display text-display-md text-balance">
             Agents prepare. <span className="stamp">People</span> decide. Wallets sign.
           </h2>
-          <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium text-balance">
+          <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium text-balance">
             Memecoin launches go wrong when an agent silently controls funds.
             KOKi is built so that never happens. The agent is powerful because
             it prepares — not because it holds keys.
@@ -45,17 +45,17 @@ export default function SafetySection() {
             return (
               <div key={p.title} className="card !p-5">
                 <div className="flex items-center justify-between">
-                  <div className="h-10 w-10 rounded-full border-[1.5px] border-ink-1000 bg-koki-500 flex items-center justify-center text-ink-1000">
+                  <div className="h-10 w-10 rounded-full border border-[var(--border-strong)] bg-koki-500 flex items-center justify-center text-ink-300">
                     <Icon className="h-4 w-4" />
                   </div>
                   <span className="eyebrow !text-[10px] opacity-60">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <div className="mt-5 text-[18px] font-black tracking-tight text-ink-1000">
+                <div className="mt-5 text-[18px] font-black tracking-tight text-ink-300">
                   {p.title}
                 </div>
-                <p className="mt-1.5 text-[13px] text-ink-1000/72 leading-snug font-medium">
+                <p className="mt-1.5 text-[13px] text-ink-300/72 leading-snug font-medium">
                   {p.body}
                 </p>
               </div>

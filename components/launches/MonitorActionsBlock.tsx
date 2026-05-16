@@ -65,8 +65,8 @@ export default function MonitorActionsBlock(props: Props) {
 
   if (loading) {
     return (
-      <div className="card p-6 text-sm text-ink-1000/72 flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin text-ink-1000" />
+      <div className="card p-6 text-sm text-ink-300/72 flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin text-ink-300" />
         Generating suggested next actions…
       </div>
     );
@@ -85,22 +85,22 @@ export default function MonitorActionsBlock(props: Props) {
     <div className="space-y-4">
       <div className="card p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="h-4 w-4 text-ink-1000" />
-          <div className="text-sm font-semibold text-ink-1000">Suggested next actions</div>
+          <Zap className="h-4 w-4 text-ink-300" />
+          <div className="text-sm font-semibold text-ink-300">Suggested next actions</div>
           {data.provider === "xai" ? (
             <Badge tone="live">Grok · {data.model}</Badge>
           ) : (
             <Badge tone="mock">Stub</Badge>
           )}
         </div>
-        <p className="text-sm text-ink-1000 leading-relaxed">{headline}</p>
+        <p className="text-sm text-ink-300 leading-relaxed">{headline}</p>
       </div>
 
       {riskSignals.length > 0 && (
         <div className="card p-5 border-amber-300/25">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="h-4 w-4 text-amber-300" />
-            <div className="text-sm font-semibold text-ink-1000">Risk signals</div>
+            <div className="text-sm font-semibold text-ink-300">Risk signals</div>
           </div>
           <ul className="space-y-2 text-sm text-amber-100/90">
             {riskSignals.map((r) => (
@@ -117,14 +117,14 @@ export default function MonitorActionsBlock(props: Props) {
         {actions.map((a) => (
           <div key={a.title} className="card p-4">
             <div className="flex items-start justify-between gap-2">
-              <div className="text-sm font-semibold text-ink-1000 tracking-tight">
+              <div className="text-sm font-semibold text-ink-300 tracking-tight">
                 {a.title}
               </div>
               <Badge tone={a.priority === "now" ? "live" : a.priority === "today" ? "info" : "soon"}>
                 {a.priority}
               </Badge>
             </div>
-            <p className="mt-2 text-xs text-ink-1000/72 leading-relaxed">{a.why}</p>
+            <p className="mt-2 text-xs text-ink-300/72 leading-relaxed">{a.why}</p>
           </div>
         ))}
       </div>

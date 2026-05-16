@@ -45,7 +45,7 @@ export default function SettingsPage() {
             <ShieldAlert className="h-4 w-4" />
             <h2 className="text-base font-semibold">Clear local data</h2>
           </div>
-          <p className="text-sm text-ink-1000/72">
+          <p className="text-sm text-ink-300/72">
             Wipe locally stored launch history. This does NOT touch on-chain
             tokens — only your browser's history list.
           </p>

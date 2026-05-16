@@ -3,7 +3,7 @@ import { ArrowRight, Radar } from "lucide-react";
 
 export default function AttentionLayerSection() {
   return (
-    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
+    <section className="border-t border-[var(--border)] bg-bg">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
         <div className="max-w-4xl">
           <div className="eyebrow flex items-center gap-2">
@@ -15,7 +15,7 @@ export default function AttentionLayerSection() {
             <br />
             <span className="opacity-60">KOKi watches first.</span>
           </h2>
-          <p className="mt-6 text-ink-1000/80 text-base md:text-lg leading-relaxed max-w-2xl text-balance font-medium">
+          <p className="mt-6 text-ink-300/80 text-base md:text-lg leading-relaxed max-w-2xl text-balance font-medium">
             KOKi reads X meme signals, community momentum, and on-chain
             relevance before drafting a launch kit and preparing Pump.fun
             execution. You start at the top of the funnel — not a blank form.
@@ -26,7 +26,7 @@ export default function AttentionLayerSection() {
               Try Auto-pilot
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <span className="text-[12px] font-bold text-ink-1000/72">
+            <span className="text-[12px] font-bold text-ink-300/72">
               Live X search via Grok’s x_search tool.
             </span>
           </div>

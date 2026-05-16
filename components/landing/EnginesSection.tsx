@@ -72,14 +72,14 @@ const ENGINES: Engine[] = [
 
 export default function EnginesSection() {
   return (
-    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500">
+    <section className="border-t border-[var(--border)] bg-bg">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-3xl">
           <div className="eyebrow">Four engines · one agent</div>
           <h2 className="mt-3 text-display text-display-md text-balance">
             X attention · community · on-chain · <span className="stamp">launch</span>.
           </h2>
-          <p className="mt-5 text-ink-1000/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
+          <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
             Memecoins are born on X. Communities move on X. Alpha flows from
             on-chain to X. KOKi is the first to wire all four into a single
             autonomous launch agent.
@@ -97,7 +97,7 @@ export default function EnginesSection() {
               >
                 <div className="flex items-center justify-between">
                   <span className="eyebrow !text-[10px] opacity-70">PHASE {e.num}</span>
-                  <div className="h-9 w-9 rounded-full border-[1.5px] border-ink-1000 flex items-center justify-center text-ink-1000 bg-koki-500">
+                  <div className="h-9 w-9 rounded-full border border-[var(--border-strong)] flex items-center justify-center text-ink-300 bg-koki-500">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
@@ -105,19 +105,19 @@ export default function EnginesSection() {
                   <div className="text-display text-[34px] md:text-[40px]">
                     {e.name}
                   </div>
-                  <p className="mt-2 text-[13px] text-ink-1000/72 leading-snug font-medium">
+                  <p className="mt-2 text-[13px] text-ink-300/72 leading-snug font-medium">
                     {e.insight}
                   </p>
                 </div>
-                <ul className="mt-5 space-y-1.5 text-[13px] text-ink-1000 font-semibold">
+                <ul className="mt-5 space-y-1.5 text-[13px] text-ink-300 font-semibold">
                   {e.capabilities.map((c) => (
                     <li key={c} className="flex gap-2.5 items-start">
-                      <span className="text-ink-1000 leading-6">●</span>
+                      <span className="text-ink-300 leading-6">●</span>
                       <span>{c}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-7 inline-flex items-center gap-1.5 text-[13px] text-ink-1000 font-extrabold group-hover:gap-2.5 transition-all">
+                <div className="mt-7 inline-flex items-center gap-1.5 text-[13px] text-ink-300 font-extrabold group-hover:gap-2.5 transition-all">
                   {e.cta}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>

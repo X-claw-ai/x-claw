@@ -16,27 +16,27 @@ export default function MemeCard({ meme, compact = false }: Props) {
     <div className="card card-hover !p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="h-10 w-10 rounded-md bg-koki-500 border-[1.5px] border-ink-1000 flex items-center justify-center text-ink-1000 shrink-0">
+          <div className="h-10 w-10 rounded-md bg-koki-500 border border-[var(--border-strong)] flex items-center justify-center text-ink-300 shrink-0">
             <Radar className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <div className="text-[16px] font-black text-ink-1000 truncate tracking-tight">
+            <div className="text-[16px] font-black text-ink-300 truncate tracking-tight">
               {meme.name}
             </div>
-            <div className="text-[10px] uppercase tracking-[0.12em] text-ink-1000/70 font-extrabold">
+            <div className="text-[10px] uppercase tracking-[0.12em] text-ink-300/70 font-extrabold">
               ${meme.ticker}
             </div>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
           <Badge tone={meta.tone}>{meta.label}</Badge>
-          <span className="text-[10px] text-ink-1000/55 font-bold">
+          <span className="text-[10px] text-ink-300/55 font-bold">
             {meme.source}
           </span>
         </div>
       </div>
 
-      <p className="text-[13px] text-ink-1000/72 leading-snug font-medium">
+      <p className="text-[13px] text-ink-300/72 leading-snug font-medium">
         {meme.shortDescription}
       </p>
 
@@ -54,7 +54,7 @@ export default function MemeCard({ meme, compact = false }: Props) {
       </div>
 
       {!compact && (
-        <div className="text-[11px] text-ink-1000/55 font-bold">
+        <div className="text-[11px] text-ink-300/55 font-bold">
           {meme.sampleTweetCount.toLocaleString()} sample posts · detected{" "}
           {timeSince(meme.detectedAt)}
         </div>
@@ -93,10 +93,10 @@ function ScorePill({
   const bg =
     value >= 90
       ? "bg-ink-1000 text-koki-500"
-      : "bg-cream-50 text-ink-1000";
+      : "bg-cream-50 text-ink-300";
   return (
     <div
-      className={`rounded-[10px] border-[1.5px] border-ink-1000 px-2 py-1.5 ${bg} ${
+      className={`rounded-[10px] border border-[var(--border-strong)] px-2 py-1.5 ${bg} ${
         headline ? "ring-2 ring-ink-1000" : ""
       }`}
     >

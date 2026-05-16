@@ -61,7 +61,7 @@ export default function LaunchesTable() {
         <div className="text-[20px] font-black tracking-tight">
           No public launches yet
         </div>
-        <p className="text-[13px] text-ink-1000/70 mt-2 max-w-md mx-auto font-medium">
+        <p className="text-[13px] text-ink-300/70 mt-2 max-w-md mx-auto font-medium">
           {error
             ? "Couldn't load the public launch board right now. Try refreshing."
             : "Be the first to ship a memecoin through KOKi. Every shipped token shows up here for everyone to see."}
@@ -139,7 +139,7 @@ function PublicLaunchCard({
       className="card card-hover group flex flex-col overflow-hidden !p-0 launch-card-anim"
       style={{ animationDelay: `${Math.min(idx, 12) * 60}ms` }}
     >
-      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b-[1.5px] border-ink-1000">
+      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b border-[var(--border-strong)]">
         {imgUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -150,7 +150,7 @@ function PublicLaunchCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-ink-1000 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
+            <span className="text-ink-300 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
               ${launch.ticker}
             </span>
           </div>
@@ -162,18 +162,18 @@ function PublicLaunchCard({
           <div className="text-[14px] font-black tracking-tight truncate">
             {launch.token_name}
           </div>
-          <span className="text-[10px] font-extrabold text-ink-1000/65 shrink-0">
+          <span className="text-[10px] font-extrabold text-ink-300/65 shrink-0">
             ${launch.ticker}
           </span>
         </div>
-        <div className="text-[10px] text-ink-1000/55 font-mono truncate">
+        <div className="text-[10px] text-ink-300/55 font-mono truncate">
           {launch.mint_pubkey.slice(0, 5)}…{launch.mint_pubkey.slice(-5)}
         </div>
 
         {/* Live market cap from Pump.fun. Always show the row so the user
             can see when the data hasn't arrived yet. */}
         <div className="flex items-baseline justify-between gap-2 pt-1">
-          <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-ink-300/55 uppercase tracking-wider">
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
@@ -191,7 +191,7 @@ function PublicLaunchCard({
           >
             {stats?.complete ? "Graduated" : "Launched"}
           </Badge>
-          <span className="text-[10px] text-ink-1000/55 font-bold">
+          <span className="text-[10px] text-ink-300/55 font-bold">
             {new Date(launch.created_at).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -200,7 +200,7 @@ function PublicLaunchCard({
         </div>
         <div className="flex items-center justify-between pt-1">
           <span
-            className="text-[10px] text-ink-1000/55 font-mono"
+            className="text-[10px] text-ink-300/55 font-mono"
             title={`Launched by wallet ${launch.wallet_pubkey}`}
           >
             by {creator}
@@ -211,7 +211,7 @@ function PublicLaunchCard({
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-1000/72 hover:text-ink-1000 hover:underline"
+              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
             >
               Pump <ExternalLink className="h-2.5 w-2.5" />
             </a>
@@ -232,14 +232,14 @@ function BondingBar({
   const pct = Math.max(0, Math.min(1, progress)) * 100;
   return (
     <div className="space-y-1 pt-1">
-      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
+      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-300/55 uppercase tracking-wider">
         <span>Bonding</span>
         <span className="tabular-nums">{pct.toFixed(0)}%</span>
       </div>
       <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
         <div
           className={`h-full transition-all duration-500 ${
-            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-ink-1000"
+            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-[var(--border-strong)]"
           }`}
           style={{ width: `${pct}%` }}
         />
@@ -253,7 +253,7 @@ function SkeletonGrid() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="card !p-0 overflow-hidden animate-pulse">
-          <div className="aspect-square w-full bg-koki-500/40 border-b-[1.5px] border-ink-1000" />
+          <div className="aspect-square w-full bg-koki-500/40 border-b border-[var(--border-strong)]" />
           <div className="p-3.5 space-y-2">
             <div className="h-3.5 bg-ink-1000/10 rounded w-3/4" />
             <div className="h-2.5 bg-ink-1000/10 rounded w-1/2" />

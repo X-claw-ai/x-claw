@@ -81,7 +81,7 @@ export default function CommandCenter() {
             <h2 className="text-[26px] md:text-[30px] font-black tracking-tight mt-1">
               Tokens shipped by KOKi agents
             </h2>
-            <p className="text-[13px] text-ink-1000/70 mt-1 font-medium max-w-xl">
+            <p className="text-[13px] text-ink-300/70 mt-1 font-medium max-w-xl">
               Every memecoin launched through the KOKi agent — name, ticker,
               mint, and the meme art that shipped to Pump.fun. Click any card
               to open the live monitor.
@@ -182,7 +182,7 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
       style={{ animationDelay: `${Math.min(idx, 12) * 60}ms` }}
     >
       {/* Meme image / fallback tile */}
-      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b-[1.5px] border-ink-1000">
+      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b border-[var(--border-strong)]">
         {imgUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -193,7 +193,7 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-ink-1000 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
+            <span className="text-ink-300 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
               ${launch.ticker}
             </span>
           </div>
@@ -206,11 +206,11 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
           <div className="text-[14px] font-black tracking-tight truncate">
             {launch.tokenName}
           </div>
-          <span className="text-[10px] font-extrabold text-ink-1000/65 shrink-0">
+          <span className="text-[10px] font-extrabold text-ink-300/65 shrink-0">
             ${launch.ticker}
           </span>
         </div>
-        <div className="text-[10px] text-ink-1000/55 font-mono truncate">
+        <div className="text-[10px] text-ink-300/55 font-mono truncate">
           {shortAddr(launch.mintPubkey || "—")}
         </div>
 
@@ -218,7 +218,7 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
             can see when data hasn't arrived yet — much better debug than
             the row silently disappearing on API failure. */}
         <div className="flex items-baseline justify-between gap-2 pt-1">
-          <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-ink-300/55 uppercase tracking-wider">
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
@@ -236,7 +236,7 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
           >
             {stats?.complete ? "Graduated" : "Launched"}
           </Badge>
-          <span className="text-[10px] text-ink-1000/55 font-bold">
+          <span className="text-[10px] text-ink-300/55 font-bold">
             {new Date(launch.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -249,7 +249,7 @@ function TokenCard({ launch, idx = 0 }: { launch: SavedLaunch; idx?: number }) {
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-1000/72 hover:text-ink-1000 hover:underline"
+            className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
           >
             Pump.fun <ExternalLink className="h-2.5 w-2.5" />
           </a>
@@ -267,7 +267,7 @@ function EmptyState() {
       <div className="text-[20px] font-black tracking-tight">
         No agent launches yet
       </div>
-      <p className="text-[13px] text-ink-1000/70 mt-2 max-w-md mx-auto font-medium">
+      <p className="text-[13px] text-ink-300/70 mt-2 max-w-md mx-auto font-medium">
         Send a prompt or hit Auto-pilot, and the KOKi agent will draft and
         ship a memecoin to Pump.fun. Every coin you launch shows up here.
       </p>
@@ -287,7 +287,7 @@ function SkeletonGrid() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="card !p-0 overflow-hidden animate-pulse">
-          <div className="aspect-square w-full bg-koki-500/40 border-b-[1.5px] border-ink-1000" />
+          <div className="aspect-square w-full bg-koki-500/40 border-b border-[var(--border-strong)]" />
           <div className="p-3.5 space-y-2">
             <div className="h-3.5 bg-ink-1000/10 rounded w-3/4" />
             <div className="h-2.5 bg-ink-1000/10 rounded w-1/2" />
@@ -308,14 +308,14 @@ function BondingBar({
   const pct = Math.max(0, Math.min(1, progress)) * 100;
   return (
     <div className="space-y-1 pt-1">
-      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
+      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-300/55 uppercase tracking-wider">
         <span>Bonding</span>
         <span className="tabular-nums">{pct.toFixed(0)}%</span>
       </div>
       <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
         <div
           className={`h-full transition-all duration-500 ${
-            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-ink-1000"
+            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-[var(--border-strong)]"
           }`}
           style={{ width: `${pct}%` }}
         />

@@ -50,7 +50,7 @@ export default function LiveLaunchesSection() {
   if (items !== null && items.length === 0) return null;
 
   return (
-    <section className="bg-koki-500 border-b-[1.5px] border-ink-1000">
+    <section className="bg-bg border-b border-[var(--border)]">
       <div className="mx-auto max-w-6xl px-6 pt-16 pb-20 md:pt-20 md:pb-24">
         <div className="flex items-end justify-between gap-4 mb-10 flex-wrap">
           <div>
@@ -62,7 +62,7 @@ export default function LiveLaunchesSection() {
               <br />
               <span className="opacity-60">Real wallets. Real markets.</span>
             </h2>
-            <p className="mt-4 text-ink-1000/80 text-base md:text-lg leading-snug max-w-xl font-medium">
+            <p className="mt-4 text-ink-300/80 text-base md:text-lg leading-snug max-w-xl font-medium">
               Every memecoin shipped through the KOKi agent — across all
               wallets — with live market cap and bonding-curve progress
               straight from Pump.fun.
@@ -136,7 +136,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
       className="card card-hover group flex flex-col overflow-hidden !p-0 launch-card-anim"
       style={{ animationDelay: `${Math.min(idx, 8) * 60}ms` }}
     >
-      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b-[1.5px] border-ink-1000">
+      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b border-[var(--border-strong)]">
         {imgUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -147,7 +147,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-ink-1000 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
+            <span className="text-ink-300 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
               ${launch.ticker}
             </span>
           </div>
@@ -159,13 +159,13 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
           <div className="text-[14px] font-black tracking-tight truncate">
             {launch.token_name}
           </div>
-          <span className="text-[10px] font-extrabold text-ink-1000/65 shrink-0">
+          <span className="text-[10px] font-extrabold text-ink-300/65 shrink-0">
             ${launch.ticker}
           </span>
         </div>
 
         <div className="flex items-baseline justify-between gap-2 pt-1">
-          <span className="text-[10px] font-bold text-ink-1000/55 uppercase tracking-wider">
+          <span className="text-[10px] font-bold text-ink-300/55 uppercase tracking-wider">
             Mcap
           </span>
           <span className="text-[13px] font-black tabular-nums tracking-tight">
@@ -174,7 +174,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
         </div>
         {stats && stats.bondingProgress !== null && (
           <div className="space-y-1 pt-1">
-            <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-1000/55 uppercase tracking-wider">
+            <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-300/55 uppercase tracking-wider">
               <span>Bonding</span>
               <span className="tabular-nums">
                 {(Math.max(0, Math.min(1, stats.bondingProgress)) * 100).toFixed(0)}%
@@ -185,7 +185,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
                 className={`h-full transition-all duration-500 ${
                   stats.complete
                     ? "bg-ink-1000"
-                    : "bg-koki-500 border-r border-ink-1000"
+                    : "bg-koki-500 border-r border-[var(--border-strong)]"
                 }`}
                 style={{
                   width: `${Math.max(0, Math.min(1, stats.bondingProgress)) * 100}%`,
@@ -208,7 +208,7 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-1000/72 hover:text-ink-1000 hover:underline"
+              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
             >
               Pump <ExternalLink className="h-2.5 w-2.5" />
             </a>
@@ -224,7 +224,7 @@ function SkeletonGrid() {
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="card !p-0 overflow-hidden animate-pulse">
-          <div className="aspect-square w-full bg-koki-500/40 border-b-[1.5px] border-ink-1000" />
+          <div className="aspect-square w-full bg-koki-500/40 border-b border-[var(--border-strong)]" />
           <div className="p-3.5 space-y-2">
             <div className="h-3.5 bg-ink-1000/10 rounded w-3/4" />
             <div className="h-2.5 bg-ink-1000/10 rounded w-1/2" />

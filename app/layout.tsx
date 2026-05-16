@@ -51,8 +51,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#E55B14",
-  colorScheme: "light",
+  // Match the page background so the URL bar / status bar on mobile
+  // blends into the app. Was the brand orange when the site was
+  // orange-on-cream; now it's the deep dark canvas.
+  themeColor: "#0B0E11",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -61,8 +64,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-koki-500">
-      <body className="min-h-screen bg-koki-500 text-ink-1000 antialiased">
+    <html lang="en" className="bg-bg">
+      <body className="min-h-screen bg-bg text-ink-300 antialiased bg-app">
         <XClawWalletProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />

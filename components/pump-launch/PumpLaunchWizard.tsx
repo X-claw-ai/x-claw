@@ -677,7 +677,7 @@ function ConceptStep({
           type="button"
           onClick={onAutoPilot}
           disabled={autoPiloting}
-          className="btn !bg-koki-500 !text-ink-1000 !border-koki-500 !py-2 !px-4 !text-xs whitespace-nowrap disabled:opacity-60"
+          className="btn !bg-koki-500 !text-ink-300 !border-koki-500 !py-2 !px-4 !text-xs whitespace-nowrap disabled:opacity-60"
         >
           {autoPiloting ? (
             <>
@@ -695,10 +695,10 @@ function ConceptStep({
 
       <div className="card p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Rocket className="h-5 w-5 text-ink-1000" />
+          <Rocket className="h-5 w-5 text-ink-300" />
           <h2 className="text-lg font-semibold">Or — manual concept</h2>
         </div>
-        <p className="text-sm text-ink-1000/72">
+        <p className="text-sm text-ink-300/72">
           Describe the project yourself. The agent drafts launch materials. You review everything before any signature.
         </p>
 
@@ -809,7 +809,7 @@ function ConceptStep({
                 onChange={(e) => onLogoChange(e.target.files?.[0] ?? null)}
               />
             </label>
-            <span className="text-xs font-bold text-ink-1000/65">
+            <span className="text-xs font-bold text-ink-300/65">
               {concept.logoDataUrl ? "Image ready" : "No image yet"}
             </span>
           </div>
@@ -818,12 +818,12 @@ function ConceptStep({
               <img
                 src={concept.logoDataUrl}
                 alt="Logo preview"
-                className="h-20 w-20 rounded-md border-[1.5px] border-ink-1000 object-cover"
+                className="h-20 w-20 rounded-md border border-[var(--border-strong)] object-cover"
               />
               <div className="flex flex-col gap-1">
                 <Badge>Preview</Badge>
                 {logoProvider && (
-                  <span className="text-[10px] font-bold text-ink-1000/65">
+                  <span className="text-[10px] font-bold text-ink-300/65">
                     Source: {logoProvider}
                   </span>
                 )}
@@ -831,7 +831,7 @@ function ConceptStep({
                   type="button"
                   onClick={onGenerateLogo}
                   disabled={generatingLogo}
-                  className="text-[11px] font-extrabold text-ink-1000 underline hover:opacity-70 text-left"
+                  className="text-[11px] font-extrabold text-ink-300 underline hover:opacity-70 text-left"
                 >
                   {generatingLogo ? "regenerating…" : "↻ Regenerate"}
                 </button>
@@ -842,7 +842,7 @@ function ConceptStep({
       </div>
 
         <div className="flex items-center justify-between pt-2">
-          <p className="text-xs text-ink-1000/65">
+          <p className="text-xs text-ink-300/65">
             Inputs stay on your device until you submit. Nothing is signed yet.
           </p>
           <Button onClick={onNext} disabled={!conceptValid}>
@@ -869,11 +869,11 @@ function GeneratingStep({ generating }: { generating: boolean }) {
   ];
   return (
     <div className="card p-8 text-center space-y-4">
-      <div className="mx-auto h-12 w-12 rounded-full bg-koki-500 border border-ink-1000 flex items-center justify-center text-ink-1000">
+      <div className="mx-auto h-12 w-12 rounded-full bg-koki-500 border border-[var(--border-strong)] flex items-center justify-center text-ink-300">
         {generating ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
       </div>
       <h2 className="text-lg font-semibold">Generating Launch Kit</h2>
-      <ul className="text-sm text-ink-1000/72 space-y-1">
+      <ul className="text-sm text-ink-300/72 space-y-1">
         {lines.map((l) => (
           <li key={l}>{l}</li>
         ))}
@@ -998,8 +998,8 @@ function ReviewStep({
               <div className="grid md:grid-cols-2 gap-3">
                 {kit.faq.map((f, i) => (
                   <div key={i} className="card p-4">
-                    <div className="text-sm font-semibold text-ink-1000">Q. {f.q}</div>
-                    <div className="mt-2 text-sm text-ink-1000/72 leading-relaxed">A. {f.a}</div>
+                    <div className="text-sm font-semibold text-ink-300">Q. {f.q}</div>
+                    <div className="mt-2 text-sm text-ink-300/72 leading-relaxed">A. {f.a}</div>
                   </div>
                 ))}
               </div>
@@ -1014,9 +1014,9 @@ function ReviewStep({
           <div className="grid md:grid-cols-2 gap-3">
             {kit.sevenDayPlan.map((d) => (
               <div key={d.day} className="card p-4">
-                <div className="text-xs text-ink-1000/65">Day {d.day}</div>
+                <div className="text-xs text-ink-300/65">Day {d.day}</div>
                 <div className="text-sm font-semibold">{d.title}</div>
-                <ul className="mt-2 text-xs text-ink-1000/72 space-y-1">
+                <ul className="mt-2 text-xs text-ink-300/72 space-y-1">
                   {d.bullets.map((b) => (
                     <li key={b}>• {b}</li>
                   ))}
@@ -1028,10 +1028,10 @@ function ReviewStep({
 
         <div>
           <h3 className="text-sm font-semibold mt-4 mb-2">Daily checklist</h3>
-          <ul className="text-sm text-ink-1000 space-y-1">
+          <ul className="text-sm text-ink-300 space-y-1">
             {kit.dailyChecklist.map((c) => (
               <li key={c} className="flex gap-2">
-                <span className="text-ink-1000">▢</span>
+                <span className="text-ink-300">▢</span>
                 {c}
               </li>
             ))}
@@ -1040,8 +1040,8 @@ function ReviewStep({
       </div>
 
       <div className="card p-4 flex items-start gap-3 text-sm">
-        <ShieldCheck className="h-4 w-4 text-ink-1000 mt-0.5" />
-        <p className="text-ink-1000">
+        <ShieldCheck className="h-4 w-4 text-ink-300 mt-0.5" />
+        <p className="text-ink-300">
           Compliance check: no guaranteed-profit, guaranteed-viral, or partnership claims detected. Edit any field before continuing.
         </p>
       </div>
@@ -1063,15 +1063,15 @@ function PreviewBlock({ title, icon, text }: { title: string; icon?: React.React
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 text-sm font-semibold text-ink-1000">
+        <div className="flex items-center gap-2 text-sm font-semibold text-ink-300">
           {icon}
           {title}
         </div>
-        <button onClick={copy} className="inline-flex items-center gap-1 text-xs text-ink-1000/72 hover:text-ink-1000">
+        <button onClick={copy} className="inline-flex items-center gap-1 text-xs text-ink-300/72 hover:text-ink-300">
           <Copy className="h-3 w-3" /> Copy
         </button>
       </div>
-      <pre className="text-xs whitespace-pre-wrap text-ink-1000 leading-relaxed font-sans">{text}</pre>
+      <pre className="text-xs whitespace-pre-wrap text-ink-300 leading-relaxed font-sans">{text}</pre>
     </div>
   );
 }
@@ -1080,10 +1080,10 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="card p-4">
       <div className="text-sm font-semibold mb-2">{title}</div>
-      <ul className="space-y-1.5 text-xs text-ink-1000 max-h-72 overflow-auto pr-2">
+      <ul className="space-y-1.5 text-xs text-ink-300 max-h-72 overflow-auto pr-2">
         {items.map((it, i) => (
           <li key={i} className="leading-relaxed">
-            <span className="text-ink-1000/65 mr-1">{i + 1}.</span>
+            <span className="text-ink-300/65 mr-1">{i + 1}.</span>
             {it}
           </li>
         ))}
@@ -1110,24 +1110,24 @@ function WalletStep({
   return (
     <div className="card p-6 space-y-5">
       <div className="flex items-center gap-2">
-        <Wallet className="h-5 w-5 text-ink-1000" />
+        <Wallet className="h-5 w-5 text-ink-300" />
         <h2 className="text-lg font-semibold">Connect Wallet</h2>
         {connected && <Badge tone="live">Connected</Badge>}
       </div>
-      <p className="text-sm text-ink-1000/72 max-w-xl">
+      <p className="text-sm text-ink-300/72 max-w-xl">
         KOKi does not store private keys and does not ask for seed phrases. Your wallet (Phantom or Solflare) is the only signer. Pump.fun runs on Solana <span className="text-amber-300 font-semibold">mainnet</span>.
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
         <WalletMultiButton />
         {connected && publicKey && (
-          <span className="text-xs text-ink-1000/72">
+          <span className="text-xs text-ink-300/72">
             {walletName} · <span className="font-mono">{shortAddr(publicKey)}</span>
           </span>
         )}
       </div>
 
-      <div className="flex items-start gap-2 text-xs text-ink-1000/65">
+      <div className="flex items-start gap-2 text-xs text-ink-300/65">
         <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-amber-300" />
         Mainnet uses real SOL. Make sure your wallet has at least 0.05 SOL before launching.
       </div>
@@ -1164,7 +1164,7 @@ function SignStep({
   return (
     <div className="card p-6 space-y-5">
       <div className="flex items-center gap-2 flex-wrap">
-        <ShieldCheck className="h-5 w-5 text-ink-1000" />
+        <ShieldCheck className="h-5 w-5 text-ink-300" />
         <h2 className="text-lg font-semibold">Sign & Launch</h2>
         <Badge tone="live">Mainnet · Real SOL</Badge>
       </div>
@@ -1255,7 +1255,7 @@ function LaunchProgress({ phase, error }: { phase: LaunchPhase; error: string | 
           <div
             key={s.p}
             className={`flex items-center gap-2 text-sm ${
-              done ? "text-ink-1000" : active ? "text-ink-1000" : "text-ink-1000/65"
+              done ? "text-ink-300" : active ? "text-ink-300" : "text-ink-300/65"
             }`}
           >
             {done ? (
@@ -1263,7 +1263,7 @@ function LaunchProgress({ phase, error }: { phase: LaunchPhase; error: string | 
             ) : active ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <span className="h-4 w-4 rounded-full border border-ink-1000" />
+              <span className="h-4 w-4 rounded-full border border-[var(--border-strong)]" />
             )}
             {s.label}
           </div>
@@ -1302,8 +1302,8 @@ function phaseLabel(phase: LaunchPhase): string {
 function SummaryRow({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
   return (
     <div className={`card p-3 ${wide ? "sm:col-span-2" : ""}`}>
-      <div className="text-[10px] uppercase tracking-widest text-ink-1000/65">{label}</div>
-      <div className="mt-1 text-sm text-ink-1000">{value}</div>
+      <div className="text-[10px] uppercase tracking-widest text-ink-300/65">{label}</div>
+      <div className="mt-1 text-sm text-ink-300">{value}</div>
     </div>
   );
 }
@@ -1324,12 +1324,12 @@ function DashboardStep({
     <div className="space-y-6">
       <div className="card p-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <CheckCircle2 className="h-5 w-5 text-ink-1000" />
+          <CheckCircle2 className="h-5 w-5 text-ink-300" />
           <h2 className="text-lg font-semibold">Launched on Pump.fun</h2>
           <Badge tone="live">Mainnet · Live</Badge>
           <ProviderBadge meta={providerMeta} />
         </div>
-        <p className="mt-2 text-sm text-ink-1000/72 max-w-2xl">
+        <p className="mt-2 text-sm text-ink-300/72 max-w-2xl">
           Your token is live on Solana. The metadata + image are stored on IPFS and the bonding-curve trading is now active on Pump.fun.
         </p>
 
@@ -1344,7 +1344,7 @@ function DashboardStep({
         <div className="mt-4 flex items-center gap-2 flex-wrap">
           <a
             href={`/launches/${result.mintPubkey}`}
-            className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-ink-1000 px-3.5 py-2 text-sm font-semibold hover:bg-koki-400"
+            className="inline-flex items-center gap-2 rounded-md bg-koki-500 text-ink-300 px-3.5 py-2 text-sm font-semibold hover:bg-koki-400"
           >
             Open monitoring dashboard
           </a>
@@ -1352,7 +1352,7 @@ function DashboardStep({
             href={result.pumpUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-ink-1000 px-3.5 py-2 text-sm font-semibold hover:bg-cream-100"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--border-strong)] px-3.5 py-2 text-sm font-semibold hover:bg-cream-100"
           >
             View on Pump.fun
             <ExternalLink className="h-4 w-4" />
@@ -1361,7 +1361,7 @@ function DashboardStep({
             href={solscan}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-ink-1000 px-3.5 py-2 text-sm font-semibold hover:bg-cream-100"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--border-strong)] px-3.5 py-2 text-sm font-semibold hover:bg-cream-100"
           >
             View tx on Solscan
             <ExternalLink className="h-4 w-4" />
@@ -1377,19 +1377,19 @@ function DashboardStep({
 
       <div className="card p-4">
         <div className="text-sm font-semibold mb-2">Daily checklist</div>
-        <ul className="text-sm text-ink-1000 space-y-1">
+        <ul className="text-sm text-ink-300 space-y-1">
           {kit.dailyChecklist.map((c) => (
             <li key={c} className="flex gap-2">
-              <span className="text-ink-1000">▢</span>
+              <span className="text-ink-300">▢</span>
               {c}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="card p-4 text-xs text-ink-1000/65">
+      <div className="card p-4 text-xs text-ink-300/65">
         Launch saved to your local launch history. Head to{" "}
-        <a href="/launches" className="text-ink-1000 hover:underline">/launches</a>{" "}
+        <a href="/launches" className="text-ink-300 hover:underline">/launches</a>{" "}
         to revisit.
       </div>
     </div>
@@ -1406,23 +1406,23 @@ function DashboardStep({
 function RadarSourceBanner({ meme }: { meme: RadarMeme }) {
   const meta = READINESS_META[meme.launchReadiness];
   return (
-    <div className="card p-4 border-ink-1000 flex items-start gap-3">
-      <div className="h-9 w-9 rounded-md bg-koki-500 border border-ink-1000 flex items-center justify-center text-ink-1000 shrink-0">
+    <div className="card p-4 border-[var(--border-strong)] flex items-start gap-3">
+      <div className="h-9 w-9 rounded-md bg-koki-500 border border-[var(--border-strong)] flex items-center justify-center text-ink-300 shrink-0">
         <Radar className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] uppercase tracking-widest text-ink-1000">
+          <span className="text-[10px] uppercase tracking-widest text-ink-300">
             Radar signal
           </span>
-          <span className="text-sm font-semibold text-ink-1000">
+          <span className="text-sm font-semibold text-ink-300">
             {meme.name}
           </span>
-          <span className="text-xs text-ink-1000/65">${meme.ticker}</span>
+          <span className="text-xs text-ink-300/65">${meme.ticker}</span>
           <Badge tone={meta.tone}>{meta.label} readiness</Badge>
           <Badge tone="neutral">Trend {meme.scores.trend}</Badge>
         </div>
-        <p className="mt-1.5 text-xs text-ink-1000/72 leading-relaxed">
+        <p className="mt-1.5 text-xs text-ink-300/72 leading-relaxed">
           Form prefilled from a Real-time Meme Radar signal. Edit any field
           before generating, or proceed if it looks good.
         </p>

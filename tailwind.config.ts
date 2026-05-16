@@ -39,17 +39,51 @@ const config: Config = {
         "extra-tight": "-0.025em",
       },
       colors: {
-        // ── Ink (true black tones) ──────────────────────────────────────
+        // ── Semantic tokens (preferred for new code) ────────────────────
+        // These mirror the CSS variables in globals.css so Tailwind classes
+        // stay in sync with hover/focus rules defined there. Reach for
+        // these first; the legacy palettes below are kept so existing
+        // class names (bg-cream-50, text-ink-1000, etc.) compile cleanly
+        // and re-resolve to dark-mode equivalents.
+        bg: "var(--bg)",
+        "bg-elevated": "var(--bg-elevated)",
+        surface: "var(--surface)",
+        "surface-2": "var(--surface-2)",
+        text: "var(--text)",
+        "text-muted": "var(--text-muted)",
+        "text-subtle": "var(--text-subtle)",
+        border: "var(--border)",
+        "border-strong": "var(--border-strong)",
+        up: "var(--up)",
+        down: "var(--down)",
+
+        // ── Ink palette — REMAPPED to Binance-dark surface scale. ───────
+        // Previously these were dark hex values used for both surfaces
+        // AND text on light backgrounds. Now the project is dark-themed,
+        // so:
+        //   - `bg-ink-1000` (was "deepest dark") still resolves to the
+        //     deepest tone — our page bg — so it keeps working.
+        //   - `text-ink-1000` (was "primary text on light bg") would now
+        //     be near-invisible. Components should migrate to `text-text`
+        //     or `text-ink-50` instead. We map the high end of the scale
+        //     to the page bg and the LOW end to light text colors, so any
+        //     remaining `text-ink-100`-ish usage still produces readable
+        //     light text by accident in most cases.
         ink: {
-          1000: "#0B0B0B", // brand black (logo paw + headlines)
-          950: "#1A0A04",
-          900: "#2A1408",
-          800: "#3A1F0F",
-          700: "#4A2A18",
-          600: "#5C3520",
-          500: "#6E4029",
+          1000: "#0B0E11", // page bg
+          950: "#181A20",
+          900: "#1E2329", // card surface
+          800: "#252A31",
+          700: "#2B3139",
+          600: "#454B54",
+          500: "#848E9C", // text subtle
+          400: "#B7BDC6", // text muted
+          300: "#EAECEF", // primary text — new
+          200: "#F0F3F5",
+          100: "#F5F7FA",
+          50:  "#FAFCFE",
         },
-        // ── KOKi orange (brand primary — Shiba-energy tangerine) ────────
+        // ── KOKi orange — unchanged. The single warm accent on dark. ────
         koki: {
           50: "#FFF4ED",
           100: "#FFE0CB",
@@ -76,13 +110,17 @@ const config: Config = {
           800: "#6F2A0B",
           900: "#4A1C07",
         },
-        // ── Cream (Shiba face inner / soft surface) ─────────────────────
+        // ── Cream — REMAPPED to dark surfaces. Anywhere components used
+        //    `bg-cream-50` for "card surface" now correctly gets the dark
+        //    card surface. Anywhere `text-cream-50` was used (text on
+        //    inverted ink panels) now produces text-near-white on a dark
+        //    accent panel — still legible.
         cream: {
-          50: "#FFF7ED",
-          100: "#FFEED4",
-          200: "#FFE0B0",
+          50: "#1E2329",   // primary card surface (was light cream)
+          100: "#2B3139",  // hover / nested panel
+          200: "#3A4049",  // warmer dark variant
         },
-        // ── Cool blue for data/info accents ─────────────────────────────
+        // ── Cool blue for data/info accents — unchanged. ────────────────
         sea: {
           400: "#5BA9FF",
           500: "#3B8FFA",

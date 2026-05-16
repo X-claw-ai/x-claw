@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function FinalCTA() {
   return (
-    <section className="border-t-[1.5px] border-ink-1000 bg-koki-500 relative overflow-hidden">
+    <section className="border-t border-[var(--border)] bg-bg relative overflow-hidden">
       <svg
         viewBox="0 0 32 32"
         className="absolute -left-24 -top-24 w-[420px] h-[420px] opacity-[0.07] pointer-events-none"
@@ -22,7 +22,7 @@ export default function FinalCTA() {
           <br />
           <span className="stamp">Live</span> on Pump.fun.
         </h2>
-        <p className="mt-6 text-ink-1000/80 text-base md:text-lg max-w-xl mx-auto font-bold">
+        <p className="mt-6 text-ink-300/80 text-base md:text-lg max-w-xl mx-auto font-bold">
           $KOKI · Grok-native · X-native · open source.
         </p>
         <div className="mt-9 flex justify-center gap-3 flex-wrap">

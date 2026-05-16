@@ -25,7 +25,7 @@ export default function LaunchHistoryPage() {
       <section className="mx-auto max-w-7xl px-6 py-10">
         <LaunchesTable />
 
-        <p className="mt-8 text-xs text-ink-1000/55 text-center">
+        <p className="mt-8 text-xs text-ink-300/55 text-center">
           To see only your own launches, head to{" "}
           <a href="/dashboard" className="font-extrabold underline">
             My Launches

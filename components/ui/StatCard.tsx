@@ -30,7 +30,7 @@ export function StatCard({
       <div
         className={cn(
           "mt-2 text-[28px] font-black tracking-tight",
-          isEmph ? "text-koki-500" : "text-ink-1000"
+          isEmph ? "text-koki-500" : "text-ink-300"
         )}
       >
         {value}
@@ -39,7 +39,7 @@ export function StatCard({
         <div
           className={cn(
             "mt-1 text-[12px] font-bold",
-            isEmph ? "text-koki-500/80" : "text-ink-1000/65"
+            isEmph ? "text-koki-500/80" : "text-ink-300/65"
           )}
         >
           {hint}

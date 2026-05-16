@@ -8,7 +8,7 @@ const styles: Record<Variant, string> = {
   secondary: "btn btn-secondary",
   ghost: "btn btn-ghost",
   danger:
-    "btn !border-ink-1000 bg-red-600 hover:bg-red-700 text-white",
+    "btn !border-[var(--border-strong)] bg-red-600 hover:bg-red-700 text-white",
 };
 
 interface BaseProps {
