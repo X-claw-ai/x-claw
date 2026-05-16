@@ -106,11 +106,12 @@ export async function POST(req: NextRequest) {
     // via XAI_MODEL_AUTO_CONCEPT for testing.
     const searchModel = process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3";
 
-    // 14-day window balances freshness vs result depth. Pro plan gives us
-    // 300s of function time so we can afford a richer search than the
-    // 7-day/5-result minimum we'd squeeze into Hobby's 60s ceiling.
+    // 48-HOUR window. The user explicitly wants the FRESHEST viral content
+    // ("최신 소식, 조회수 엄청 많고 반응 핫한"), so a wide 14-day window pulls
+    // back posts that already peaked days ago. 48 hours forces Grok to dig
+    // into right-now-trending content.
     const today = new Date();
-    const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
     const llmRes = await callLLM({
@@ -128,9 +129,9 @@ export async function POST(req: NextRequest) {
       ...(wantLiveSearch || true
         ? {
             liveSearch: {
-              fromDate: isoDate(twoWeeksAgo),
+              fromDate: isoDate(twoDaysAgo),
               toDate: isoDate(today),
-              maxResults: 25, // bigger pool = better odds of finding a non-excluded post
+              maxResults: 30, // bigger pool = better odds of clearing the engagement floor
               enableImageUnderstanding: true,
             },
           }

@@ -58,27 +58,58 @@ export function buildAutoConceptMessages(opts: AutoConceptPromptOptions = {}): M
 ${excludeBlock}
 END EXCLUDE LIST.
 
-YOU HAVE THE x_search TOOL. USE IT. Steps:
-1. Call x_search to find what's trending in meme / crypto-twitter / AI-agent / Solana culture in the last 14 days. PREFER posts that have an attached image — the visual IS the meme.
-2. Filter the results HARD. The post you anchor on MUST be:
+YOU HAVE THE x_search TOOL. USE IT — AGGRESSIVELY.
+
+STEP 1 — SEARCH WIDE, FILTER NARROW.
+Call x_search MULTIPLE TIMES with different queries to build a pool of 20-40 candidates from the LAST 48 HOURS ONLY (not 7 days, not 14 days — 48 hours, otherwise it isn't fresh). Run searches like:
+  - trending viral memes today
+  - top liked X posts last 24 hours
+  - what's everyone laughing at on X this week
+  - viral images crypto twitter
+  - AI agent jokes trending
+  - solana culture viral
+  - dog meme viral / cat meme viral / frog meme viral
+Then merge the results. Bigger pool = better odds of finding a true banger.
+
+STEP 2 — HARD ENGAGEMENT FLOOR. Reject any post that doesn't clearly meet AT LEAST ONE of these:
+   • 100,000+ views, OR
+   • 10,000+ likes, OR
+   • 5,000+ retweets/reposts, OR
+   • is currently a top reply on a thread that itself has those numbers
+If you can't see numbers in the search result, the post probably isn't big enough — skip it. We want stuff people are ACTUALLY talking about, not a random post that happens to be cute.
+
+STEP 3 — SPECIFICITY TEST. The summary you write MUST point at something concrete:
+   ✓ A specific named character, animal, or persona ("Moo Deng the baby hippo", "the side-eye chihuahua", "the orange office cat employee #47")
+   ✓ A specific event, situation, or punchline ("the AI tried to order pizza for a meeting", "Japanese company employs 11 cats")
+   ✓ A specific recognizable visual people will identify on sight
+   ✗ REJECT generic descriptions like "a dog sitting on a fence looking confused" or "a cat with a beautiful coat" — those are placeholders, not viral content
+The test: could a stranger on X read your summary, recognize WHICH POST you mean, and nod? If they'd just say "which one?" — it isn't viral enough.
+
+STEP 4 — ORGANIC CONTENT FILTER. The post you anchor on MUST be:
    ✓ Organic cultural content — a joke, image, observation, video clip, screenshot, take, format, character
    ✓ Has at least one attached image (we'll use it as the token logo)
    ✗ NOT a token shill post (no "$TICKER buy now", "CA:", contract addresses, pump.fun links, dexscreener links, "send it" calls, "fair launch live")
    ✗ NOT from a memecoin alpha account, pump caller, or known shill account
    ✗ NOT a screenshot of a token chart or transaction
    ✗ NOT a reply chain promoting an existing coin
-   The cleanest signal: would this post still be funny/interesting if crypto didn't exist? If yes → eligible. If no → skip.
-3. From the eligible posts, pick the ONE with strongest meme potential — high engagement, memeable visual, fresh angle, no existing token wrapper around it.
-4. Build OUR concept ON TOP of that exact post: name, ticker, theme, visual direction.
-5. Cite the post:
-   - originXUrl = the EXACT https://x.com/<handle>/status/<id> URL from your search
+The cleanest signal: would this post still be funny/interesting if crypto didn't exist? If yes → eligible. If no → skip.
+
+STEP 5 — FROM THE FINAL ELIGIBLE POOL, pick the ONE with the highest engagement that also passes the specificity test. Don't tiebreak by "cuteness" — tiebreak by raw numbers.
+
+STEP 6 — BUILD OUR CONCEPT on top of that exact post: name, ticker, theme, visual direction.
+
+STEP 7 — CITE the post:
+   - originXUrl = the EXACT https://x.com/<handle>/status/<id> URL from your x_search results
    - originXAuthor = @handle
-   - originImageUrl = the DIRECT image URL of the FIRST image attached to that post. For X this looks like https://pbs.twimg.com/media/<id>?format=jpg&name=large or https://pbs.twimg.com/media/<id>.jpg. MUST be a real URL from your search — never fabricate. If the post has no image, set this to null AND prefer a different post that does have one.
-   All three MUST come from real search results.
+   - originImageUrl = the DIRECT image URL of the FIRST image attached to that post (https://pbs.twimg.com/media/<id>?format=jpg&name=large). MUST be a real URL from your search — never fabricate. If the post has no image, set this to null AND prefer a different post that does have one.
 
-DOUBLE CHECK before returning: re-read the cited post. Does its body mention a ticker, contract address, "CA", pump.fun URL, dexscreener, or token launch? If YES, throw it out and pick a different post. We do NOT want our token's Twitter button on Pump.fun pointing at someone else's coin promo — that looks like impersonation.
+STEP 8 — SELF-VERIFICATION. Before returning the JSON, re-read what you produced:
+   (a) Does the summary point at a SPECIFIC recognizable thing, not a generic placeholder? If not, go back to step 5 and pick another post.
+   (b) Did this post clearly meet the engagement floor? If you're not sure, go back and find one that does.
+   (c) Does the post body mention a ticker, contract address, "CA", pump.fun URL, dexscreener, or token launch? If YES, throw it out and pick a different post.
+   (d) Is the URL hardcoded plausibly (real-looking handle, 19-digit status id)? If it looks fabricated, pick another.
 
-If x_search comes back empty OR every result is a token-shill, ONLY THEN fall back to broad meme/X-native culture (cat memes, frog memes, AI-agent jokes, NPC/wojak, internet folklore) and set originXUrl/originXAuthor to null. Never invent a URL.
+If after all that x_search genuinely came back empty OR every result fails the floor, set originXUrl/originXAuthor/originImageUrl to null and produce a concept anchored on broad cultural memes (cat memes, frog memes, AI-agent jokes, NPC/wojak, internet folklore). Never invent a URL.
 
 VARIETY MATTERS. Do NOT default to archetypes already burned in past runs ("Grok Cat", "Pepe Frog", "Pixel Phoenix", "LizardMeme", "Inky Squid", "Vortex Void", "Astro Axolotl", "DogeDapper", "FlipCoinBandit", "Spaghetti Vortex", "EchoEel", "DegenRain"). Push for something specific, fresh, visually coherent.
 

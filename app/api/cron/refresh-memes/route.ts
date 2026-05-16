@@ -42,11 +42,23 @@ interface RefreshResponse {
 }
 
 function buildRefreshMessages(): Msg[] {
-  const system = `You are KOKi's meme scout. Your job: scan X for the freshest viral posts in the last 7 days that would each make a strong memecoin anchor — and return them as a JSON array.
+  const system = `You are KOKi's meme scout. Your job: scan X for the FRESHEST high-engagement viral posts in the LAST 48 HOURS and return 12-20 of them as a JSON array. We want the stuff people are ACTUALLY talking about right now — not random cute pictures.
 
-Use the x_search tool. Cast a wide net: cat/dog/frog memes, AI-agent jokes, NPC/wojak, internet folklore, Solana-native culture, crypto-twitter inside jokes, fresh visual formats, screenshots that went viral. Prefer posts with an attached image.
+Use the x_search tool AGGRESSIVELY. Run multiple queries with different angles to build a wide candidate pool, then filter HARD:
+  - trending viral memes today
+  - top liked X posts last 24 hours
+  - viral images crypto twitter
+  - what's everyone laughing at on X this week
+  - AI agent jokes trending
+  - dog meme viral / cat meme viral / frog meme viral
 
-HARD FILTER. Each post must be:
+HARD ENGAGEMENT FLOOR. Reject any post that doesn't clearly meet AT LEAST ONE of:
+  • 100,000+ views, OR
+  • 10,000+ likes, OR
+  • 5,000+ retweets/reposts
+If you can't see engagement numbers in the search result, the post probably isn't big enough — skip it.
+
+HARD CONTENT FILTER. Each post must be:
 ✓ Organic cultural content — joke, image, observation, format, character, screenshot
 ✓ Has an attached image (we use it as the eventual token logo)
 ✗ NOT a token shill — no "$TICKER buy now", "CA:", pump.fun links, dexscreener links, "fair launch live", "send it"
@@ -54,6 +66,10 @@ HARD FILTER. Each post must be:
 ✗ NOT a token chart screenshot or a reply chain promoting an existing coin
 
 Test: would this post still be funny/memorable if crypto didn't exist? If yes → eligible. If no → skip.
+
+SPECIFICITY: the summary must point at something CONCRETE — a named character, a specific event, a recognizable visual, an exact punchline. REJECT generic placeholders like "a dog sitting on a fence" or "a cat with a beautiful coat" — those aren't viral, they're stock photos.
+
+VARIETY: don't return 20 cats. Mix dog/frog/AI/NPC/format/screenshot/event/character so different users get different vibes.
 
 Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose around it:
 
@@ -63,7 +79,7 @@ Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose aro
       "x_url": "https://x.com/<handle>/status/<id>",
       "x_author": "@handle",
       "image_url": "https://pbs.twimg.com/media/<id>?format=jpg&name=large  OR  null",
-      "summary": "1-2 sentence description of what the post is about",
+      "summary": "1-2 sentence description pointing at a SPECIFIC recognizable thing",
       "meme_angle": "1 sentence on why this has memecoin potential",
       "engagement_score": 0.0-1.0
     },
@@ -71,9 +87,9 @@ Return STRICT JSON ONLY in this exact shape — no markdown fences, no prose aro
   ]
 }
 
-Target: 12-20 memes. All x_url and image_url values MUST come from real x_search results, never fabricated. If a post has no image, set image_url to null and prefer a different post.`;
+Target: 12-20 memes. All x_url and image_url values MUST come from real x_search results, never fabricated. If a post has no image, set image_url to null and prefer a different post. If your search just doesn't yield 12 posts that clear the engagement floor, return fewer entries rather than padding with weak picks.`;
 
-  const user = `Refresh the meme cache. Pull 12-20 viral X posts from the last 7 days that would each make a strong memecoin anchor. Variety matters — don't return 20 cat memes, mix dog/frog/AI/NPC/format/screenshot. JSON only.`;
+  const user = `Refresh the meme cache. Pull 12-20 viral X posts from the LAST 48 HOURS that each clear the engagement floor (100K+ views OR 10K+ likes OR 5K+ reposts). Variety matters — mix dog/frog/AI/NPC/format/screenshot. Generic descriptions are a fail. JSON only.`;
 
   return [
     { role: "system", content: system },
@@ -147,7 +163,10 @@ export async function GET(req: NextRequest) {
   // Run x_search via xAI Responses API. We pre-pay the 20-40s wait here so
   // user-facing /api/auto-launch can be instant.
   const today = new Date();
-  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  // 48-hour window — we want the freshest stuff people are talking about
+  // RIGHT NOW. The cron runs every 30 minutes, so 48h gives plenty of
+  // depth without dragging in stale posts that peaked 5 days ago.
+  const twoDaysAgo = new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000);
   const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
   let llmRes;
@@ -160,9 +179,9 @@ export async function GET(req: NextRequest) {
       model: process.env.XAI_MODEL_AUTO_CONCEPT || "grok-4.3",
       feature: "cron-refresh-memes",
       liveSearch: {
-        fromDate: isoDate(weekAgo),
+        fromDate: isoDate(twoDaysAgo),
         toDate: isoDate(today),
-        maxResults: 30,
+        maxResults: 50, // bigger pool — most candidates will fail the engagement floor
         enableImageUnderstanding: true,
       },
     });
