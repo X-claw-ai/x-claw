@@ -106,7 +106,7 @@ export default function WalletTrackingAgent({
         <div className="flex items-center gap-2">
           <Eye className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">Wallet Tracking Agent</h2>
-          <Badge tone="live">Live · On-chain</Badge>
+          <Badge tone="live">Live, On-chain</Badge>
         </div>
         <p className="text-sm text-ink-300/72 max-w-2xl">
           Pull a public Solana wallet's on-chain footprint and let Grok turn
@@ -201,7 +201,7 @@ function ReportView({
           <div className="flex gap-2">
             {provider && (
               <Badge tone={provider === "xai" ? "live" : "neutral"}>
-                Brief by {provider} {model ? `· ${model}` : ""}
+                Brief by {provider} {model ? `(${model})` : ""}
               </Badge>
             )}
             <a

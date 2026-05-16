@@ -55,7 +55,7 @@ export default function MemeCard({ meme, compact = false }: Props) {
 
       {!compact && (
         <div className="text-[11px] text-ink-300/55 font-bold">
-          {meme.sampleTweetCount.toLocaleString()} sample posts · detected{" "}
+          {meme.sampleTweetCount.toLocaleString()} sample posts, detected{" "}
           {timeSince(meme.detectedAt)}
         </div>
       )}

@@ -52,7 +52,7 @@ export default function Hero() {
 
         <div className="mt-7 inline-flex items-center gap-2 text-[12px] font-bold text-ink-300/72">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Solana mainnet · Phantom / Solflare · KOKi never holds your keys.
+          Solana mainnet, Phantom / Solflare, KOKi never holds your keys.
         </div>
 
         <div className="hairline mt-16 max-w-4xl" />

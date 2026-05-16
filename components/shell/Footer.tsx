@@ -31,7 +31,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-[var(--border-strong)]">
         <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between text-[11px] font-extrabold text-ink-300 tracking-tight">
-          <span>© {new Date().getFullYear()} koki.ai · $KOKI</span>
+          <span>© {new Date().getFullYear()} koki.ai, $KOKI</span>
           <span className="opacity-70">From meme idea to Pump.fun launch.</span>
         </div>
       </div>

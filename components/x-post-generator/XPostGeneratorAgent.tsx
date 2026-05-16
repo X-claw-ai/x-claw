@@ -89,7 +89,7 @@ export default function XPostGeneratorAgent({
         <div className="flex items-center gap-2 flex-wrap">
           <Twitter className="h-5 w-5 text-koki-500" />
           <h2 className="text-lg font-semibold">X Post Generator</h2>
-          <Badge tone="live">Live · Creator Agents</Badge>
+          <Badge tone="live">Live, Creator Agents</Badge>
         </div>
         <p className="text-sm text-ink-300/72 max-w-2xl">
           Turn a topic into ready-to-post X content. Drafts only, no
@@ -189,11 +189,11 @@ export default function XPostGeneratorAgent({
           <div className="flex items-center gap-2">
             <Badge tone={data.provider === "xai" ? "live" : "neutral"}>
               {providerLabel(data.provider)}
-              {data.model ? ` · ${data.model}` : ""}
+              {data.model ? `, ${data.model}` : ""}
             </Badge>
             <span className="text-xs text-ink-300/65">
               {data.posts?.length ?? 0} posts
-              {data.thread ? " · 1 thread" : ""}
+              {data.thread ? ", 1 thread" : ""}
             </span>
           </div>
 
@@ -211,16 +211,16 @@ export default function XPostGeneratorAgent({
                 <Sparkles className="h-4 w-4 text-koki-500" />
                 Thread
               </div>
-              <ThreadTweet label="Hook · 1" text={data.thread.hook} />
+              <ThreadTweet label="Hook, 1" text={data.thread.hook} />
               {data.thread.body.map((b, i) => (
                 <ThreadTweet
                   key={i}
-                  label={`Body · ${i + 2}`}
+                  label={`Body, ${i + 2}`}
                   text={b}
                 />
               ))}
               <ThreadTweet
-                label={`Conclusion · ${(data.thread.body.length || 0) + 2}`}
+                label={`Conclusion, ${(data.thread.body.length || 0) + 2}`}
                 text={data.thread.conclusion}
               />
               <div className="pt-2">
@@ -264,7 +264,7 @@ function PostCard({ index, text }: { index: number; text: string }) {
     <div className="card p-4 space-y-2">
       <div className="flex items-center justify-between">
         <div className="text-[10px] uppercase tracking-widest text-ink-300/65">
-          Post {index} · {text.length}/280
+          Post {index}, {text.length}/280
         </div>
         <div className="flex gap-2">
           <button
@@ -305,7 +305,7 @@ function ThreadTweet({ label, text }: { label: string; text: string }) {
     <div className="border border-[var(--border-strong)]/20 rounded-md p-3 space-y-1.5">
       <div className="flex items-center justify-between">
         <div className="text-[10px] uppercase tracking-widest text-ink-300/65">
-          {label} · {text.length}/280
+          {label}, {text.length}/280
         </div>
         <button
           onClick={copy}

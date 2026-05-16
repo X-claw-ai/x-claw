@@ -23,7 +23,7 @@ export default function FinalCTA() {
           <span className="stamp">Live</span> on Pump.fun.
         </h2>
         <p className="mt-6 text-ink-300/80 text-base md:text-lg max-w-xl mx-auto font-bold">
-          $KOKI · Grok-native · X-native · open source.
+          $KOKI, Grok-native, X-native, open source.
         </p>
         <div className="mt-9 flex justify-center gap-3 flex-wrap">
           <Link href="/launch" className="btn btn-primary !py-3.5 !px-6 !text-base">

@@ -19,7 +19,7 @@ const ENGINES: Engine[] = [
     capabilities: [
       "Real-time Meme Radar",
       "Meme idea generation",
-      "Narrative hooks · viral angles",
+      "Narrative hooks, viral angles",
       "10 X launch posts per kit",
     ],
     icon: Sparkles,
@@ -59,7 +59,7 @@ const ENGINES: Engine[] = [
     name: "Execution",
     insight: "Three engines into one signature. Pump.fun in a single shot.",
     capabilities: [
-      "Token concept · ticker",
+      "Token concept, ticker",
       "Pump.fun metadata (IPFS)",
       "Direct Pump.fun launch",
       "Live launch status",
@@ -75,9 +75,9 @@ export default function EnginesSection() {
     <section className="border-t border-[var(--border)] bg-bg">
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="max-w-3xl">
-          <div className="eyebrow">Four engines · one agent</div>
+          <div className="eyebrow">Four engines, one agent</div>
           <h2 className="mt-3 text-display text-display-md text-balance">
-            X attention · community · on-chain · <span className="stamp">launch</span>.
+            X attention, community, on-chain, <span className="stamp">launch</span>.
           </h2>
           <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
             Memecoins are born on X. Communities move on X. Alpha flows from

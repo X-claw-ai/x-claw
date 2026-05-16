@@ -109,7 +109,7 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div className="text-[11px] uppercase tracking-[0.18em] text-ink-300 mb-2">
-              Analyze · Phase 02
+              Analyze, Phase 02
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <h2 className="text-display text-3xl md:text-4xl font-semibold tracking-extra-tight text-ink-300">
@@ -118,11 +118,11 @@ export default function MemeAnalysisView({ memeId }: { memeId: string }) {
               <span className="text-ink-300/65 font-mono">${meme.ticker}</span>
               <Badge tone={tone}>Launch readiness: {a.launchReadiness}</Badge>
               {data.provider === "xai" ? (
-                <Badge tone="live">Grok · {data.model}</Badge>
+                <Badge tone="live">Grok, {data.model}</Badge>
               ) : data.provider === "mock" ? (
-                <Badge tone="mock">Stub · set XAI_API_KEY for Grok</Badge>
+                <Badge tone="mock">Stub, set XAI_API_KEY for Grok</Badge>
               ) : data.provider ? (
-                <Badge tone="info">{data.provider} · {data.model}</Badge>
+                <Badge tone="info">{data.provider}, {data.model}</Badge>
               ) : null}
             </div>
             <p className="mt-4 text-ink-300 text-base leading-relaxed max-w-3xl">

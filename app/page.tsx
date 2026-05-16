@@ -16,7 +16,7 @@ import FinalCTA from "@/components/landing/FinalCTA";
 //   2. Hero              , headline + tagline + 4-phase strip
 //   3. Attention Layer   , "Most launch tools wait for an idea"
 //   4. Engines           , Attention / Community / Intelligence / Execution
-//   5. Safety            , Agent prepares · User approves · Wallet signs · Launches
+//   5. Safety            , Agent prepares, User approves, Wallet signs, Launches
 //   6. FinalCTA          , push to /launch
 export default function LandingPage() {
   return (

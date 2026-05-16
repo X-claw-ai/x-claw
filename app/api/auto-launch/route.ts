@@ -336,7 +336,7 @@ function fallbackConcept(): AutoConceptResult {
     idea: "Grok-native meme cat that watches X timelines 24/7. The patron saint of the AI agent era.",
     tokenName: "Grok Cat",
     ticker: "GROKCAT",
-    theme: "AI cat archetype · neon-on-dark · X-native posting energy",
+    theme: "AI cat archetype, neon-on-dark, X-native posting energy",
     audience: "AI-curious crypto natives, Grok power users, cat-meme posters",
     launchStyle: "hype-raid",
     reasoning:

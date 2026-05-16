@@ -54,7 +54,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
             <div className="flex items-center gap-2 flex-wrap">
               <Rocket className="h-5 w-5 text-koki-500" />
               <h1 className="text-xl font-semibold">{tokenName}</h1>
-              <span className="text-sm text-ink-300/72">· {ticker}</span>
+              <span className="text-sm text-ink-300/72">, {ticker}</span>
               {isMock && <Badge tone="mock">Mock</Badge>}
               {!isMock && record && <Badge tone="live">Live launch</Badge>}
               {!record && hydrated && (
@@ -68,7 +68,7 @@ export default function LaunchMonitorPage({ mint }: { mint: string }) {
               <div className="mt-1 text-xs text-ink-300/65">
                 Launched {new Date(record.createdAt).toLocaleString()}
                 {record?.devBuyInSol != null
-                  ? ` · dev buy ${record.devBuyInSol} SOL`
+                  ? `, dev buy ${record.devBuyInSol} SOL`
                   : ""}
               </div>
             )}

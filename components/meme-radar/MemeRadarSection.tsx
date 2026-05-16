@@ -36,8 +36,8 @@ export default function MemeRadarSection({
                 )}
               </div>
               <p className="text-[12px] text-ink-300/65 mt-1 font-bold">
-                Detect → Analyze → Generate → Launch → Monitor ·{" "}
-                {memes.length === 0 ? "no signals yet" : `${memes.length} signals`}
+                Detect → Analyze → Generate → Launch → Monitor.{" "}
+                {memes.length === 0 ? "No signals yet." : `${memes.length} signals.`}
               </p>
             </div>
           </div>
@@ -72,9 +72,9 @@ function EmptyState() {
         live trending memes appear here ready to be turned into launches.
       </p>
       <div className="mt-7 flex items-center justify-center gap-2 flex-wrap">
-        <Badge tone="info">Pipeline · X API</Badge>
-        <Badge tone="info">Pipeline · Grok search</Badge>
-        <Badge tone="info">Pipeline · On-chain</Badge>
+        <Badge tone="info">Pipeline, X API</Badge>
+        <Badge tone="info">Pipeline, Grok search</Badge>
+        <Badge tone="info">Pipeline, On-chain</Badge>
       </div>
       <p className="mt-7 text-[11px] text-ink-300/55 font-bold">
         In the meantime, you can launch from your own idea via the Launch wizard.

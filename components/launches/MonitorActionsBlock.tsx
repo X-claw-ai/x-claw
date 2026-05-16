@@ -88,7 +88,7 @@ export default function MonitorActionsBlock(props: Props) {
           <Zap className="h-4 w-4 text-ink-300" />
           <div className="text-sm font-semibold text-ink-300">Suggested next actions</div>
           {data.provider === "xai" ? (
-            <Badge tone="live">Grok · {data.model}</Badge>
+            <Badge tone="live">Grok, {data.model}</Badge>
           ) : (
             <Badge tone="mock">Stub</Badge>
           )}
