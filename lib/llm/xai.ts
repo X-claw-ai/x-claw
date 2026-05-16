@@ -145,9 +145,12 @@ async function callXAIResponses(
   };
   if (req.maxTokens) body.max_output_tokens = req.maxTokens;
   if (req.temperature !== undefined) body.temperature = req.temperature;
-  // Responses API accepts response_format the same way (JSON output mode).
+  // Responses API uses `text.format` for JSON mode (NOT `response_format` — that
+  // field is /v1/chat/completions only and produces a 400 here). xAI's error
+  // message is verbatim: "'response_format' is not supported on /v1/responses
+  // - use 'text.format' on /v1/responses".
   if (req.responseFormat === "json") {
-    body.response_format = { type: "json_object" };
+    body.text = { format: { type: "json_object" } };
   }
 
   const res = await fetch(`${BASE}/responses`, {
