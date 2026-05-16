@@ -8,8 +8,13 @@
  * This is the canonical mark. Don't restyle it — it's the brand.
  *
  * Render contexts:
- *   <KokiLogo height={32} />       // standard navbar
- *   <KokiLogo height={48} bare />  // for places where the parent already paints orange
+ *   <KokiLogo height={36} className="rounded-md overflow-hidden" />
+ *     // standard — show the orange tile + black wordmark; works on
+ *     // any background. After the Binance-dark rebrand, this is the
+ *     // ONLY way the logo is legible on the page bg.
+ *   <KokiLogo height={48} bare />
+ *     // only when the parent surface is ALREADY orange (e.g. an
+ *     // orange CTA hero panel). Black wordmark vanishes on dark.
  */
 export default function KokiLogo({
   height = 32,
