@@ -180,17 +180,22 @@ function PreviewCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
                 {(Math.max(0, Math.min(1, stats.bondingProgress)) * 100).toFixed(0)}%
               </span>
             </div>
-            <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
+            <div className="h-[5px] w-full rounded-full bg-ink-1000/40 overflow-hidden">
               <div
-                className={`h-full transition-all duration-500 ${
+                className={`h-full relative transition-all duration-500 ${
                   stats.complete
-                    ? "bg-ink-1000"
-                    : "bg-koki-500 border-r border-[var(--border-strong)]"
+                    ? "bg-koki-500"
+                    : "bg-koki-500"
                 }`}
                 style={{
                   width: `${Math.max(0, Math.min(1, stats.bondingProgress)) * 100}%`,
                 }}
-              />
+              >
+                {/* shimmer overlay, only while still bonding (not graduated) */}
+                {!stats.complete && (
+                  <span className="absolute inset-0 bonding-shimmer pointer-events-none" />
+                )}
+              </div>
             </div>
           </div>
         )}

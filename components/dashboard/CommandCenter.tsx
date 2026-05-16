@@ -312,13 +312,15 @@ function BondingBar({
         <span>Bonding</span>
         <span className="tabular-nums">{pct.toFixed(0)}%</span>
       </div>
-      <div className="h-[5px] w-full rounded-full bg-ink-1000/10 overflow-hidden">
+      <div className="h-[5px] w-full rounded-full bg-ink-1000/40 overflow-hidden">
         <div
-          className={`h-full transition-all duration-500 ${
-            complete ? "bg-ink-1000" : "bg-koki-500 border-r border-[var(--border-strong)]"
-          }`}
+          className="h-full relative bg-koki-500 transition-all duration-500"
           style={{ width: `${pct}%` }}
-        />
+        >
+          {!complete && (
+            <span className="absolute inset-0 bonding-shimmer pointer-events-none" />
+          )}
+        </div>
       </div>
     </div>
   );
