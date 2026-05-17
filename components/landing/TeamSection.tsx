@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Users, Linkedin } from "lucide-react";
 
 // KOKi AI team. The trio sits at the very top of the landing page —
@@ -17,7 +18,8 @@ interface Socials {
 }
 
 interface Member {
-  initial: string;
+  /** Pixel-art KOKi shiba mascot, costumed per member. */
+  avatar: string;
   name: string;
   role: string;
   affiliations: Affiliation[];
@@ -28,7 +30,7 @@ interface Member {
 
 const MEMBERS: Member[] = [
   {
-    initial: "D",
+    avatar: "/team/dallen.png",
     name: "Dallen",
     role: "Co-Founder / Product & Growth Lead",
     affiliations: [
@@ -52,7 +54,7 @@ const MEMBERS: Member[] = [
       "Leads product strategy, growth, community expansion, and viral mechanism design at KOKi AI.",
   },
   {
-    initial: "C",
+    avatar: "/team/chae.png",
     name: "Chae Xun",
     role: "Co-Founder / Strategic Lead",
     affiliations: [
@@ -71,7 +73,7 @@ const MEMBERS: Member[] = [
       "Leads exchange relationships, Web3 strategy, global partnerships, and ecosystem expansion at KOKi AI.",
   },
   {
-    initial: "L",
+    avatar: "/team/landly.png",
     name: "Landly",
     role: "Founder & CEO of KOKi AI",
     affiliations: [
@@ -130,8 +132,14 @@ export default function TeamSection() {
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="h-12 w-12 shrink-0 rounded-full bg-koki-500 text-ink-1000 font-extrabold text-lg flex items-center justify-center border border-[var(--border-strong)]">
-                    {m.initial}
+                  <div className="h-14 w-14 shrink-0 rounded-full bg-koki-500 border border-[var(--border-strong)] overflow-hidden relative">
+                    <Image
+                      src={m.avatar}
+                      alt={`${m.name} pixel mascot`}
+                      fill
+                      sizes="56px"
+                      className="object-cover [image-rendering:pixelated]"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-display text-[22px] leading-none truncate">
