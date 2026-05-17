@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { Users, Linkedin } from "lucide-react";
 
 // KOKi AI team. The trio sits at the very top of the landing page —
 // credibility-first ordering, since trust matters more than aesthetics
@@ -11,11 +11,17 @@ interface Affiliation {
   href: string;
 }
 
+interface Socials {
+  x?: string;
+  linkedin?: string;
+}
+
 interface Member {
   initial: string;
   name: string;
   role: string;
   affiliations: Affiliation[];
+  socials: Socials;
   bio: string;
   focus: string;
 }
@@ -37,6 +43,10 @@ const MEMBERS: Member[] = [
         href: "https://x.com/cashtreeglobal",
       },
     ],
+    socials: {
+      x: "https://x.com/dallenhedera",
+      linkedin: "https://www.linkedin.com/in/dallen-kim-6a8869b4/",
+    },
     bio: "Co-founder of Dungeon & Fighter, one of Asia’s most iconic games, and founder/CEO of Cashtree, a rewards app with 24M users. Deep history in large-scale consumer platforms, gaming communities, reward-based growth, and user acquisition.",
     focus:
       "Leads product strategy, growth, community expansion, and viral mechanism design at KOKi AI.",
@@ -52,6 +62,10 @@ const MEMBERS: Member[] = [
         href: "https://x.com/HTX_Global",
       },
     ],
+    socials: {
+      x: "https://x.com/hoonchae251853",
+      linkedin: "https://www.linkedin.com/in/chaexun/",
+    },
     bio: "Former CEO of Huobi Korea and current CEO of BlueHelix Korea. Deep experience across global crypto exchange operations, Web3 business development, listing strategy, blockchain infrastructure, and strategic partnerships.",
     focus:
       "Leads exchange relationships, Web3 strategy, global partnerships, and ecosystem expansion at KOKi AI.",
@@ -67,11 +81,28 @@ const MEMBERS: Member[] = [
         href: "https://x.com/officialkokiai",
       },
     ],
+    socials: {
+      x: "https://x.com/LandlyFranscott",
+    },
     bio: "Built the original vision: a fully autonomous AI agent that detects real-time X virality and turns it into onchain launches. Former engineer at BMW, now building AI products across autonomous agents, onchain execution, and internet culture.",
     focus:
       "Sets the product direction at KOKi AI and ships the core agent loop end-to-end.",
   },
 ];
+
+// X (Twitter) logo — same path used in Navbar.
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 1200 1227"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M714.163 519.284 1160.89 0H1055.03L667.137 450.887 357.328 0H0L468.492 681.821 0 1226.37H105.866L515.491 750.218 842.672 1226.37H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z" />
+    </svg>
+  );
+}
 
 export default function TeamSection() {
   return (
@@ -97,17 +128,46 @@ export default function TeamSection() {
               key={m.name}
               className="card card-hover flex flex-col !p-7"
             >
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-koki-500 text-ink-1000 font-extrabold text-lg flex items-center justify-center border border-[var(--border-strong)]">
-                  {m.initial}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="h-12 w-12 shrink-0 rounded-full bg-koki-500 text-ink-1000 font-extrabold text-lg flex items-center justify-center border border-[var(--border-strong)]">
+                    {m.initial}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-display text-[22px] leading-none truncate">
+                      {m.name}
+                    </div>
+                    <div className="mt-1.5 text-[11px] font-extrabold uppercase tracking-wider text-ink-300/70">
+                      {m.role}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-display text-[22px] leading-none">
-                    {m.name}
-                  </div>
-                  <div className="mt-1.5 text-[11px] font-extrabold uppercase tracking-wider text-ink-300/70">
-                    {m.role}
-                  </div>
+                {/* Per-member personal socials, top-right of card. */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {m.socials.x && (
+                    <a
+                      href={m.socials.x}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${m.name} on X`}
+                      title={`${m.name} on X`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border)] text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
+                    >
+                      <XIcon className="h-3.5 w-3.5 fill-current" />
+                    </a>
+                  )}
+                  {m.socials.linkedin && (
+                    <a
+                      href={m.socials.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${m.name} on LinkedIn`}
+                      title={`${m.name} on LinkedIn`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border)] text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
+                    >
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               </div>
 
