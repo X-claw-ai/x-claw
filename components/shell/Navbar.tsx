@@ -10,7 +10,8 @@ import KokiLogo from "./KokiLogo";
 const NAV = [
   // /dashboard is wallet-scoped, only the connected wallet's own launches.
   // /launches is public, every coin every KOKi agent has ever shipped.
-  // /team is the founders page — hidden from /, surfaced here.
+  // /team is the founders page — surfaced both inline (always) and in the
+  // mobile drawer, so visitors never have to dig for it.
   { href: "/dashboard", label: "My Launches" },
   { href: "/launch", label: "Launch" },
   { href: "/launches", label: "All Launches" },
@@ -49,18 +50,27 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Team link — always visible (even on mobile) per request. The
+              other landing links (My/All Launches, Launch) still live in
+              the hamburger drawer to keep the navbar from overflowing on
+              narrow phones. */}
+          <Link
+            href="/team"
+            className="md:hidden px-2.5 py-1.5 text-[12px] font-extrabold tracking-tight text-ink-300/85 hover:text-ink-300 rounded-md hover:bg-ink-1000/10 transition-colors"
+          >
+            Team
+          </Link>
           {/* Official KOKi X + GitHub accounts — sit on the LEFT of the
               wallet pill so the brand presence reads before the wallet UI.
-              Hidden on phones so we don't crowd the small navbar; users
-              reach them from the mobile drawer below. */}
+              Visible at every breakpoint per request. */}
           <a
             href="https://x.com/officialkokiai"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="KOKi on X"
             title="@officialkokiai"
-            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
           >
             <svg
               viewBox="0 0 1200 1227"
@@ -77,7 +87,7 @@ export default function Navbar() {
             rel="noopener noreferrer"
             aria-label="KOKi on GitHub"
             title="koki-ai-agent/Koki"
-            className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
           >
             <svg
               viewBox="0 0 16 16"
