@@ -30,8 +30,17 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-[var(--border-strong)]">
-        <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between text-[11px] font-extrabold text-ink-300 tracking-tight">
+        <div className="mx-auto max-w-7xl px-6 h-14 flex flex-wrap items-center justify-between gap-3 text-[11px] font-extrabold text-ink-300 tracking-tight">
           <span>© {new Date().getFullYear()} koki.ai, $KOKI</span>
+          <a
+            href="https://github.com/koki-ai-agent/Koki/commit/ae5ff49"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ink-300/80 hover:text-ink-300 underline-offset-4 hover:underline"
+            title="First public commit: ae5ff49 on 2026-05-04"
+          >
+            Original since 2026-05-04 · commit ae5ff49
+          </a>
           <span className="opacity-70">From meme idea to Pump.fun launch.</span>
         </div>
       </div>

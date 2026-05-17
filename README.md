@@ -1,6 +1,9 @@
 # KOKi.ai
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Original since 2026-05-04](https://img.shields.io/badge/Original%20since-2026--05--04-E66B1F?style=flat-square)](https://github.com/koki-ai-agent/Koki/commit/ae5ff49)
+[![First public commit](https://img.shields.io/badge/First%20public%20commit-ae5ff49-1a1208?style=flat-square)](https://github.com/koki-ai-agent/Koki/commit/ae5ff49)
+[![Live](https://img.shields.io/badge/Live-kokiai.app-22c55e?style=flat-square)](https://kokiai.app)
 
 **The Grok-native Meme Coin Launch Agent.**
 KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun launches.
@@ -10,6 +13,24 @@ KOKi.ai detects real-time memes on X and turns them into autonomous Pump.fun lau
 Token ticker: `$KOKI`
 
 KOKi.ai is an independent open-source project. It is not affiliated with xAI, X, Grok, Pump.fun, PumpPortal, or Solana Foundation. Nothing in this app is financial advice.
+
+---
+
+## 🟧 Originality & Authenticity
+
+KOKi AI is the **original** autonomous Grok-native memecoin launch agent. Everything in this repository is timestamped, verifiable, and irrevocable on public infrastructure.
+
+| Proof | Source | Date |
+|---|---|---|
+| **First public commit** | [`ae5ff49`](https://github.com/koki-ai-agent/Koki/commit/ae5ff49) — "Initial commit: X CLAW — The Grok-native Meme Coin Launch Agent" | **2026-05-04** |
+| **GitHub repository** | [koki-ai-agent/Koki](https://github.com/koki-ai-agent/Koki) (public, MIT) | 2026-05-04 |
+| **Live deployment** | [kokiai.app](https://kokiai.app) | 2026-05 |
+| **Official X account** | [@officialkokiai](https://x.com/officialkokiai) | — |
+| **Onchain launches** | Public Solana mainnet transactions from KOKi-built tokens | continuous |
+
+**If you see a project that looks like KOKi but uses a different name — check the first-commit dates.** Any autonomous Grok × Pump.fun launch agent whose first public commit is *after* 2026-05-04 is downstream of this codebase, regardless of how it is marketed.
+
+The full commit history is preserved in this public repository and additionally mirrored by GitHub Arctic Code Vault, the Internet Archive, and downstream forks. Originality here is not a claim — it is a [verifiable hash chain](https://github.com/koki-ai-agent/Koki/commits/main).
 
 ---
 
