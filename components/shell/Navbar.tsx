@@ -10,12 +10,9 @@ import KokiLogo from "./KokiLogo";
 const NAV = [
   // /dashboard is wallet-scoped, only the connected wallet's own launches.
   // /launches is public, every coin every KOKi agent has ever shipped.
-  // /team is the founders page — surfaced both inline (always) and in the
-  // mobile drawer, so visitors never have to dig for it.
   { href: "/dashboard", label: "My Launches" },
   { href: "/launch", label: "Launch" },
   { href: "/launches", label: "All Launches" },
-  { href: "/team", label: "Team" },
 ];
 
 export default function Navbar() {
@@ -51,16 +48,6 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Team link — always visible (even on mobile) per request. The
-              other landing links (My/All Launches, Launch) still live in
-              the hamburger drawer to keep the navbar from overflowing on
-              narrow phones. */}
-          <Link
-            href="/team"
-            className="md:hidden px-2.5 py-1.5 text-[12px] font-extrabold tracking-tight text-ink-300/85 hover:text-ink-300 rounded-md hover:bg-ink-1000/10 transition-colors"
-          >
-            Team
-          </Link>
           {/* Official KOKi X + GitHub accounts — sit on the LEFT of the
               wallet pill so the brand presence reads before the wallet UI.
               Visible at every breakpoint per request. */}

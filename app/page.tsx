@@ -9,8 +9,7 @@ import FinalCTA from "@/components/landing/FinalCTA";
 //
 // Pump.fun-style ordering: live token gallery sits FIRST so the visitor
 // sees real shipped coins immediately, then the pitch underneath. The
-// product proves itself before the brand statement does. The Team page
-// lives at /team, reachable from the navbar.
+// product proves itself before the brand statement does.
 //
 // Sections (top → bottom):
 //   1. LiveLaunches      , live mcap + bonding from Pump.fun (social proof)
