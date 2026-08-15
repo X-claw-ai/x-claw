@@ -1,4 +1,4 @@
-// Wagmi + RainbowKit config for KOKi on Robinhood Chain.
+// Wagmi + RainbowKit config for HAMR on Robinhood Chain.
 //
 // This file is the single source of truth for the wallet stack. The
 // client provider (components/evm/WalletContext) and any server-side
@@ -26,11 +26,11 @@ const WC_PROJECT_ID =
   "koki-dev";
 
 export const wagmiConfig = getDefaultConfig({
-  appName: "KOKi.ai",
+  appName: "HAMR.fun",
   appDescription:
     "Autonomous Grok-native memecoin launch agent on Robinhood Chain.",
-  appUrl: "https://kokiai.app",
-  appIcon: "https://kokiai.app/koki-icon.svg",
+  appUrl: "https://hamr.fun",
+  appIcon: "https://hamr.fun/hamr-logo.jpg",
   projectId: WC_PROJECT_ID,
   chains: [robinhoodChain],
   transports: {

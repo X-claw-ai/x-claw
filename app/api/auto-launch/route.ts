@@ -9,7 +9,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 // Per-call live x_search. Every Auto-pilot invocation asks Grok to do its
 // OWN fresh X search and pick a viral post that hasn't been used by any
-// previous KOKi launch, strict deduplication across all wallets.
+// previous HAMR launch, strict deduplication across all wallets.
 //
 // Why per-call (and not a shared cache): 1000 concurrent users splitting a
 // 14-meme pool means most users get duplicates. With per-call search +
@@ -22,7 +22,7 @@ export const maxDuration = 180;
 export const runtime = "nodejs";
 
 /** How many recent launches to look back when building the exclude list.
- *  100 = roughly the last ~3-7 days of KOKi launches at expected volume.
+ *  100 = roughly the last ~3-7 days of HAMR launches at expected volume.
  *  Tradeoff: bigger = stricter dedup, larger prompt. Grok-4 handles 100+
  *  URLs in a system message without trouble. */
 const RECENT_LAUNCHES_FOR_EXCLUDE = 200;

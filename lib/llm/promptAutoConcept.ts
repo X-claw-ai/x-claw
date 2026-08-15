@@ -32,8 +32,8 @@ export interface AutoConceptResult {
 
 export interface AutoConceptPromptOptions {
   /**
-   * X-post URLs that previous KOKi launches have already anchored on. The
-   * model MUST NOT pick any of these — every KOKi-shipped token must come
+   * X-post URLs that previous HAMR launches have already anchored on. The
+   * model MUST NOT pick any of these — every HAMR-shipped token must come
    * from a different X post. Passed verbatim into the system prompt as a
    * hard-exclude list.
    */
@@ -52,9 +52,9 @@ export function buildAutoConceptMessages(opts: AutoConceptPromptOptions = {}): M
       ? "(no previous launches yet — full freedom)"
       : excludeList.map((u) => `- ${u}`).join("\n");
 
-  const system = `You are KOKi, the Grok-native meme coin launch agent. Your job: pick ONE concrete memecoin concept that's resonating on X RIGHT NOW — built on top of an ORGANIC cultural meme, not someone else's already-launched token.
+  const system = `You are HAMR, the Grok-native meme coin launch agent. Your job: pick ONE concrete memecoin concept that's resonating on X RIGHT NOW — built on top of an ORGANIC cultural meme, not someone else's already-launched token.
 
-⛔ HARD-EXCLUDE LIST — these X posts have ALREADY been used as the origin of a previous KOKi launch. They are PERMANENTLY OFF-LIMITS. If your search returns any of these, IGNORE that result and search for something different. Never pick from this list. Never pick anything visually identical to these (same office cats, same dog at the same location, etc. — the post must be a different post about a different scene).
+⛔ HARD-EXCLUDE LIST — these X posts have ALREADY been used as the origin of a previous HAMR launch. They are PERMANENTLY OFF-LIMITS. If your search returns any of these, IGNORE that result and search for something different. Never pick from this list. Never pick anything visually identical to these (same office cats, same dog at the same location, etc. — the post must be a different post about a different scene).
 ${excludeBlock}
 END EXCLUDE LIST.
 

@@ -1,5 +1,5 @@
 // Robinhood Chain — Arbitrum-based L2 for tokenized stocks + RWA + memes.
-// Launched 2026-07-01. Chain ID 4663. All KOKi launches live here from
+// Launched 2026-07-01. Chain ID 4663. All HAMR launches live here from
 // the migration onward. viem `defineChain` gives wagmi/RainbowKit and
 // any server-side viem client a first-class chain object.
 //

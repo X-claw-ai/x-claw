@@ -6,7 +6,7 @@ import { buildXPostMessages, type XPostRequest } from "@/lib/llm/promptXPosts";
 // POST /api/x-post-generator
 //
 // Generates ready-to-post X content (tweets + optional thread) via the
-// KOKi LLM router (Grok primary). Falls back to a clearly-labeled local
+// HAMR LLM router (Grok primary). Falls back to a clearly-labeled local
 // stub when no provider is configured.
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -134,7 +134,7 @@ function localStub(req: XPostRequest): ResponseShape {
       hook: `A short builder thread on ${t}, auto-generated stub until XAI_API_KEY is set.`,
       body: [
         `Why ${t} matters: it's a workflow, not a vibe.`,
-        `What KOKi does about it: agents prepare, you confirm, workflows execute.`,
+        `What HAMR does about it: agents prepare, you confirm, workflows execute.`,
       ],
       conclusion: `Once Grok is wired into /api/x-post-generator, this thread becomes real.`,
     },

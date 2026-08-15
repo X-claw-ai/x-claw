@@ -81,7 +81,7 @@ export default function EnginesSection() {
           </h2>
           <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium max-w-2xl">
             Memecoins are born on X. Communities move on X. Alpha flows from
-            onchain to X. KOKi is the first to wire all four into a single
+            onchain to X. HAMR is the first to wire all four into a single
             autonomous launch agent.
           </p>
         </div>

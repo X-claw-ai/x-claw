@@ -1,34 +1,34 @@
-# KOKi.ai
+# HAMR.fun
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Original since 2026-05-04](https://img.shields.io/badge/Original%20since-2026--05--04-E66B1F?style=flat-square)](https://github.com/koki-ai-agent/Koki/commit/ae5ff49)
 [![First public commit](https://img.shields.io/badge/First%20public%20commit-ae5ff49-1a1208?style=flat-square)](https://github.com/koki-ai-agent/Koki/commit/ae5ff49)
-[![Live](https://img.shields.io/badge/Live-kokiai.app-22c55e?style=flat-square)](https://kokiai.app)
+[![Live](https://img.shields.io/badge/Live-hamr.fun-22c55e?style=flat-square)](https://hamr.fun)
 
 **The Grok-native Meme Coin Launch Agent.**
-KOKi.ai detects real-time memes on X and turns them into autonomous Pons launches on Robinhood Chain.
+HAMR.fun detects real-time memes on X and turns them into autonomous Pons launches on Robinhood Chain.
 
 > Real-time X memes → autonomous token launches on Pons.
 
 Token ticker: `$KOKI`
 
-KOKi.ai is an independent open-source project. It is not affiliated with xAI, X, Grok, Pons Labs, Robinhood, or Uniswap. Nothing in this app is financial advice.
+HAMR.fun is an independent open-source project. It is not affiliated with xAI, X, Grok, Pons Labs, Robinhood, or Uniswap. Nothing in this app is financial advice.
 
 ---
 
 ## 🟧 Originality & Authenticity
 
-KOKi AI is the **original** autonomous Grok-native memecoin launch agent. Everything in this repository is timestamped, verifiable, and irrevocable on public infrastructure.
+HAMR is the **original** autonomous Grok-native memecoin launch agent. Everything in this repository is timestamped, verifiable, and irrevocable on public infrastructure.
 
 | Proof | Source | Date |
 |---|---|---|
 | **First public commit** | [`ae5ff49`](https://github.com/koki-ai-agent/Koki/commit/ae5ff49) — "Initial commit: X CLAW — The Grok-native Meme Coin Launch Agent" | **2026-05-04** |
 | **GitHub repository** | [koki-ai-agent/Koki](https://github.com/koki-ai-agent/Koki) (public, MIT) | 2026-05-04 |
-| **Live deployment** | [kokiai.app](https://kokiai.app) | 2026-05 |
+| **Live deployment** | [hamr.fun](https://hamr.fun) | 2026-05 |
 | **Official X account** | [@officialkokiai](https://x.com/officialkokiai) | — |
-| **Onchain launches** | Public Robinhood Chain mainnet transactions from KOKi-built tokens on Pons | continuous |
+| **Onchain launches** | Public Robinhood Chain mainnet transactions from HAMR-built tokens on Pons | continuous |
 
-**If you see a project that looks like KOKi but uses a different name — check the first-commit dates.** Any autonomous Grok × onchain launchpad agent (Pons, Pump.fun, four.meme, or any other) whose first public commit is *after* 2026-05-04 is downstream of this codebase, regardless of how it is marketed.
+**If you see a project that looks like HAMR but uses a different name — check the first-commit dates.** Any autonomous Grok × onchain launchpad agent (Pons, Pump.fun, four.meme, or any other) whose first public commit is *after* 2026-05-04 is downstream of this codebase, regardless of how it is marketed.
 
 The full commit history is preserved in this public repository and additionally mirrored by GitHub Arctic Code Vault, the Internet Archive, and downstream forks. Originality here is not a claim — it is a [verifiable hash chain](https://github.com/koki-ai-agent/Koki/commits/main).
 
@@ -45,7 +45,7 @@ Detect  →  Analyze  →  Generate  →  Launch  →  Monitor
 | **01 Detect** | Real-time Meme Radar scans X for trending memes, viral keywords, fast-growing narratives. | `/dashboard` |
 | **02 Analyze** | 10-criteria launch readiness scoring (viral, clarity, X engagement, ticker strength, on-chain, timing, saturation, brand/legal). | `/analyze?meme=<id>` |
 | **03 Generate** | Full AI launch kit: token identity, Pons metadata, 10 launch tweets + 5 viral hooks + 5 thread ideas + 20 raid replies + 5 DM templates + founder/product/discord/community announcements + raid mission + FAQ + 7-day plan + checklist. | `/launch` (wizard step 0–2) |
-| **04 Launch** | Direct Pons execution on Robinhood Chain. Real mainnet, real wallet signature. KOKi.ai never holds keys. | `/launch` (wizard step 3–5) |
+| **04 Launch** | Direct Pons execution on Robinhood Chain. Real mainnet, real wallet signature. HAMR.fun never holds keys. | `/launch` (wizard step 3–5) |
 | **05 Monitor** | Post-launch dashboard: pool price, graduation progress, deployer, and Blockscout links, all polled from the Pons factory + locker. | `/launches/[address]` |
 
 ## Live integrations

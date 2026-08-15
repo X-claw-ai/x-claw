@@ -1,4 +1,4 @@
-// Shared LLM types used by every KOKi agent module.
+// Shared LLM types used by every HAMR agent module.
 // Provider-agnostic so we can swap backends without touching agent code.
 
 export type Role = "system" | "user" | "assistant";

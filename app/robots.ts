@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/_next/"],
       },
     ],
-    sitemap: "https://kokiai.app/sitemap.xml",
-    host: "https://kokiai.app",
+    sitemap: "https://hamr.fun/sitemap.xml",
+    host: "https://hamr.fun",
   };
 }

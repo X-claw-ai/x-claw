@@ -1,6 +1,6 @@
-# Contributing to KOKi.ai
+# Contributing to HAMR.fun
 
-Thanks for considering a contribution. KOKi.ai is an open Agent OS for the X era — every X account being able to have its own AI workforce only happens if many people build modules together.
+Thanks for considering a contribution. HAMR.fun is an open Agent OS for the X era — every X account being able to have its own AI workforce only happens if many people build modules together.
 
 ## TL;DR
 

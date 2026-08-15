@@ -11,7 +11,7 @@ import { wagmiConfig } from "@/lib/evm/wagmi-config";
 // Wallet provider boundary. Wraps the entire app so any client component
 // can call wagmi hooks (useAccount / useSignMessage / useWriteContract).
 //
-// KOKi ships on Robinhood Chain via Pons — RainbowKit's default modal
+// HAMR ships on Robinhood Chain via Pons — RainbowKit's default modal
 // surfaces MetaMask, Coinbase Wallet, and every WalletConnect-compatible
 // wallet (Robinhood Wallet, Rainbow, Trust, Zerion, etc.) automatically.
 // We deliberately do NOT ship a custodial / browser-keypair wallet;
@@ -36,16 +36,16 @@ export function KokiWalletProvider({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
-            accentColor: "#E66B1F", // KOKi orange
-            accentColorForeground: "#0B0E11",
+            accentColor: "#7CC7A5", // HAMR steel-mint
+            accentColorForeground: "#14181D",
             borderRadius: "medium",
             fontStack: "system",
           })}
           modalSize="compact"
           initialChain={wagmiConfig.chains[0]}
           appInfo={{
-            appName: "KOKi.ai",
-            learnMoreUrl: "https://kokiai.app",
+            appName: "HAMR.fun",
+            learnMoreUrl: "https://hamr.fun",
           }}
         >
           {children}

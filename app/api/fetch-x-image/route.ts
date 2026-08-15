@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
     upstream = await fetch(parsed.toString(), {
       headers: {
         // Some X CDN paths return 403 without a referer; identify ourselves.
-        "User-Agent": "KOKi-agent/1.0 (+https://kokiai.app)",
+        "User-Agent": "HAMR-agent/1.0 (+https://hamr.fun)",
         Accept: "image/jpeg,image/png,image/webp,image/*;q=0.9,*/*;q=0.5",
       },
       cache: "no-store",

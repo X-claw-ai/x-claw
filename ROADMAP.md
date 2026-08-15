@@ -1,6 +1,6 @@
-# KOKi.ai Roadmap
+# HAMR.fun Roadmap
 
-KOKi.ai ships in three phases. Phase 1 is live today. Phase 2 polishes the open-source repo. Phase 3 adds a Telegram front for the same agent.
+HAMR.fun ships in three phases. Phase 1 is live today. Phase 2 polishes the open-source repo. Phase 3 adds a Telegram front for the same agent.
 
 > Detect → Analyze → Generate → Launch → Monitor
 
@@ -18,7 +18,7 @@ The Grok-native Meme Coin Launch Agent as a web app, end to end.
 - [x] Provider-agnostic LLM router (xAI → Anthropic → OpenAI → mock)
 - [x] Open-source under MIT
 - [x] Vercel deployment
-- [ ] $KOKI token launch via KOKi.ai itself
+- [ ] $KOKI token launch via HAMR.fun itself
 
 ## Phase 2 — Open-source polish (now → ongoing)
 

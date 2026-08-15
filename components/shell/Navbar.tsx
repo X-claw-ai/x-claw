@@ -9,7 +9,7 @@ import KokiLogo from "./KokiLogo";
 
 const NAV = [
   // /dashboard is wallet-scoped, only the connected wallet's own launches.
-  // /launches is public, every coin every KOKi agent has ever shipped.
+  // /launches is public, every coin every HAMR agent has ever shipped.
   { href: "/dashboard", label: "My Launches" },
   { href: "/launch", label: "Launch" },
   { href: "/launches", label: "All Launches" },
@@ -48,14 +48,14 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Official KOKi X + GitHub accounts — sit on the LEFT of the
+          {/* Official HAMR X + GitHub accounts — sit on the LEFT of the
               wallet pill so the brand presence reads before the wallet UI.
               Visible at every breakpoint per request. */}
           <a
             href="https://x.com/officialkokiai"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="KOKi on X"
+            aria-label="HAMR on X"
             title="@officialkokiai"
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
           >
@@ -72,7 +72,7 @@ export default function Navbar() {
             href="https://github.com/koki-ai-agent/Koki"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="KOKi on GitHub"
+            aria-label="HAMR on GitHub"
             title="koki-ai-agent/Koki"
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
           >
@@ -138,7 +138,7 @@ export default function Navbar() {
                 href="https://x.com/officialkokiai"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="KOKi on X"
+                aria-label="HAMR on X"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-ink-300/85 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
               >
                 <svg viewBox="0 0 1200 1227" className="h-4 w-4 fill-current" aria-hidden="true">
@@ -149,7 +149,7 @@ export default function Navbar() {
                 href="https://github.com/koki-ai-agent/Koki"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="KOKi on GitHub"
+                aria-label="HAMR on GitHub"
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] text-ink-300/85 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
               >
                 <svg viewBox="0 0 16 16" className="h-[18px] w-[18px] fill-current" aria-hidden="true">

@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { ArrowRight, Rocket } from "lucide-react";
 
-// PLACEHOLDER live-launches section for the landing page. Once P6 lands
-// the full Pons-indexed grid (live pool price, graduation progress, and
-// Blockscout links pulled from lib/pons/indexer.ts + lib/pons/read.ts)
-// takes over this file. Kept as a proper section so the home page still
-// has the block below Hero and above the four-engine section.
+// Landing "Live launches" band. Once the Pons indexer populates
+// public.pons_launches with real rows the tile grid slots in below the
+// header — until then, the section pitches the launch board without
+// pretending it's already busy.
 
 export default function LiveLaunchesSection() {
   return (
@@ -19,14 +18,14 @@ export default function LiveLaunchesSection() {
             Live launches
           </div>
           <h2 className="mt-3 text-display text-display-md text-balance">
-            Migrating to <span className="stamp">Robinhood Chain</span>.
+            Real launches.
             <br />
-            <span className="opacity-60">New launches ship shortly.</span>
+            <span className="opacity-60">Real wallets. Real markets.</span>
           </h2>
           <p className="mt-6 text-ink-300/80 text-base md:text-lg leading-relaxed max-w-2xl font-medium">
-            KOKi is moving the launch engine from Pump.fun on Solana to
-            Pons on Robinhood Chain. The public launch board comes back
-            online as soon as the indexer catches up to the current head.
+            Every memecoin shipped through the HAMR agent, indexed straight
+            off the Pons factory on Robinhood Chain — with live pool price,
+            graduation progress, and Blockscout links.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Link href="/launches" className="btn btn-primary !py-3 !px-5">

@@ -1,6 +1,6 @@
-# KOKi.ai Architecture
+# HAMR.fun Architecture
 
-KOKi.ai is an AI agent organized as five phases that flow into each other. Each phase has a clear UI surface, a server route, and an LLM prompt + parser pair. Mock data falls back wherever a real provider isn't configured, so the UI is always demoable.
+HAMR.fun is an AI agent organized as five phases that flow into each other. Each phase has a clear UI surface, a server route, and an LLM prompt + parser pair. Mock data falls back wherever a real provider isn't configured, so the UI is always demoable.
 
 ```
 Detect → Analyze → Generate → Launch → Monitor
@@ -136,7 +136,7 @@ Provider chain: **xAI Grok → Anthropic Claude → OpenAI → Mock fallback**. 
 
 ## Compliance enforced at the prompt level
 
-Every system prompt across all 5 phases includes the KOKi.ai compliance rules:
+Every system prompt across all 5 phases includes the HAMR.fun compliance rules:
 
 1. No guaranteed-profit / pump / listing claims.
 2. No fake partnership claims with xAI / X / Grok / Pump.fun / Solana.

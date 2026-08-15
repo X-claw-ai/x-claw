@@ -1,14 +1,14 @@
 import { cn } from "@/lib/cn";
 
 /**
- * KOKi brand mark.
+ * HAMR brand mark.
  *
  * Two visual modes:
  *   - default  → BLACK tile + ORANGE wordmark (use ON ORANGE backgrounds)
  *   - inverted → ORANGE tile + BLACK wordmark (use ON BLACK / dark surfaces)
  *
  * Two shape variants:
- *   - "default"  → wordmark "KOKi" + tiny paw accent (full brand mark)
+ *   - "default"  → wordmark "HAMR" + tiny paw accent (full brand mark)
  *   - "paw-only" → just the paw glyph (favicons / tight UI slots)
  */
 export function KokiMark({
@@ -42,7 +42,7 @@ export function KokiMark({
         boxShadow:
           "0 1.5px 0 rgba(255,255,255,0.08) inset, 0 4px 0 -2px rgba(11,11,11,0.55)",
       }}
-      aria-label="KOKi"
+      aria-label="HAMR"
     >
       {isWordmark ? (
         <svg
@@ -62,7 +62,7 @@ export function KokiMark({
             fontSize="30"
             letterSpacing="-1.5"
           >
-            KOKi
+            HAMR
           </text>
           <g transform="translate(64,8) scale(0.32)">
             <ellipse cx="16" cy="22" rx="7.5" ry="6" fill={fg} />

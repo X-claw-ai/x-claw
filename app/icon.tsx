@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-// Browser tab favicon, orange tile with the KOKi paw glyph.
+// Browser tab favicon, orange tile with the HAMR paw glyph.
 // Next.js auto-emits this at /icon and adds <link rel="icon"> in <head>.
 
 export const runtime = "edge";

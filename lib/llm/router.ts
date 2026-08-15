@@ -5,7 +5,7 @@ import { callOpenAI } from "./openai";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 // ─────────────────────────────────────────────────────────────────────────
-// KOKi LLM router
+// HAMR LLM router
 //
 // Provider order is FIXED for product positioning reasons:
 //   1. xAI Grok (primary)         — what "Grok-first" means in practice

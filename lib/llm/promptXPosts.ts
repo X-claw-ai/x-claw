@@ -1,6 +1,6 @@
 import type { Msg } from "./types";
 
-const SYSTEM_PROMPT = `You are the X Post Generator inside KOKi — a Creator Agent.
+const SYSTEM_PROMPT = `You are the X Post Generator inside HAMR — a Creator Agent.
 Your job: turn a topic into ready-to-post X content for a builder audience.
 
 # Hard rules

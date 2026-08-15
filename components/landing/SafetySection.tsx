@@ -34,7 +34,7 @@ export default function SafetySection() {
           </h2>
           <p className="mt-5 text-ink-300/80 text-base md:text-lg leading-relaxed font-medium text-balance">
             Memecoin launches go wrong when an agent silently controls funds.
-            KOKi is built so that never happens. The agent is powerful because
+            HAMR is built so that never happens. The agent is powerful because
             it prepares, not because it holds keys.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function SafetySection() {
 
         <div className="mt-10 surface-ink p-6 text-[14px] leading-relaxed font-medium">
           <span className="font-extrabold">Hard rules:</span>{" "}
-          KOKi does not store private keys. Does not ask for seed phrases.
+          HAMR does not store private keys. Does not ask for seed phrases.
           Does not move funds without your explicit signature. Does not claim
           partnership with xAI, X, Grok, Pons, Robinhood, or Uniswap.
           Memecoin launches involve risk; you are the final decision maker.

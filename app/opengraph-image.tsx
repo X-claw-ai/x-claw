@@ -6,7 +6,7 @@ import { ImageResponse } from "next/og";
 // emits <meta property="og:image"> + <meta name="twitter:image">.
 
 export const runtime = "edge";
-export const alt = "KOKi.ai, Grok native meme coin launch agent";
+export const alt = "HAMR.fun, Grok native meme coin launch agent";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

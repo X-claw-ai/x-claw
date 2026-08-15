@@ -5,7 +5,7 @@ import type { Msg } from "./types";
 // Pump Launch Agent — system prompt (Phase 3: Generate)
 // ─────────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the Generate phase of the KOKi Grok-native Meme Coin Launch Agent.
+const SYSTEM_PROMPT = `You are the Generate phase of the HAMR Grok-native Meme Coin Launch Agent.
 Your job is to produce a complete launch kit for a Pons token on Robinhood Chain, ready for the human team to review and sign.
 
 # Hard compliance rules (NEVER violate)

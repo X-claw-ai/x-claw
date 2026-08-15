@@ -20,7 +20,7 @@ interface LaunchInsert {
   /**
    * URL of the originating viral X post that inspired this token, when
    * known. Recorded so /api/auto-launch can hard-exclude it from future
-   * Grok picks, no two KOKi-shipped tokens should ever come from the
+   * Grok picks, no two HAMR-shipped tokens should ever come from the
    * same X post (deduplication across all wallets).
    */
   sourceXUrl?: string;
@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
  * DELETE ?wallet=<0x…> — clear all launch history rows for a wallet.
  *
  * Onchain tokens themselves are immutable — this only removes the rows
- * KOKi has tracked. The user's dashboard goes back to an empty state.
+ * HAMR has tracked. The user's dashboard goes back to an empty state.
  */
 export async function DELETE(req: NextRequest) {
   const wallet = req.nextUrl.searchParams.get("wallet");

@@ -10,15 +10,20 @@
 
   /* Brand orange — kept from the previous KOKi palette as the sole
      warm accent. Reserve it for CTAs, key numbers, and the logomark. */
-  --orange: #E55B14;
-  --orange-deep: #BF4710;
-  --orange-soft: #FF7A2E;
+  /* Steel accent — was KOKi orange, now brushed-steel gray/mint that
+     matches the glass-hammer logomark. Reserved for CTAs, key numbers,
+     and inline stamps. `--orange` names kept intact so the ~40 sites
+     that consume var(--orange) don't need touching. */
+  --orange: #7CC7A5;
+  --orange-deep: #4E9E7A;
+  --orange-soft: #A6E0C4;
 
-  /* Binance-style dark canvas + panels. */
-  --bg: #0B0E11;            /* deep navy, almost-black page bg */
-  --bg-elevated: #181A20;   /* one notch above bg — used for navbar/footer */
-  --surface: #1E2329;       /* card / panel surface */
-  --surface-2: #2B3139;     /* hover / nested panels */
+  /* Steel-gray dark canvas + panels. Slightly cooler than the old
+     Binance navy so the glass-hammer accent stays legible. */
+  --bg: #14181D;            /* deep gunmetal page bg */
+  --bg-elevated: #1E2530;   /* one notch above bg — used for navbar/footer */
+  --surface: #232B36;       /* card / panel surface */
+  --surface-2: #2F3844;     /* hover / nested panels */
 
   /* Text */
   --text: #EAECEF;          /* primary near-white */
@@ -45,7 +50,7 @@
 
   /* Accent — orange solid on dark. */
   --accent: var(--orange);
-  --accent-on: #0B0E11;     /* dark text on the orange button */
+  --accent-on: #14181D;     /* dark text on the orange button */
 }
 
 html,
@@ -63,14 +68,14 @@ body {
 
 ::selection {
   background: var(--orange);
-  color: #0B0E11;
+  color: #14181D;
 }
 
 /* ── Atmospheric glow watermarks (low alpha, decorative) ───────────────── */
 .bg-app {
   background:
-    radial-gradient(60% 40% at 80% 0%, rgba(229, 91, 20, 0.10) 0%, rgba(229, 91, 20, 0) 70%),
-    radial-gradient(50% 35% at 10% 100%, rgba(229, 91, 20, 0.06) 0%, rgba(229, 91, 20, 0) 70%),
+    radial-gradient(60% 40% at 80% 0%, rgba(124, 199, 165, 0.08) 0%, rgba(229, 91, 20, 0) 70%),
+    radial-gradient(50% 35% at 10% 100%, rgba(124, 199, 165, 0.04) 0%, rgba(229, 91, 20, 0) 70%),
     var(--bg);
 }
 
@@ -103,7 +108,7 @@ body {
 .stamp {
   display: inline-block;
   background: var(--orange);
-  color: #0B0E11;
+  color: #14181D;
   padding: 0 0.18em;
   border-radius: 6px;
   transform: rotate(-2deg);
@@ -136,7 +141,7 @@ body {
 /* ── Inverted surface — orange accent panel ────────────────────────────── */
 .surface-ink {
   background: var(--orange);
-  color: #0B0E11;
+  color: #14181D;
   border: 1px solid var(--orange);
   border-radius: 14px;
 }
@@ -168,13 +173,13 @@ body {
 /* Primary — orange solid (the accent CTA color). */
 .btn-primary {
   background: var(--orange);
-  color: #0B0E11;
+  color: #14181D;
   border-color: var(--orange);
 }
 .btn-primary:hover {
   background: var(--orange-soft);
   border-color: var(--orange-soft);
-  box-shadow: 0 6px 22px -6px rgba(229, 91, 20, 0.55);
+  box-shadow: 0 6px 22px -6px rgba(124, 199, 165, 0.35);
 }
 
 /* Secondary — dark panel surface with hairline border. */
@@ -218,7 +223,7 @@ body {
 }
 .pill-emph {
   background: var(--orange);
-  color: #0B0E11;
+  color: #14181D;
   border-color: var(--orange);
 }
 .pill-live::before {
@@ -245,7 +250,7 @@ body {
   letter-spacing: -0.01em;
 }
 .chip strong {
-  color: #0B0E11;
+  color: #14181D;
   background: var(--orange);
   padding: 0 5px;
   border-radius: 3px;
@@ -337,9 +342,9 @@ textarea::placeholder { color: var(--text-subtle); }
   font-weight: 800;
 }
 .phase-step.is-active { color: var(--text); }
-.phase-step.is-active .num { background: var(--orange); color: #0B0E11; border-color: var(--orange); }
+.phase-step.is-active .num { background: var(--orange); color: #14181D; border-color: var(--orange); }
 .phase-step.is-done { color: var(--text); }
-.phase-step.is-done .num { background: var(--orange); color: #0B0E11; border-color: var(--orange); }
+.phase-step.is-done .num { background: var(--orange); color: #14181D; border-color: var(--orange); }
 
 /* ── Animations ────────────────────────────────────────────────────────── */
 @keyframes fade-in-up {
@@ -366,10 +371,10 @@ textarea::placeholder { color: var(--text-subtle); }
 .card-hover { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
 .card-hover:hover {
   transform: translateY(-3px);
-  border-color: rgba(229, 91, 20, 0.45);
+  border-color: rgba(124, 199, 165, 0.30);
   box-shadow:
     0 14px 32px -10px rgba(0, 0, 0, 0.65),
-    0 0 24px -6px rgba(229, 91, 20, 0.35);
+    0 0 24px -6px rgba(124, 199, 165, 0.22);
 }
 
 /* ── Bonding-curve shimmer ──────────────────────────────────────────────

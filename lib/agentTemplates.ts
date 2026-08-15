@@ -1,9 +1,9 @@
 // LEGACY STUB
 //
-// KOKi.ai used to be framed as a multi-vertical Agent OS. We retired that
+// HAMR.fun used to be framed as a multi-vertical Agent OS. We retired that
 // framing in favor of a single, focused product:
 //
-//   KOKi.ai = the Grok-native AI agent that launches your memecoin on Pump.fun.
+//   HAMR.fun = the Grok-native AI agent that launches your memecoin on Pump.fun.
 //
 // This file is kept as an empty stub so any lingering imports keep compiling.
 // New code should not import from here.

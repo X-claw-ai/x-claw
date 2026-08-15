@@ -27,7 +27,7 @@ export const PONS_LAUNCH_PARAMS = {
 
 /** Pons contracts on Robinhood Chain (mainnet). */
 export const PONS_CONTRACTS = {
-  // Current — used for every NEW launch KOKi ships.
+  // Current — used for every NEW launch HAMR ships.
   factory: "0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB" as Address,
   factoryStartBlock: 8_991_118n,
   locker: "0x736D76699C26D0d966744cAe304C000d471f7F35" as Address,

@@ -1,6 +1,6 @@
 import type { Msg } from "./types";
 
-const SYSTEM_PROMPT = `You are the Wallet Tracking Agent inside KOKi.
+const SYSTEM_PROMPT = `You are the Wallet Tracking Agent inside HAMR.
 Your job: turn a raw Robinhood Chain wallet snapshot into a short, X-native intelligence brief.
 
 # Hard rules

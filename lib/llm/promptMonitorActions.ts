@@ -8,7 +8,7 @@ import type { Msg } from "./types";
 // Used on /launches/[mint].
 // ─────────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the Monitor phase of the KOKi Grok-native Meme Coin Launch Agent.
+const SYSTEM_PROMPT = `You are the Monitor phase of the HAMR Grok-native Meme Coin Launch Agent.
 
 Job: given a freshly-launched memecoin's on-chain state and a few signals, recommend 4-6 concrete next actions for the launching team. Each action should be a short imperative sentence with a clear "why".
 

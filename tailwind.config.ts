@@ -83,7 +83,7 @@ const config: Config = {
           100: "#F5F7FA",
           50:  "#FAFCFE",
         },
-        // ── KOKi orange — unchanged. The single warm accent on dark. ────
+        // ── HAMR orange — unchanged. The single warm accent on dark. ────
         koki: {
           50: "#FFF4ED",
           100: "#FFE0CB",
@@ -97,7 +97,7 @@ const config: Config = {
           900: "#4A1C07",
         },
         // ── Legacy alias so any lingering "claw-*" classes still render
-        // (mirrors KOKi orange). Prefer `koki-*` going forward.
+        // (mirrors HAMR orange). Prefer `koki-*` going forward.
         claw: {
           50: "#FFF4ED",
           100: "#FFE0CB",

@@ -5,7 +5,7 @@ import { Sparkles, ArrowRight } from "lucide-react";
 import type { ConceptInput } from "../types";
 
 // Step 1: Concept. Two lanes:
-//   - Auto-pilot: KOKi agent scans X and picks a viral post itself.
+//   - Auto-pilot: HAMR agent scans X and picks a viral post itself.
 //   - Manual: user types the idea, ticker, and (optional) source URL.
 //
 // The manual lane pre-fills from the `?meme=<id>` search-param upstream
@@ -51,7 +51,7 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
           selected={autoPilot}
           onSelect={() => setAutoPilot(true)}
           eyebrow="Auto-pilot"
-          title="KOKi picks the meme"
+          title="HAMR picks the meme"
           body="Grok scans X for the freshest viral moment, then drafts the whole launch kit for you."
         />
         <LaneCard
@@ -59,7 +59,7 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
           onSelect={() => setAutoPilot(false)}
           eyebrow="Manual"
           title="You bring the idea"
-          body="Type your concept, ticker, and (optional) source X post. KOKi handles the rest."
+          body="Type your concept, ticker, and (optional) source X post. HAMR handles the rest."
         />
       </div>
 

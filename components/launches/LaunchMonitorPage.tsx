@@ -257,7 +257,7 @@ export default function LaunchMonitorPage({ token }: Props) {
         <div className="card !p-6">
           <div className="eyebrow">No Pons state yet</div>
           <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
-            KOKi couldn&apos;t find this address in the current or legacy
+            HAMR couldn&apos;t find this address in the current or legacy
             Pons factory. It may not have launched yet, or it lives outside
             the Pons protocol. Check Blockscout directly:
           </p>

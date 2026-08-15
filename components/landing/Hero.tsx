@@ -28,7 +28,7 @@ export default function Hero() {
           <span className="stamp">Launch.</span> Repeat.
         </h1>
 
-        {/* Positioning statement, the one-liner that explains what KOKi
+        {/* Positioning statement, the one-liner that explains what HAMR
             actually does. Bigger and brighter than a subline because this
             is the elevator pitch every visitor should read. */}
         <p className="mt-7 text-ink-300 text-xl md:text-2xl leading-snug max-w-3xl font-bold text-balance">
@@ -51,7 +51,7 @@ export default function Hero() {
 
         <div className="mt-5 inline-flex items-center gap-2 text-[12px] font-bold text-ink-300/72">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Robinhood Chain mainnet, MetaMask / Rainbow / Robinhood Wallet, KOKi never holds your keys.
+          Robinhood Chain mainnet, MetaMask / Rainbow / Robinhood Wallet, HAMR never holds your keys.
         </div>
       </div>
     </section>
