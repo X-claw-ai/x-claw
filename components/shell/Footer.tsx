@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Show the orange chip against the dark footer. */}
           <KokiLogo height={40} className="rounded-md overflow-hidden" />
           <p className="mt-4 text-ink-300/72 leading-relaxed max-w-xs font-medium">
-            Grok native Meme Coin Launch Agent. Detect → Analyze → Generate → Launch → Monitor. From meme idea to Pump.fun launch.
+            Grok native Meme Coin Launch Agent. Detect → Analyze → Generate → Launch → Monitor. From meme idea to Pons launch on Robinhood Chain.
           </p>
         </div>
         <div>
@@ -24,7 +24,7 @@ export default function Footer() {
           <div className="eyebrow !text-[10px] mb-4">Disclaimers</div>
           <p className="text-ink-300/72 leading-relaxed max-w-sm font-medium">
             koki.ai is an independent open source project. Not affiliated with
-            xAI, X, Grok, Pump.fun, PumpPortal, or Solana. Memecoin launches
+            xAI, X, Grok, Pons, Robinhood, or Uniswap. Memecoin launches
             involve risk. Nothing here is financial advice.
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function Footer() {
           >
             Original since 2026-05-04 · commit ae5ff49
           </a>
-          <span className="opacity-70">From meme idea to Pump.fun launch.</span>
+          <span className="opacity-70">From meme idea to Pons launch on Robinhood Chain.</span>
         </div>
       </div>
     </footer>

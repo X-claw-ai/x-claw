@@ -20,7 +20,7 @@ export default function FinalCTA() {
         <h2 className="text-display text-display-md text-balance max-w-3xl mx-auto">
           One sig. One memecoin.
           <br />
-          <span className="stamp">Live</span> on Pump.fun.
+          <span className="stamp">Live</span> on Pons, Robinhood Chain.
         </h2>
         <p className="mt-6 text-ink-300/80 text-base md:text-lg max-w-xl mx-auto font-bold">
           $KOKI, Grok native, X native, open source.

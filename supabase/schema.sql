@@ -1,4 +1,4 @@
--- KOKi.ai — Supabase / Postgres schema draft (MVP)
+-- KOKi.ai — Supabase / Postgres schema (Robinhood Chain / Pons era)
 -- ───────────────────────────────────────────────────────────────────────────
 -- Hard rules baked into the schema:
 --   • No private key column, anywhere.
@@ -35,12 +35,12 @@ create type launch_status as enum ('draft', 'pending-signature', 'launched', 'fa
 create table if not exists public.launches (
   id uuid primary key default uuid_generate_v4(),
   project_id uuid not null references public.projects(id) on delete cascade,
-  chain text not null check (chain in ('solana', 'base', 'ethereum')),
+  chain text not null check (chain in ('robinhood', 'base', 'ethereum', 'arbitrum')),
   ticker text not null,
   token_name text not null,
   status launch_status not null default 'draft',
-  tx_signature text,
-  pump_url text,
+  tx_hash text,
+  pons_url text,
   launched_at timestamptz,
   mock boolean not null default true,
   created_at timestamptz not null default now()
@@ -90,7 +90,7 @@ create table if not exists public.wallet_connections (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null references public.users(id) on delete cascade,
   address text not null,
-  chain text not null check (chain in ('solana', 'base', 'ethereum')),
+  chain text not null check (chain in ('robinhood', 'base', 'ethereum', 'arbitrum')),
   last_seen timestamptz not null default now(),
   unique (user_id, address, chain)
 );
@@ -102,7 +102,6 @@ alter table public.launches enable row level security;
 alter table public.generated_content enable row level security;
 alter table public.usage_credits enable row level security;
 alter table public.wallet_connections enable row level security;
--- agent_templates is public-read (no PII, just catalog)
 alter table public.agent_templates enable row level security;
 
 create policy "users_self_read" on public.users
@@ -154,24 +153,31 @@ create policy "agent_templates_public_read" on public.agent_templates
 -- ───────────────────────────────────────────────────────────────────────────
 -- MVP — wallet-keyed (no Supabase Auth required yet)
 --
--- These tables are written from the server using SUPABASE_SERVICE_ROLE_KEY.
--- The browser never holds the service role key. Reads go through API routes
--- that filter by wallet pubkey from the request body / query.
+-- Server-writes only via SUPABASE_SERVICE_ROLE_KEY. The browser never
+-- holds the service role. Reads go through API routes that filter by
+-- wallet address from the request body / query.
 -- ───────────────────────────────────────────────────────────────────────────
 
--- Real Pump.fun launches, keyed by wallet pubkey.
-create table if not exists public.launches_v1 (
+-- Real Pons launches on Robinhood Chain, keyed by wallet address.
+--
+-- Legacy note: the previous Solana/Pump.fun era used `mint_pubkey`,
+-- `pump_url`, `tx_signature`, and `dev_buy_sol` on this same table.
+-- After the migration those rows are purged in place (see the migration
+-- section at the bottom) and re-created with the EVM shape below.
+create table if not exists public.pons_launches (
   id uuid primary key default uuid_generate_v4(),
-  wallet_pubkey text not null,
-  mint_pubkey text not null unique,
+  wallet_address text not null,           -- 0x… EVM signer that deployed
+  token_address text not null unique,     -- 0x… ERC-20 contract address
+  pool_address text,                       -- Uniswap V3 pool paired vs WETH
   ticker text not null,
   token_name text not null,
-  chain text not null default 'solana',
+  chain text not null default 'robinhood',
   status text not null default 'launched',
-  tx_signature text,
-  pump_url text,
-  metadata_uri text,
-  dev_buy_sol numeric,
+  tx_hash text,                            -- 0x… mainnet tx hash
+  pons_url text,                           -- ponsfamily.com/launchpad/<token>
+  explorer_url text,                       -- robinhoodchain.blockscout.com/…
+  logo_url text,                           -- IPFS or public URL
+  initial_buy_eth numeric,                 -- creator's first-buy in ETH, if any
   mock boolean not null default false,
   -- URL of the viral X post this token was anchored on (Auto-pilot or manual
   -- input). /api/auto-launch reads this to build a HARD-EXCLUDE LIST so no
@@ -180,19 +186,19 @@ create table if not exists public.launches_v1 (
   source_x_url text,
   created_at timestamptz not null default now()
 );
-create index if not exists launches_v1_wallet_idx on public.launches_v1 (wallet_pubkey);
-create index if not exists launches_v1_created_idx on public.launches_v1 (created_at desc);
-create index if not exists launches_v1_source_x_url_idx on public.launches_v1 (source_x_url) where source_x_url is not null;
+create index if not exists pons_launches_wallet_idx on public.pons_launches (wallet_address);
+create index if not exists pons_launches_created_idx on public.pons_launches (created_at desc);
+create index if not exists pons_launches_source_x_url_idx on public.pons_launches (source_x_url) where source_x_url is not null;
 
 -- Short-term X-post URL reservations. /api/auto-launch writes here the
 -- INSTANT Grok returns a concept URL — solves a race where 20 concurrent
 -- callers all anchor on the same hot post in the gap between "got concept"
--- and "launch committed to launches_v1". 30-min TTL: if the launch
--- completes the row in launches_v1 takes over (permanent exclusion);
+-- and "launch committed to pons_launches". 30-min TTL: if the launch
+-- completes the row in pons_launches takes over (permanent exclusion);
 -- if the user abandons, the reservation expires.
 create table if not exists public.reserved_x_urls (
   x_url text primary key,
-  wallet_pubkey text,
+  wallet_address text,
   reserved_at timestamptz not null default now(),
   expires_at timestamptz not null default (now() + interval '30 minutes')
 );
@@ -218,7 +224,7 @@ create index if not exists radar_signals_expires_idx on public.radar_signals (ex
 -- Per-call LLM usage trail. Fire-and-forget, no PII.
 create table if not exists public.llm_usage (
   id uuid primary key default uuid_generate_v4(),
-  wallet_pubkey text,
+  wallet_address text,
   provider text not null,
   model text not null,
   feature text not null,
@@ -230,42 +236,72 @@ create table if not exists public.llm_usage (
   created_at timestamptz not null default now()
 );
 create index if not exists llm_usage_created_idx on public.llm_usage (created_at desc);
-create index if not exists llm_usage_wallet_idx on public.llm_usage (wallet_pubkey);
+create index if not exists llm_usage_wallet_idx on public.llm_usage (wallet_address);
 
--- These three tables are server-write-only; RLS off because the service-role
--- key bypasses RLS anyway. If you later add Supabase Auth and want wallet-
--- linked accounts, enable RLS and add policies similar to launches.
-
--- ───────────────────────────────────────────────────────────────────────────
--- Pre-warmed x_search cache (Auto-pilot speed optimization).
---
--- Auto-pilot's biggest latency is xAI's x_search tool — 20-40s per call. A
--- Vercel cron job hits /api/cron/refresh-memes every 30 minutes, runs the
--- expensive x_search server-side, and stores the trending viral X posts in
--- this table. Then user-facing /api/auto-launch just reads from the cache
--- and asks Grok to pick + draft a concept (5-10s). Net result: 30s total
--- end-to-end vs. 70-145s previously, with zero quality loss (still real X
--- trends, just up to 30 minutes stale).
--- ───────────────────────────────────────────────────────────────────────────
+-- Pre-warmed x_search cache (Auto-pilot speed optimization). Unchanged
+-- between the Solana and Robinhood Chain eras — the cache is chain-
+-- agnostic; only the launch tables reshape.
 create table if not exists public.cached_memes (
   id uuid primary key default uuid_generate_v4(),
-  -- Direct URL to the viral X post, e.g. https://x.com/handle/status/123
   x_url text not null unique,
-  -- Author handle with leading @
   x_author text not null,
-  -- Direct pbs.twimg.com URL of the first image attached to the post, if any
   image_url text,
-  -- Short summary of what the post is about (1-2 sentences, generated by Grok)
   summary text not null,
-  -- Why this post has meme potential (1 sentence)
   meme_angle text,
-  -- Engagement score (likes + reposts + replies, normalized 0..1)
   engagement_score numeric,
-  -- Which refresh batch produced this row — lets us atomically swap the cache
   batch_id uuid not null,
   cached_at timestamptz not null default now(),
-  -- Auto-pilot only reads rows where expires_at > now()
   expires_at timestamptz not null default (now() + interval '90 minutes')
 );
 create index if not exists cached_memes_expires_idx on public.cached_memes (expires_at desc);
 create index if not exists cached_memes_batch_idx on public.cached_memes (batch_id);
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- Migration script — Solana/Pump.fun era → Robinhood Chain/Pons era
+--
+-- Run this ONCE, on the day of the cutover, against the Supabase SQL
+-- editor. It:
+--   1. Drops the legacy `launches_v1` (Solana mint_pubkey / pump_url shape).
+--   2. Renames `reserved_x_urls.wallet_pubkey` → `wallet_address` if it
+--      still has the old column name.
+--   3. Rewrites the `launches` / `wallet_connections` chain CHECK
+--      constraints so `solana` is no longer allowed.
+--
+-- Idempotent-ish: safe to re-run — every DROP uses IF EXISTS, every ALTER
+-- checks the column shape before touching it.
+--
+-- To roll forward manually in the Supabase dashboard:
+--   supabase db push  (if you use migrations)  OR
+--   copy the block below into the SQL editor.
+-- ───────────────────────────────────────────────────────────────────────────
+
+-- 1. Legacy launches — drop; the new EVM-shaped table above replaces it.
+drop table if exists public.launches_v1 cascade;
+
+-- 2. Reservations — rename wallet column if the old name is still around.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'reserved_x_urls'
+      and column_name = 'wallet_pubkey'
+  ) then
+    alter table public.reserved_x_urls rename column wallet_pubkey to wallet_address;
+  end if;
+end $$;
+
+-- 3. LLM usage — same rename.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'llm_usage'
+      and column_name = 'wallet_pubkey'
+  ) then
+    alter table public.llm_usage rename column wallet_pubkey to wallet_address;
+  end if;
+end $$;

@@ -108,7 +108,7 @@ The test: could a stranger on X read your summary, recognize WHICH POST you mean
 STEP 4 — ORGANIC CONTENT FILTER. The post you anchor on MUST be:
    ✓ Organic cultural content — a joke, image, observation, video clip, screenshot, take, format, character
    ✓ Has at least one attached image (we'll use it as the token logo)
-   ✗ NOT a token shill post (no "$TICKER buy now", "CA:", contract addresses, pump.fun links, dexscreener links, "send it" calls, "fair launch live")
+   ✗ NOT a token shill post (no "$TICKER buy now", "CA:", contract addresses, pump.fun / pons.family / uniswap links, dexscreener links, "send it" calls, "fair launch live")
    ✗ NOT from a memecoin alpha account, pump caller, or known shill account
    ✗ NOT a screenshot of a token chart or transaction
    ✗ NOT a reply chain promoting an existing coin
@@ -135,8 +135,8 @@ VARIETY MATTERS. Do NOT default to archetypes already burned in past runs ("Grok
 
 Hard rules:
 - Safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
-- No claim of partnership with X / xAI / Grok / Pump.fun / PumpPortal / Solana. Use "X-native" / "Solana-native" framing instead.
-- Ticker: 3–6 uppercase letters/numbers, memorable, NOT a real major ticker (no BTC/ETH/SOL/USDC/USDT/BNB/etc) and NOT the same ticker as the source post (if the post mentions one, that's a red flag — pick a different post).
+- No claim of partnership with X / xAI / Grok / Pons / Robinhood / Uniswap. Use "X-native" / "Robinhood-Chain-native" framing instead.
+- Ticker: 3–6 uppercase letters/numbers, memorable, NOT a real major ticker (no BTC/ETH/USDC/USDT/PONS/HOOD/etc) and NOT the same ticker as the source post (if the post mentions one, that's a red flag — pick a different post).
 - originXUrl: ONLY a real direct post URL from your x_search results, ONLY if that post is organic cultural content (rule #2 above). Otherwise null. Never fabricate.
 - Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.
 

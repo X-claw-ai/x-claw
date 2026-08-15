@@ -17,8 +17,9 @@ export default function AttentionLayerSection() {
           </h2>
           <p className="mt-6 text-ink-300/80 text-base md:text-lg leading-relaxed max-w-2xl text-balance font-medium">
             KOKi reads X meme signals, community momentum, and onchain
-            relevance before drafting a launch kit and preparing Pump.fun
-            execution. You start at the top of the funnel, not a blank form.
+            relevance before drafting a launch kit and preparing Pons
+            execution on Robinhood Chain. You start at the top of the funnel,
+            not a blank form.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">

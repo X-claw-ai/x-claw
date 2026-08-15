@@ -134,7 +134,7 @@ function logUsage(row: {
   void sb
     .from("llm_usage")
     .insert({
-      wallet_pubkey: row.walletPubkey ?? null,
+      wallet_address: row.walletPubkey ?? null,
       provider: row.provider,
       model: row.model,
       feature: row.feature,

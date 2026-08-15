@@ -1,7 +1,7 @@
 import type { Msg } from "./types";
 
 const SYSTEM_PROMPT = `You are the Wallet Tracking Agent inside KOKi.
-Your job: turn a raw Solana wallet snapshot into a short, X-native intelligence brief.
+Your job: turn a raw Robinhood Chain wallet snapshot into a short, X-native intelligence brief.
 
 # Hard rules
 1. NEVER speculate about identity. Don't claim a wallet "belongs to" anyone unless that is stated.
@@ -17,7 +17,7 @@ Your job: turn a raw Solana wallet snapshot into a short, X-native intelligence 
 `;
 
 export function buildWalletSummaryMessages(digest: string): Msg[] {
-  const userPrompt = `Summarize this Solana wallet snapshot for an X audience. Output strict JSON matching this schema:
+  const userPrompt = `Summarize this Robinhood Chain wallet snapshot for an X audience. Output strict JSON matching this schema:
 
 {
   "headline": string,                    // single sentence, under 140 chars

@@ -3,33 +3,38 @@ import LaunchMonitorPage from "@/components/launches/LaunchMonitorPage";
 import { PhaseProgress } from "@/components/ui/PhaseProgress";
 
 // /launches/[mint], Phase 05 (Monitor) of the agent loop.
+//
+// The dynamic segment name is still `mint` for backward compatibility
+// with radar / share links from the Solana era. Values are now EVM
+// token addresses (0x...) instead of Solana mint pubkeys; the monitor
+// component handles both shapes gracefully.
 export default function LaunchByMintPage({
   params,
 }: {
   params: { mint: string };
 }) {
-  const mint = params.mint;
+  const token = params.mint;
   return (
     <>
       <PageHeader
         eyebrow="Monitor, Phase 05"
         title="Post-launch monitor"
-        description="Live onchain monitoring + Grok-recommended next actions. Supply, top holders, creator wallet activity, and ready-to-post content all in one view."
+        description="Live Pons state on Robinhood Chain — pool price, graduation progress, deployer, and Blockscout links, all polled straight from the factory."
         breadcrumbs={[
           { href: "/", label: "KOKi" },
           { href: "/launches", label: "Launches" },
-          { label: shortMint(mint) },
+          { label: shortAddr(token) },
         ]}
       />
       <div className="mx-auto max-w-7xl px-6 pt-8">
         <PhaseProgress current="monitor" />
       </div>
-      <LaunchMonitorPage mint={mint} />
+      <LaunchMonitorPage token={token} />
     </>
   );
 }
 
-function shortMint(s: string): string {
+function shortAddr(s: string): string {
   if (s.length <= 14) return s;
   return `${s.slice(0, 6)}…${s.slice(-6)}`;
 }

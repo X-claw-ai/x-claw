@@ -14,12 +14,12 @@ const PILLARS = [
   {
     icon: Wallet,
     title: "Wallet signs",
-    body: "Phantom or Solflare signs the create-token transaction. We never see your keys.",
+    body: "MetaMask, Rainbow, or Robinhood Wallet signs the create-token transaction. We never see your keys.",
   },
   {
     icon: ShieldCheck,
     title: "Launch executes",
-    body: "Only after your signature does the token go live on Solana mainnet.",
+    body: "Only after your signature does the token go live on Robinhood Chain mainnet.",
   },
 ];
 
@@ -67,7 +67,7 @@ export default function SafetySection() {
           <span className="font-extrabold">Hard rules:</span>{" "}
           KOKi does not store private keys. Does not ask for seed phrases.
           Does not move funds without your explicit signature. Does not claim
-          partnership with xAI, X, Grok, Pump.fun, PumpPortal, or Solana.
+          partnership with xAI, X, Grok, Pons, Robinhood, or Uniswap.
           Memecoin launches involve risk; you are the final decision maker.
         </div>
       </div>

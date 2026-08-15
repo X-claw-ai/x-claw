@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
     // Hard dedup check, if Grok ignored the exclude list and re-picked a
     // URL that's already taken (launched OR reserved), refuse to anchor on
     // it. Drop the X attribution; the wizard will use a safe ticker-search
-    // Pump.fun URL as the token's Twitter link instead. Better an
+    // Pons URL as the token's Twitter link instead. Better an
     // unattributed launch than a duplicate.
     const excludeSet = new Set(excludeXUrls);
     if (concept.originXUrl && excludeSet.has(concept.originXUrl)) {
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
     // the next 30 minutes) won't see it as available. The reservation is
     // fire-and-forget, we don't await it before returning the response.
     // If the user completes their launch, /api/launches POST writes the
-    // URL into launches_v1 (permanent). If they abandon, the 30-min TTL
+    // URL into pons_launches (permanent). If they abandon, the 30-min TTL
     // sweeps it.
     if (concept.originXUrl) {
       void reserveXUrl(concept.originXUrl, walletPubkey);
@@ -196,11 +196,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Safety net: if the cited X post body looks like a token-shill (CA,
-    // contract, pump.fun link, dexscreener, base58 mint address, "$TICKER"
-    // mentions, "fair launch live"), the post probably already has its own
-    // coin and our token's Twitter button would point at that coin's
-    // promo, bad look. Drop the originXUrl in that case so the token
-    // falls back to the safe ticker-search URL on Pump.fun.
+    // contract, pons.family / pump.fun / uniswap link, dexscreener, EVM
+    // address, "$TICKER" mentions, "fair launch live"), the post probably
+    // already has its own coin and our token's Twitter button would point
+    // at that coin's promo, bad look. Drop the originXUrl in that case so
+    // the token falls back to the safe ticker-search URL on Pons.
     //
     // We only see what the model wrote in `idea` / `reasoning` though, not
     // the post body itself, so check those fields and the URL itself for
@@ -253,7 +253,7 @@ export async function POST(req: NextRequest) {
  * Pull X-post URLs that are off-limits for the next Auto-pilot pick. This is
  * the UNION of two tables:
  *
- *   1. launches_v1.source_x_url, posts that previous launches already
+ *   1. pons_launches.source_x_url, posts that previous launches already
  *      anchored on. PERMANENT exclusion (a token is a token).
  *
  *   2. reserved_x_urls (expires_at > now()), posts that another concurrent
@@ -273,7 +273,7 @@ async function fetchUnavailableXUrls(): Promise<string[]> {
   // Run the two queries in parallel, they don't depend on each other.
   const [launchedRes, reservedRes] = await Promise.all([
     sb
-      .from("launches_v1")
+      .from("pons_launches")
       .select("source_x_url")
       .not("source_x_url", "is", null)
       .order("created_at", { ascending: false })
@@ -322,7 +322,7 @@ async function fetchUnavailableXUrls(): Promise<string[]> {
  * Fire-and-forget: failure here doesn't break the user's launch flow,
  * it just means concurrent users might pick the same post. The
  * post-LLM excludeSet check on the next caller will still catch
- * duplicates once launches_v1 has the row.
+ * duplicates once pons_launches has the row.
  */
 async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Promise<void> {
   const sb = getSupabaseAdmin();
@@ -333,7 +333,7 @@ async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Prom
       .upsert(
         {
           x_url: xUrl,
-          wallet_pubkey: walletPubkey ?? null,
+          wallet_address: walletPubkey ?? null,
           reserved_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         },

@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 // Web app manifest. Next.js auto-emits this at /manifest.webmanifest
 // and adds <link rel="manifest"> in <head>. Signals to browsers,
-// search engines, and Phantom/Blowfish reputation systems that this
-// is a real, intentional web app, not a phishing throwaway.
+// search engines, and wallet reputation systems (MetaMask, Rainbow,
+// Robinhood Wallet, Blowfish) that this is a real, intentional web app.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "KOKi.ai, Grok native Meme Coin Launch Agent",
     short_name: "KOKi.ai",
     description:
-      "Grok native AI agent that detects X memes, generates launch kits, and ships tokens to Pump.fun in one signature.",
+      "Grok native AI agent that detects X memes, generates launch kits, and ships tokens to Pons on Robinhood Chain in one signature.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
