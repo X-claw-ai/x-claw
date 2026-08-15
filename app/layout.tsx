@@ -52,10 +52,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Match the page background so the URL bar / status bar on mobile
-  // blends into the app. Was the brand orange when the site was
-  // orange-on-cream; now it's the deep dark canvas.
-  themeColor: "#14181D",
-  colorScheme: "dark",
+  // blends into the app. Pure white now that the site is a monochrome
+  // light theme.
+  themeColor: "#FFFFFF",
+  colorScheme: "light",
 };
 
 export default function RootLayout({

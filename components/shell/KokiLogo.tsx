@@ -22,16 +22,18 @@ import Image from "next/image";
 
 export default function KokiLogo({
   height = 32,
-  bare = false,
+  // `bare` is kept in the signature for backward compatibility with the
+  // ~5 call sites that still pass it, but the tile background is now
+  // always off — the wordmark and icon float directly on whatever
+  // surface the parent provides.
+  bare: _bare = false,
   className,
 }: {
   height?: number;
-  /** Skip the outer tile background (parent already provides one). */
   bare?: boolean;
   className?: string;
 }) {
-  // Lockup is roughly icon + wordmark ≈ 4.2 : 1
-  const width = Math.round(height * 4.2);
+  void _bare;
   const iconSize = height;
 
   return (
@@ -41,11 +43,8 @@ export default function KokiLogo({
         display: "inline-flex",
         alignItems: "center",
         gap: Math.round(height * 0.2),
-        width,
         height,
-        background: bare ? "transparent" : "#1E2530",
-        padding: bare ? 0 : `0 ${Math.round(height * 0.25)}px`,
-        color: "#E7EDF3",
+        color: "var(--text)",
         fontFamily:
           "'Inter','Manrope','Hanken Grotesk',-apple-system,'SF Pro Display',system-ui,sans-serif",
         fontWeight: 900,
@@ -65,11 +64,10 @@ export default function KokiLogo({
           width: iconSize,
           borderRadius: Math.round(iconSize * 0.18),
           objectFit: "cover",
-          background: "#F4F6F8",
         }}
       />
       <span style={{ fontSize: Math.round(height * 0.55), lineHeight: 1 }}>
-        hamr<span style={{ opacity: 0.72 }}>.fun</span>
+        hamr<span style={{ opacity: 0.6 }}>.fun</span>
       </span>
     </span>
   );
