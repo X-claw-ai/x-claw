@@ -2,6 +2,11 @@ import PageHeader from "@/components/shell/PageHeader";
 import PonsLaunchWizard from "@/components/pons-launch/PonsLaunchWizard";
 import { PhaseProgress } from "@/components/ui/PhaseProgress";
 
+// wagmi + WalletConnect touch indexedDB during hydration, which throws
+// during Next.js prerender. Skip static generation for this route so the
+// wallet stack only ever runs in the browser.
+export const dynamic = "force-dynamic";
+
 // /launch, Phase 03 (Generate) and Phase 04 (Launch) of the agent loop.
 // Wired to the Pons launch wizard: Grok drafts the launch kit, then the
 // user's wallet signs one transaction to the Pons factory on Robinhood

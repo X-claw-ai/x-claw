@@ -2,6 +2,10 @@ import PageHeader from "@/components/shell/PageHeader";
 import LaunchMonitorPage from "@/components/launches/LaunchMonitorPage";
 import { PhaseProgress } from "@/components/ui/PhaseProgress";
 
+// Monitor page polls Pons contracts via viem — must render in the browser
+// only, otherwise wagmi's WalletConnect init crashes prerender on indexedDB.
+export const dynamic = "force-dynamic";
+
 // /launches/[mint], Phase 05 (Monitor) of the agent loop.
 //
 // The dynamic segment name is still `mint` for backward compatibility

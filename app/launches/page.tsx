@@ -3,13 +3,17 @@ import { ButtonLink } from "@/components/ui/Button";
 import LaunchesTable from "@/components/launches/LaunchesTable";
 import { Rocket } from "lucide-react";
 
+// Skip prerender — the wagmi provider in RootLayout initializes
+// WalletConnect which touches indexedDB during hydration.
+export const dynamic = "force-dynamic";
+
 export default function LaunchHistoryPage() {
   return (
     <>
       <PageHeader
         eyebrow="Public board"
         title="All Launches"
-        description="Every memecoin every KOKi agent has shipped, across all wallets. Newest first. Click any token to open the live monitor on Pump.fun."
+        description="Every memecoin every KOKi agent has shipped on Robinhood Chain, across all wallets. Newest first. Click any token to open the live monitor."
         breadcrumbs={[
           { href: "/", label: "KOKi" },
           { label: "All Launches" },
