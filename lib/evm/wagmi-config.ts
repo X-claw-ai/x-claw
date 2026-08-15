@@ -23,7 +23,7 @@ const WC_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
   // Fallback demo id — Vercel deployment MUST override this or
   // WalletConnect returns 403 on the mobile pairing request.
-  "koki-dev";
+  "hamr-dev";
 
 export const wagmiConfig = getDefaultConfig({
   appName: "HAMR.fun",

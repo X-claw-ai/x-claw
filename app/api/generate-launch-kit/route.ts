@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   const input: ConceptInput = {
     idea: body.idea ?? "",
     tokenName: body.tokenName ?? "HAMR",
-    ticker: (body.ticker ?? "KOKI").toUpperCase(),
+    ticker: (body.ticker ?? "HAMR").toUpperCase(),
     chain: body.chain ?? "solana",
     theme: body.theme ?? "",
     audience: body.audience ?? "",

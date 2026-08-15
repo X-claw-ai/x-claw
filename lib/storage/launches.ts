@@ -8,7 +8,7 @@
 // are identical (id, tokenName, ticker, createdAt, status, metadataUri)
 // so most render code just re-reads without changes.
 
-const KEY = "koki:launches:v2";
+const KEY = "hamr:launches:v2";
 
 export type LaunchStatus = "draft" | "signing" | "launched" | "failed";
 

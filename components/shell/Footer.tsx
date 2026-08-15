@@ -31,7 +31,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-[var(--border-strong)]">
         <div className="mx-auto max-w-7xl px-6 h-14 flex flex-wrap items-center justify-between gap-3 text-[11px] font-extrabold text-ink-300 tracking-tight">
-          <span>© {new Date().getFullYear()} hamr.fun, $KOKI</span>
+          <span>© {new Date().getFullYear()} hamr.fun, $HAMR</span>
           <a
             href="https://github.com/koki-ai-agent/Koki/commit/ae5ff49"
             target="_blank"

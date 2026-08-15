@@ -5,7 +5,7 @@ import type { ConceptInput, LaunchKit } from "./types";
 // kits come from /api/generate-launch-kit hitting Grok via the LLM router.
 export function generateMockLaunchKit(input: ConceptInput): LaunchKit {
   const name = input.tokenName || "HAMR";
-  const ticker = (input.ticker || "KOKI")
+  const ticker = (input.ticker || "HAMR")
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")
     .slice(0, 6);

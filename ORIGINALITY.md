@@ -11,7 +11,7 @@
 | Public GitHub repository | [koki-ai-agent/Koki](https://github.com/koki-ai-agent/Koki) — MIT licensed | 2026-05-04 |
 | First stable release tag | `v1.0.0` — *"First public stable release — HAMR"* | 2026-05-18 |
 | Live deployment | [hamr.fun](https://hamr.fun) — Vercel production | 2026-05 |
-| Official X account | [@officialkokiai](https://x.com/officialkokiai) | — |
+| Official X account | [@hamrdotfun](https://x.com/hamrdotfun) | — |
 | Solana onchain launches | HAMR-built tokens on Pump.fun (Solana mainnet) | continuous |
 
 ## What "Originality" means here
@@ -53,4 +53,4 @@ do is misrepresent themselves as the original.
 
 ---
 
-HAMR · [hamr.fun](https://hamr.fun) · [@officialkokiai](https://x.com/officialkokiai) · MIT
+HAMR · [hamr.fun](https://hamr.fun) · [@hamrdotfun](https://x.com/hamrdotfun) · MIT

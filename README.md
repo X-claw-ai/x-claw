@@ -10,7 +10,7 @@ HAMR.fun detects real-time memes on X and turns them into autonomous Pons launch
 
 > Real-time X memes → autonomous token launches on Pons.
 
-Token ticker: `$KOKI`
+Token ticker: `$HAMR`
 
 HAMR.fun is an independent open-source project. It is not affiliated with xAI, X, Grok, Pons Labs, Robinhood, or Uniswap. Nothing in this app is financial advice.
 
@@ -25,7 +25,7 @@ HAMR is the **original** autonomous Grok-native memecoin launch agent. Everythin
 | **First public commit** | [`ae5ff49`](https://github.com/koki-ai-agent/Koki/commit/ae5ff49) — "Initial commit: X CLAW — The Grok-native Meme Coin Launch Agent" | **2026-05-04** |
 | **GitHub repository** | [koki-ai-agent/Koki](https://github.com/koki-ai-agent/Koki) (public, MIT) | 2026-05-04 |
 | **Live deployment** | [hamr.fun](https://hamr.fun) | 2026-05 |
-| **Official X account** | [@officialkokiai](https://x.com/officialkokiai) | — |
+| **Official X account** | [@hamrdotfun](https://x.com/hamrdotfun) | — |
 | **Onchain launches** | Public Robinhood Chain mainnet transactions from HAMR-built tokens on Pons | continuous |
 
 **If you see a project that looks like HAMR but uses a different name — check the first-commit dates.** Any autonomous Grok × onchain launchpad agent (Pons, Pump.fun, four.meme, or any other) whose first public commit is *after* 2026-05-04 is downstream of this codebase, regardless of how it is marketed.

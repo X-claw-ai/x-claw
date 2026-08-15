@@ -18,7 +18,7 @@ The Grok-native Meme Coin Launch Agent as a web app, end to end.
 - [x] Provider-agnostic LLM router (xAI → Anthropic → OpenAI → mock)
 - [x] Open-source under MIT
 - [x] Vercel deployment
-- [ ] $KOKI token launch via HAMR.fun itself
+- [ ] $HAMR token launch via HAMR.fun itself
 
 ## Phase 2 — Open-source polish (now → ongoing)
 
@@ -55,6 +55,6 @@ Telegram and Web share the same backend APIs. The bot is a thin frontend.
 - On-chain indexer integration (Helius DAS / Birdeye)
 - Holder-cohort analysis ("smart money" detection)
 - Coordinated launch windows (queue + readiness check)
-- $KOKI token-gated agent credits
+- $HAMR token-gated agent credits
 - Self-hostable agent (Docker image)
 - Public agent marketplace where builders publish their own modules

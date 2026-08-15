@@ -29,10 +29,10 @@ export default function SettingsPage() {
               <Input type="email" placeholder="you@domain.com" />
             </Field>
             <Field label="X / Twitter handle">
-              <Input placeholder="koki_builder" />
+              <Input placeholder="hamr_builder" />
             </Field>
             <Field label="Telegram handle">
-              <Input placeholder="koki_builder" />
+              <Input placeholder="hamr_builder" />
             </Field>
           </div>
           <div className="pt-2">

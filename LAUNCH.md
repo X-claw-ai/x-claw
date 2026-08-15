@@ -1,6 +1,6 @@
 # HAMR.fun Launch Day Checklist
 
-A copy-paste runbook from this repo → live `koki.vercel.app` → real $KOKI token on Pump.fun → public announcement on X.
+A copy-paste runbook from this repo → live `koki.vercel.app` → real $HAMR token on Pump.fun → public announcement on X.
 
 > **Time estimate:** 60–90 minutes. Add 30 min buffer for the first try.
 >
@@ -46,7 +46,7 @@ If anything fails locally, fix before deploying. Common issues:
 
 ## Phase 1 — Mainnet test launch with throwaway metadata (10 min)
 
-This catches bugs **before** the real $KOKI launch.
+This catches bugs **before** the real $HAMR launch.
 
 1. Go to `/launch`.
 2. Enter throwaway concept:
@@ -64,7 +64,7 @@ This catches bugs **before** the real $KOKI launch.
    - Solscan shows tx as `Success`.
    - The Pump.fun link opens to a real token page.
    - `/launches/<mint>` shows token info and top holders.
-9. ✅ If all the above worked, you're ready for the real $KOKI launch.
+9. ✅ If all the above worked, you're ready for the real $HAMR launch.
 
 If the tx fails:
 
@@ -121,15 +121,15 @@ After push:
 
 ---
 
-## Phase 4 — Real $KOKI token launch (5 min)
+## Phase 4 — Real $HAMR token launch (5 min)
 
-The meta moment. Launch $KOKI *with* HAMR.fun.
+The meta moment. Launch $HAMR *with* HAMR.fun.
 
 1. Open `https://<your-vercel-url>.vercel.app/launch`.
 2. Concept input:
-   - **Idea:** "HAMR.fun = the Grok-native meme coin launch agent. Launching $KOKI from inside its own agent."
+   - **Idea:** "HAMR.fun = the Grok-native meme coin launch agent. Launching $HAMR from inside its own agent."
    - **Token name:** `HAMR.fun`
-   - **Ticker:** `KOKI`
+   - **Ticker:** `HAMR`
    - **Theme:** "shiba paw / HAMR mascot, orange-on-dark"
    - **Audience:** "X-native crypto and meme coin builders"
    - **Launch style:** Fair launch
@@ -159,7 +159,7 @@ The Grok-native Meme Coin Launch Agent.
 X attention · community momentum · on-chain intelligence
 → autonomous launch execution.
 
-Just launched $KOKI using HAMR.fun itself.
+Just launched $HAMR using HAMR.fun itself.
 → pump.fun/coin/<MINT>
 → <your-vercel-url>
 → github.com/<you>/koki  (open source · MIT)
@@ -169,7 +169,7 @@ From meme idea to Pump.fun launch.
 
 ### Follow-up thread
 
-Open the live `/launch` flow → don't actually launch, just use the kit's tweets as a thread, OR run the X Post Generator (built into `/launches/<mint>`) on `$KOKI` itself.
+Open the live `/launch` flow → don't actually launch, just use the kit's tweets as a thread, OR run the X Post Generator (built into `/launches/<mint>`) on `$HAMR` itself.
 
 ### Where to post
 
