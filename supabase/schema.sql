@@ -1,4 +1,4 @@
--- KOKi.ai — Supabase / Postgres schema (Robinhood Chain / Pons era)
+-- HAMR.fun — Supabase / Postgres schema (Robinhood Chain / Pons era)
 -- ───────────────────────────────────────────────────────────────────────────
 -- Hard rules baked into the schema:
 --   • No private key column, anywhere.
@@ -181,7 +181,7 @@ create table if not exists public.pons_launches (
   mock boolean not null default false,
   -- URL of the viral X post this token was anchored on (Auto-pilot or manual
   -- input). /api/auto-launch reads this to build a HARD-EXCLUDE LIST so no
-  -- two KOKi-shipped tokens ever come from the same source post — strict
+  -- two HAMR-shipped tokens ever come from the same source post — strict
   -- dedup across all wallets.
   source_x_url text,
   created_at timestamptz not null default now()

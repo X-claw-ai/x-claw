@@ -13,7 +13,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Local profile fields. Persistence wires in once Supabase is connected."
         breadcrumbs={[
-          { href: "/", label: "KOKi" },
+          { href: "/", label: "HAMR" },
           { label: "Settings" },
         ]}
       />

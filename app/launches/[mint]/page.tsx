@@ -25,7 +25,7 @@ export default function LaunchByMintPage({
         title="Post-launch monitor"
         description="Live Pons state on Robinhood Chain — pool price, graduation progress, deployer, and Blockscout links, all polled straight from the factory."
         breadcrumbs={[
-          { href: "/", label: "KOKi" },
+          { href: "/", label: "HAMR" },
           { href: "/launches", label: "Launches" },
           { label: shortAddr(token) },
         ]}

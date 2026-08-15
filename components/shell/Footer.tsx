@@ -23,7 +23,7 @@ export default function Footer() {
         <div>
           <div className="eyebrow !text-[10px] mb-4">Disclaimers</div>
           <p className="text-ink-300/72 leading-relaxed max-w-sm font-medium">
-            koki.ai is an independent open source project. Not affiliated with
+            hamr.fun is an independent open source project. Not affiliated with
             xAI, X, Grok, Pons, Robinhood, or Uniswap. Memecoin launches
             involve risk. Nothing here is financial advice.
           </p>
@@ -31,7 +31,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-[var(--border-strong)]">
         <div className="mx-auto max-w-7xl px-6 h-14 flex flex-wrap items-center justify-between gap-3 text-[11px] font-extrabold text-ink-300 tracking-tight">
-          <span>© {new Date().getFullYear()} koki.ai, $KOKI</span>
+          <span>© {new Date().getFullYear()} hamr.fun, $KOKI</span>
           <a
             href="https://github.com/koki-ai-agent/Koki/commit/ae5ff49"
             target="_blank"

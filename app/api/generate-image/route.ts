@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
   //    SVG fallback so the user can see SOMETHING. The ticker (or first
   //    word of the prompt) goes on an orange tile in heavy black type.
   console.error(`[generate-image] all providers failed, returning SVG fallback. Attempts: ${attempts.map((a) => `${a.provider}: ${a.error}`).join("; ")}`);
-  const ticker = (body.ticker || body.prompt.match(/\$([A-Z0-9]{2,8})/)?.[1] || "KOKi").toUpperCase().slice(0, 6);
+  const ticker = (body.ticker || body.prompt.match(/\$([A-Z0-9]{2,8})/)?.[1] || "HAMR").toUpperCase().slice(0, 6);
   const svgFallback = renderSvgFallback(ticker);
   return NextResponse.json<GenerateImageResponse>({
     ok: true,

@@ -1,6 +1,6 @@
 # public/
 
-Drop the official **koki.ai** brand assets here. The app reads them by relative path:
+Drop the official **hamr.fun** brand assets here. The app reads them by relative path:
 
 | File | Used by | Notes |
 |---|---|---|

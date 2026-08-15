@@ -1,32 +1,23 @@
-import Hero from "@/components/landing/Hero";
-import LiveLaunchesSection from "@/components/landing/LiveLaunchesSection";
-import AttentionLayerSection from "@/components/landing/AttentionLayerSection";
-import EnginesSection from "@/components/landing/EnginesSection";
-import SafetySection from "@/components/landing/SafetySection";
-import FinalCTA from "@/components/landing/FinalCTA";
+import BoardHero from "@/components/landing/BoardHero";
+import BoardGrid from "@/components/landing/BoardGrid";
 
-// KOKi, single-product memecoin launch agent.
+// HAMR.fun home — Pump.fun-style board page. The token grid IS the home;
+// marketing sections were pulled off in favor of a compact top strip
+// and a live-refreshing grid so visitors see actual product on load,
+// not a vibe-coded pitch. wagmi/WalletConnect init happens in the
+// layout — this page just needs the grid client component.
 //
-// Pump.fun-style ordering: live token gallery sits FIRST so the visitor
-// sees real shipped coins immediately, then the pitch underneath. The
-// product proves itself before the brand statement does.
-//
-// Sections (top → bottom):
-//   1. LiveLaunches      , live mcap + bonding from Pump.fun (social proof)
-//   2. Hero              , pitch + CTAs + safety line
-//   3. Attention Layer   , "Most launch tools wait for an idea"
-//   4. Engines           , Attention / Community / Intelligence / Execution
-//   5. Safety            , Agent prepares, User approves, Wallet signs, Launches
-//   6. FinalCTA          , push to /launch
+// The old landing sections (Hero, EnginesSection, SafetySection,
+// AttentionLayerSection, FinalCTA, LiveLaunchesSection) stay in the
+// tree so an /about page can revive them; they are no longer wired
+// into /.
+export const dynamic = "force-dynamic";
+
 export default function LandingPage() {
   return (
     <>
-      <LiveLaunchesSection />
-      <Hero />
-      <AttentionLayerSection />
-      <EnginesSection />
-      <SafetySection />
-      <FinalCTA />
+      <BoardHero />
+      <BoardGrid />
     </>
   );
 }

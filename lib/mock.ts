@@ -4,7 +4,7 @@ import type { LaunchRecord } from "./types";
 export const MOCK_LAUNCH_HISTORY: LaunchRecord[] = [
   {
     id: "lch_001",
-    tokenName: "Sample KOKi",
+    tokenName: "Sample HAMR",
     ticker: "KOKI",
     chain: "solana",
     status: "launched",

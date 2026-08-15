@@ -8,7 +8,7 @@
 //
 // Each radar meme carries a `concept` block that maps cleanly onto the
 // existing PumpLaunchWizard `ConceptInput`. This is what gets prefilled
-// when the user clicks "Generate Launch Kit" or "Launch with KOKi".
+// when the user clicks "Generate Launch Kit" or "Launch with HAMR".
 // ─────────────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── KOKi.ai brand tokens ──────────────────────────────────────────────────
-   Binance-dark canvas, KOKi orange accent. Trading-desk vibe with
+/* ── HAMR.fun brand tokens ──────────────────────────────────────────────────
+   Binance-dark canvas, HAMR orange accent. Trading-desk vibe with
    memecoin energy.                                                        */
 :root {
   color-scheme: dark;
 
-  /* Brand orange — kept from the previous KOKi palette as the sole
+  /* Brand orange — kept from the previous HAMR palette as the sole
      warm accent. Reserve it for CTAs, key numbers, and the logomark. */
-  /* Steel accent — was KOKi orange, now brushed-steel gray/mint that
+  /* Steel accent — was HAMR orange, now brushed-steel gray/mint that
      matches the glass-hammer logomark. Reserved for CTAs, key numbers,
      and inline stamps. `--orange` names kept intact so the ~40 sites
      that consume var(--orange) don't need touching. */

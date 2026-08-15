@@ -20,7 +20,7 @@ export default function LaunchPage() {
         title="Launch your memecoin"
         description="Drop your meme idea (or arrive from the radar). Grok drafts the launch kit. You review, sign once, and the agent launches it on Pons on Robinhood Chain. Your wallet is the only signer."
         breadcrumbs={[
-          { href: "/", label: "KOKi" },
+          { href: "/", label: "HAMR" },
           { label: "Launch" },
         ]}
       />
