@@ -2,11 +2,11 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
-import { XClawWalletProvider } from "@/components/solana/WalletContext";
+import { KokiWalletProvider } from "@/components/evm/WalletContext";
 
 const TITLE = "KOKi.ai, The Grok native Meme Coin Launch Agent";
 const DESCRIPTION =
-  "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to Pump.fun launch.";
+  "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to a Pons launch on Robinhood Chain.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   authors: [{ name: "KOKi.ai contributors" }],
   generator: "Next.js",
   keywords: [
-    "Solana",
-    "Pump.fun",
+    "Robinhood Chain",
+    "Pons",
     "memecoin",
     "Grok",
     "xAI",
@@ -66,13 +66,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-bg">
       <body className="min-h-screen bg-bg text-ink-300 antialiased bg-app">
-        <XClawWalletProvider>
+        <KokiWalletProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
-        </XClawWalletProvider>
+        </KokiWalletProvider>
       </body>
     </html>
   );

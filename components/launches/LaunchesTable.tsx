@@ -1,267 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// PLACEHOLDER launches table for the Robinhood Chain / Pons era.
+// The Solana-era table read from a `launches` Supabase schema keyed by
+// mintPubkey + pumpUrl. Those columns are being replaced by an EVM
+// schema (token address + Blockscout URL + Pons page). Once P9 lands
+// this file becomes a proper Pons launches table sourced from
+// lib/pons/indexer.ts.
+
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
-import { usePumpCoin, formatMcUsd } from "@/lib/hooks/usePumpCoin";
-
-// Public 'All Launches' gallery, shows every memecoin every KOKi agent
-// has shipped, across all wallets. Hits /api/launches with no `wallet`
-// param; the API returns the global list (filtered to status='launched',
-// mock=false) so this is a real social-proof / discovery surface, not a
-// duplicate of the user's My Launches dashboard.
-
-interface PublicLaunch {
-  mint_pubkey: string;
-  ticker: string;
-  token_name: string;
-  chain: string;
-  status: string;
-  pump_url: string | null;
-  metadata_uri: string | null;
-  wallet_pubkey: string;
-  created_at: string;
-}
+import { Rocket } from "lucide-react";
 
 export default function LaunchesTable() {
-  const [items, setItems] = useState<PublicLaunch[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/launches", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((json: { ok: boolean; launches?: PublicLaunch[]; error?: string }) => {
-        if (cancelled) return;
-        if (!json.ok) {
-          setError(json.error || "Failed to load launches");
-          setItems([]);
-          return;
-        }
-        setItems(json.launches ?? []);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Network error");
-        setItems([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (items === null) {
-    return <SkeletonGrid />;
-  }
-
-  if (items.length === 0) {
-    return (
+  return (
+    <section className="mx-auto max-w-6xl px-6 py-16">
       <div className="card !p-10 text-center">
-        <div className="text-[20px] font-black tracking-tight">
-          No public launches yet
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-koki-500 text-ink-1000 mb-5">
+          <Rocket className="h-5 w-5" />
         </div>
-        <p className="text-[13px] text-ink-300/70 mt-2 max-w-md mx-auto font-medium">
-          {error
-            ? "Couldn't load the public launch board right now. Try refreshing."
-            : "Be the first to ship a memecoin through KOKi. Every shipped token shows up here for everyone to see."}
+        <h2 className="text-display text-display-md">
+          Launches list is being rebuilt for <span className="stamp">Pons</span>.
+        </h2>
+        <p className="mt-6 text-ink-300/80 text-base leading-relaxed font-medium max-w-xl mx-auto">
+          KOKi is indexing Pons `TokenLaunched` events on Robinhood Chain
+          directly from the factory contract. As soon as the indexer job
+          catches up the full table returns, with live pool price,
+          graduation progress, and Blockscout links.
         </p>
-        <Link
-          href="/launch"
-          className="btn btn-primary !py-2.5 !px-4 !text-sm mt-6 inline-flex"
-        >
-          Launch a memecoin
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {items.map((l, i) => (
-        <PublicLaunchCard key={l.mint_pubkey} launch={l} idx={i} />
-      ))}
-    </div>
-  );
-}
-
-function PublicLaunchCard({
-  launch,
-  idx,
-}: {
-  launch: PublicLaunch;
-  idx: number;
-}) {
-  const [imgUrl, setImgUrl] = useState<string | null>(null);
-  const stats = usePumpCoin(launch.mint_pubkey);
-
-  useEffect(() => {
-    if (!launch.metadata_uri) return;
-    const cacheKey = `koki:img:${launch.mint_pubkey}`;
-    try {
-      const cached = window.localStorage.getItem(cacheKey);
-      if (cached) {
-        setImgUrl(cached);
-        return;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    let cancelled = false;
-    fetch(launch.metadata_uri, { cache: "force-cache" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((meta) => {
-        if (cancelled) return;
-        const url = meta && typeof meta.image === "string" ? meta.image : null;
-        if (url) {
-          setImgUrl(url);
-          try {
-            window.localStorage.setItem(cacheKey, url);
-          } catch {
-            /* quota, ignore */
-          }
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [launch.metadata_uri, launch.mint_pubkey]);
-
-  const monitorHref = `/launches/${launch.mint_pubkey}`;
-  const creator = `${launch.wallet_pubkey.slice(0, 4)}…${launch.wallet_pubkey.slice(-4)}`;
-
-  return (
-    <Link
-      href={monitorHref}
-      className="card card-hover group flex flex-col overflow-hidden !p-0 launch-card-anim"
-      style={{ animationDelay: `${Math.min(idx, 12) * 60}ms` }}
-    >
-      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b border-[var(--border-strong)]">
-        {imgUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imgUrl}
-            alt={launch.token_name}
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-ink-300 font-black text-[clamp(20px,4vw,40px)] tracking-tight">
-              ${launch.ticker}
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="p-3.5 flex-1 flex flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-2 min-w-0">
-          <div className="text-[14px] font-black tracking-tight truncate">
-            {launch.token_name}
-          </div>
-          <span className="text-[10px] font-extrabold text-ink-300/65 shrink-0">
-            ${launch.ticker}
-          </span>
-        </div>
-        <div className="text-[10px] text-ink-300/55 font-mono truncate">
-          {launch.mint_pubkey.slice(0, 5)}…{launch.mint_pubkey.slice(-5)}
-        </div>
-
-        {/* Live market cap from Pump.fun. Always show the row so the user
-            can see when the data hasn't arrived yet. */}
-        <div className="flex items-baseline justify-between gap-2 pt-1">
-          <span className="text-[10px] font-bold text-ink-300/55 uppercase tracking-wider">
-            Mcap
-          </span>
-          <span className="text-[13px] font-black tabular-nums tracking-tight">
-            {stats ? formatMcUsd(stats.marketCapUsd) : "-"}
-          </span>
-        </div>
-        {stats && stats.bondingProgress !== null && (
-          <BondingBar progress={stats.bondingProgress} complete={stats.complete} />
-        )}
-
-        <div className="flex items-center justify-between gap-2 mt-auto pt-2">
-          <Badge
-            tone={stats?.complete ? "live" : "neutral"}
-            className="!h-[18px] !text-[9px] !px-2"
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link href="/launch" className="btn btn-primary !py-3 !px-5">
+            Ship a new launch
+          </Link>
+          <a
+            href="https://robinhoodchain.blockscout.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-secondary !py-3 !px-5"
           >
-            {stats?.complete ? "Graduated" : "Launched"}
-          </Badge>
-          <span className="text-[10px] text-ink-300/55 font-bold">
-            {new Date(launch.created_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
-        </div>
-        <div className="flex items-center justify-between pt-1">
-          <span
-            className="text-[10px] text-ink-300/55 font-mono"
-            title={`Launched by wallet ${launch.wallet_pubkey}`}
-          >
-            by {creator}
-          </span>
-          {launch.pump_url && (
-            <a
-              href={launch.pump_url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
-            >
-              Pump <ExternalLink className="h-2.5 w-2.5" />
-            </a>
-          )}
+            Robinhood Blockscout
+          </a>
         </div>
       </div>
-    </Link>
-  );
-}
-
-function BondingBar({
-  progress,
-  complete,
-}: {
-  progress: number;
-  complete: boolean;
-}) {
-  const pct = Math.max(0, Math.min(1, progress)) * 100;
-  return (
-    <div className="space-y-1 pt-1">
-      <div className="flex items-baseline justify-between text-[9px] font-bold text-ink-300/55 uppercase tracking-wider">
-        <span>Bonding</span>
-        <span className="tabular-nums">{pct.toFixed(0)}%</span>
-      </div>
-      <div className="h-[5px] w-full rounded-full bg-ink-1000/40 overflow-hidden">
-        <div
-          className="h-full relative bg-koki-500 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        >
-          {!complete && (
-            <span className="absolute inset-0 bonding-shimmer pointer-events-none" />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SkeletonGrid() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="card !p-0 overflow-hidden animate-pulse">
-          <div className="aspect-square w-full bg-koki-500/40 border-b border-[var(--border-strong)]" />
-          <div className="p-3.5 space-y-2">
-            <div className="h-3.5 bg-ink-1000/10 rounded w-3/4" />
-            <div className="h-2.5 bg-ink-1000/10 rounded w-1/2" />
-          </div>
-        </div>
-      ))}
-    </div>
+    </section>
   );
 }

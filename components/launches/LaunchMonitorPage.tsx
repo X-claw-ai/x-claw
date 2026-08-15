@@ -1,283 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// PLACEHOLDER token monitor. The full Pons-native monitor lands in P6 —
+// it uses readTokenMeta / readGraduation / readPriceInWeth from
+// lib/pons/read.ts to render live pool price, graduation progress, and
+// creator payout state pulled from the Pons locker.
+//
+// The route params still deliver whatever address slug was passed
+// (previously a Solana mint pubkey, now an EVM 0x… address). We surface
+// it verbatim + a Blockscout link so bookmarks stay useful during the
+// migration window.
+
 import Link from "next/link";
-import {
-  Activity,
-  ExternalLink,
-  Rocket,
-  Users2,
-  Sparkles,
-  LineChart,
-  Twitter,
-} from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
-import TokenInfoBlock from "@/components/launches/TokenInfoBlock";
-import MonitorActionsBlock from "@/components/launches/MonitorActionsBlock";
-import WalletTrackingAgent from "@/components/wallet-tracking/WalletTrackingAgent";
-import XPostGeneratorAgent from "@/components/x-post-generator/XPostGeneratorAgent";
-import { readLaunches, type SavedLaunch } from "@/lib/storage/launches";
+import { ExternalLink } from "lucide-react";
+import { explorerUrl } from "@/lib/robinhood/chain";
 
-// Per-token monitor page. Mirrors the agent loop:
-//   01 Attention  , generate post-launch X content for THIS token
-//   02 Community  , point to launch wizard if you need a fresh kit
-//   03 Intelligence, token supply + top holders + creator wallet activity
-//   04 Execution  , links to Pump.fun, Solscan, the original launch tx
-
-export default function LaunchMonitorPage({ mint }: { mint: string }) {
-  const [hydrated, setHydrated] = useState(false);
-  const [record, setRecord] = useState<SavedLaunch | null>(null);
-
-  useEffect(() => {
-    const all = readLaunches();
-    const r = all.find((x) => x.mintPubkey === mint || x.id === mint) ?? null;
-    setRecord(r);
-    setHydrated(true);
-  }, [mint]);
-
-  const tokenName = record?.tokenName || "Unknown token";
-  const ticker = record?.ticker || "-";
-  const isMock = record?.mock ?? false;
-
-  const pumpUrl = record?.pumpUrl || `https://pump.fun/coin/${mint}`;
-  const solscanToken = `https://solscan.io/token/${mint}`;
-  const solscanTx = record?.txSignature
-    ? `https://solscan.io/tx/${record.txSignature}`
-    : null;
+export default function LaunchMonitorPage({ token }: { token: string }) {
+  const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
+  const href = isEvmAddr ? explorerUrl("token", token) : undefined;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 space-y-8">
-      {/* Header card */}
-      <div className="card p-6">
-        <div className="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Rocket className="h-5 w-5 text-koki-500" />
-              <h1 className="text-xl font-semibold">{tokenName}</h1>
-              <span className="text-sm text-ink-300/72">, {ticker}</span>
-              {isMock && <Badge tone="mock">Mock</Badge>}
-              {!isMock && record && <Badge tone="live">Live launch</Badge>}
-              {!record && hydrated && (
-                <Badge tone="neutral">External token</Badge>
-              )}
-            </div>
-            <div className="mt-2 text-xs text-ink-300/65 font-mono">
-              Mint: {mint}
-            </div>
-            {record?.createdAt && (
-              <div className="mt-1 text-xs text-ink-300/65">
-                Launched {new Date(record.createdAt).toLocaleString()}
-                {record?.devBuyInSol != null
-                  ? `, dev buy ${record.devBuyInSol} SOL`
-                  : ""}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <a
-              href={pumpUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-primary !py-1.5 !px-3 !text-xs"
-            >
-              Pump.fun <ExternalLink className="h-3 w-3" />
-            </a>
-            <a
-              href={solscanToken}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-[var(--border-strong)] px-3 py-1.5 text-xs hover:bg-cream-100"
-            >
-              Solscan token <ExternalLink className="h-3 w-3" />
-            </a>
-            {solscanTx && (
-              <a
-                href={solscanTx}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-[var(--border-strong)] px-3 py-1.5 text-xs hover:bg-cream-100"
-              >
-                Launch tx <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-          </div>
+    <section className="mx-auto max-w-4xl px-6 py-16">
+      <div className="card !p-10">
+        <div className="eyebrow flex items-center gap-2">
+          <span>Pons launch monitor</span>
         </div>
-      </div>
-
-      {/* 05, Monitor: suggested next actions (from Grok) */}
-      <PhaseHeader
-        index="05"
-        name="Monitor, Suggested actions"
-        tag="Grok-recommended next moves for your launch"
-        icon={LineChart}
-      />
-      <MonitorActionsBlock
-        mint={mint}
-        tokenName={tokenName}
-        ticker={ticker}
-        supplyUiAmount={0}
-        top10SharePct={0}
-        recentTxCount={0}
-        hoursSinceLaunch={
-          record?.createdAt
-            ? Math.floor(
-                (Date.now() - new Date(record.createdAt).getTime()) / 3_600_000
-              )
-            : undefined
-        }
-      />
-
-      {/* 03, Intelligence (most useful immediately after launch) */}
-      <PhaseHeader
-        index="03"
-        name="Onchain Intelligence"
-        tag="Supply, holders, creator wallet activity"
-        icon={LineChart}
-      />
-      <TokenInfoBlock mint={mint} />
-
-      {record?.mintPubkey && (
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4 text-koki-500" />
-            <div className="text-sm font-semibold">
-              Creator wallet activity
-            </div>
-          </div>
-          <p className="text-xs text-ink-300/65 mb-4">
-            Tracking the wallet that signed the launch transaction. Note: for
-            tokens you didn't launch, paste any wallet address.
-          </p>
-          {/* The wallet that signed the launch is the creator wallet
-              recorded by the wizard. We don't store it directly today, so
-              show a free-form tracker; user can paste known addresses. */}
-          <WalletTrackingAgent />
-        </div>
-      )}
-      {!record && hydrated && (
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4 text-koki-500" />
-            <div className="text-sm font-semibold">Wallet tracker</div>
-          </div>
-          <p className="text-xs text-ink-300/65 mb-4">
-            Paste any wallet address to track its onchain activity.
-          </p>
-          <WalletTrackingAgent />
-        </div>
-      )}
-
-      {/* 01, Attention (post-launch promo) */}
-      <PhaseHeader
-        index="01"
-        name="Attention"
-        tag="Generate post-launch X content for this token"
-        icon={Sparkles}
-      />
-      <div className="card p-5">
-        <div className="flex items-center gap-2 mb-3 text-sm">
-          <Twitter className="h-4 w-4 text-koki-500" />
-          <span className="font-semibold">X Post Generator (post-launch)</span>
-        </div>
-        <p className="text-xs text-ink-300/65 mb-4">
-          Pre-filled to write about this token. Generate updates, milestone
-          posts, and reply hooks. Drafts only, you confirm before posting.
+        <h1 className="mt-3 text-display text-display-md text-balance">
+          Monitor is being rebuilt for <span className="stamp">Robinhood Chain</span>.
+        </h1>
+        <p className="mt-5 text-ink-300/80 text-base leading-relaxed font-medium">
+          Live pool price, graduation progress, holder breakdown, and
+          creator payout state all move to Pons factory + locker reads.
+          The token you asked about:
         </p>
-        <XPostGeneratorAgent
-          defaultTopic={
-            record
-              ? `${tokenName} (${ticker}), post-launch update for X. Mint ${mint}.`
-              : `Memecoin update for ${ticker}`
-          }
-          defaultAudience="X native crypto and meme coin community"
-        />
-      </div>
-
-      {/* 02, Community */}
-      <PhaseHeader
-        index="02"
-        name="Community"
-        tag="Reuse the launch wizard for any new community materials"
-        icon={Users2}
-      />
-      <div className="card p-5 flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <div className="text-sm font-semibold">
-            Need fresh raid replies, TG announcements, or DMs?
-          </div>
-          <p className="text-xs text-ink-300/65 mt-1">
-            The launch wizard's kit generator works on any concept, start a
-            new flow if you need updated community materials.
-          </p>
+        <p className="mt-4 font-mono text-[13px] text-ink-300 break-all">
+          {token}
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          {href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary !py-3 !px-5"
+            >
+              Open on Blockscout
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          ) : (
+            <span className="text-[12px] text-ink-300/60 font-bold">
+              Address doesn&apos;t look like a Robinhood Chain token yet.
+            </span>
+          )}
+          <Link href="/launches" className="btn btn-secondary !py-3 !px-5">
+            All launches
+          </Link>
         </div>
-        <Link
-          href="/launch"
-          className="inline-flex items-center gap-2 rounded-md border border-[var(--border-strong)] px-3 py-1.5 text-xs hover:bg-cream-100"
-        >
-          Open launch wizard
-        </Link>
       </div>
-
-      {/* 04, Execution recap */}
-      <PhaseHeader
-        index="04"
-        name="Execution recap"
-        tag="Original launch transaction and metadata"
-        icon={Rocket}
-      />
-      <div className="card p-5 grid sm:grid-cols-2 gap-3">
-        <KV label="Mint" value={mint} />
-        <KV label="Token" value={`${tokenName} (${ticker})`} />
-        {record?.txSignature && <KV label="Tx signature" value={record.txSignature} />}
-        {record?.metadataUri && <KV label="Metadata URI" value={record.metadataUri} />}
-        {record?.devBuyInSol != null && (
-          <KV label="Initial dev buy" value={`${record.devBuyInSol} SOL`} />
-        )}
-        {record?.createdAt && (
-          <KV
-            label="Launched at"
-            value={new Date(record.createdAt).toLocaleString()}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PhaseHeader({
-  index,
-  name,
-  tag,
-  icon: Icon,
-}: {
-  index: string;
-  name: string;
-  tag: string;
-  icon: React.ElementType;
-}) {
-  return (
-    <div className="flex items-center gap-3 border-t border-[var(--border-strong)]/20 pt-8">
-      <div className="h-9 w-9 rounded-md bg-koki-500/10 border border-koki-500/30 flex items-center justify-center text-ink-300">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="text-[10px] uppercase tracking-widest text-ink-300/65">
-        Phase {index}
-      </div>
-      <div className="text-base font-semibold text-ink-300">{name}</div>
-      <div className="text-xs text-ink-300/65">- {tag}</div>
-    </div>
-  );
-}
-
-function KV({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="card p-3">
-      <div className="text-[10px] uppercase tracking-widest text-ink-300/65">
-        {label}
-      </div>
-      <div className="mt-1 text-xs font-mono break-all text-ink-300">
-        {value}
-      </div>
-    </div>
+    </section>
   );
 }

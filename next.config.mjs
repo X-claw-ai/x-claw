@@ -2,17 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Solana wallet-adapter ships ESM that needs transpiling for Next.js
-  transpilePackages: [
-    "@solana/web3.js",
-    "@solana/wallet-adapter-base",
-    "@solana/wallet-adapter-react",
-    "@solana/wallet-adapter-react-ui",
-    "@solana/wallet-adapter-wallets",
-    "@solana/wallet-adapter-phantom",
-    "@solana/wallet-adapter-solflare",
-  ],
-
   // Skip lint + TS during the production build so deploy isn't blocked by
   // strict-mode warnings inside transitive deps. We still type-check locally
   // via `npm run type-check`.
@@ -23,11 +12,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // WalletConnect (transitively via @solana/wallet-adapter-wallets) uses
-  // pino as its logger and dynamically imports a handful of optional deps
-  // (pino-pretty, bufferutil, utf-8-validate, encoding, lokijs, react-native
-  // async storage). None of those exist on Vercel's build target, so we
-  // alias them to `false` and mark them as externals.
+  // WalletConnect (transitively via RainbowKit) uses pino as its logger
+  // and dynamically imports a handful of optional deps that don't exist
+  // on Vercel's build target. Alias them to `false` and mark externals so
+  // the build stops complaining about missing modules.
   webpack: (config) => {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
@@ -50,7 +38,8 @@ const nextConfig = {
     return config;
   },
 
-  // Single-product redirects.
+  // Single-product redirects. Keeps old Solana-era Pump.fun URLs alive
+  // so bookmarks don't 404 after the Robinhood Chain / Pons migration.
   async redirects() {
     return [
       { source: "/agents", destination: "/launch", permanent: false },
