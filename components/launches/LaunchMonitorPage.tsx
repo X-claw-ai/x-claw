@@ -25,6 +25,8 @@ import {
   HAMR_CURVE,
   hamrLaunchpadAbi,
   hamrTokenAbi,
+  fetchEthUsd,
+  formatUsd,
 } from "@/lib/hamr";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
@@ -41,6 +43,21 @@ export default function LaunchMonitorPage({ token }: Props) {
   const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
   const tokenAddr = isEvmAddr ? (token as Address) : undefined;
   const { snap, loading, error, refresh } = useHamrToken(tokenAddr);
+  const [ethUsd, setEthUsd] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () =>
+      fetchEthUsd().then((p) => {
+        if (!cancelled && p) setEthUsd(p);
+      });
+    void tick();
+    const id = setInterval(tick, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   const tokenExplorer = useMemo(
     () => (isEvmAddr ? explorerUrl("token", token) : null),
@@ -213,15 +230,21 @@ export default function LaunchMonitorPage({ token }: Props) {
               label="Price"
               value={
                 snap.priceEth > 0
-                  ? snap.priceEth.toLocaleString(undefined, {
-                      maximumSignificantDigits: 3,
-                    }) + " ETH"
+                  ? ethUsd
+                    ? formatUsd(snap.priceEth * ethUsd)
+                    : snap.priceEth.toLocaleString(undefined, {
+                        maximumSignificantDigits: 3,
+                      }) + " ETH"
                   : "—"
               }
             />
             <StatCard
               label="Market cap"
-              value={marketCapEth.toFixed(2) + " ETH"}
+              value={
+                ethUsd
+                  ? formatUsd(marketCapEth * ethUsd)
+                  : marketCapEth.toFixed(2) + " ETH"
+              }
             />
             <StatCard
               label="Sold"

@@ -8,6 +8,8 @@ import {
   readCurve,
   readTokenMeta,
   listTokens,
+  fetchEthUsd,
+  formatUsd,
   HAMR_CURVE,
   type HamrCurveState,
 } from "@/lib/hamr";
@@ -51,6 +53,21 @@ export default function BoardGrid() {
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("new");
   const [q, setQ] = useState("");
+  const [ethUsd, setEthUsd] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () =>
+      fetchEthUsd().then((p) => {
+        if (!cancelled && p) setEthUsd(p);
+      });
+    void tick();
+    const id = setInterval(tick, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -221,6 +238,7 @@ export default function BoardGrid() {
               launch={l}
               idx={i}
               market={markets[l.token_address.toLowerCase()]}
+              ethUsd={ethUsd}
             />
           ))}
         </div>
@@ -272,10 +290,12 @@ function TokenCard({
   launch,
   idx,
   market,
+  ethUsd,
 }: {
   launch: PublicLaunch;
   idx: number;
   market?: Market;
+  ethUsd: number | null;
 }) {
   const pct = market ? market.progressBps / 100 : null;
   return (
