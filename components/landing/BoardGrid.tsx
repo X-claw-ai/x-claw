@@ -259,15 +259,23 @@ export default function BoardGrid() {
     const ts = (l: PublicLaunch) =>
       l.created_at ? new Date(l.created_at).getTime() : 0;
     if (sort === "graduating") {
+      // Section, not just a sort: only curves that are actually close
+      // to graduation (>=50% of the 4 ETH raise) and not yet graduated.
+      out = out.filter((l) => {
+        const m = mkt(l);
+        return m ? !m.graduated && m.progressBps >= 5_000 : false;
+      });
       out.sort((a, b) => (mkt(b)?.progressBps ?? -1) - (mkt(a)?.progressBps ?? -1));
-    } else if (sort === "mcap") {
-      out.sort((a, b) => (mkt(b)?.mcapEth ?? -1) - (mkt(a)?.mcapEth ?? -1));
     } else if (sort === "volume") {
+      // Only tokens that actually traded in the last 24h.
+      out = out.filter((l) => (vol24h[l.token_address.toLowerCase()] ?? 0) > 0);
       out.sort(
         (a, b) =>
           (vol24h[b.token_address.toLowerCase()] ?? 0) -
           (vol24h[a.token_address.toLowerCase()] ?? 0),
       );
+    } else if (sort === "mcap") {
+      out.sort((a, b) => (mkt(b)?.mcapEth ?? -1) - (mkt(a)?.mcapEth ?? -1));
     } else if (sort === "oldest") {
       out.sort((a, b) => ts(a) - ts(b));
     } else {
@@ -309,6 +317,10 @@ export default function BoardGrid() {
       ) : filtered!.length === 0 ? (
         q ? (
           <EmptyResult label={`No token matches “${q}”.`} />
+        ) : sort === "graduating" ? (
+          <EmptyResult label="No token is close to graduation yet — 50%+ of the 4 ETH raise lands here." />
+        ) : sort === "volume" ? (
+          <EmptyResult label="No trades in the last 24h yet." />
         ) : (
           <EmptyBoard />
         )
