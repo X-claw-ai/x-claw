@@ -64,55 +64,60 @@ const config: Config = {
         // text on dark bg) now resolves to a dark near-black so the
         // migrated components stay readable.
         ink: {
-          1000: "#0F1114", // text primary (near-black)
-          950:  "#14181D",
-          900:  "#1F242B", // charcoal accents
-          800:  "#2E353F",
-          700:  "#3B4149",
-          600:  "#4B535E",
-          500:  "#5A6472", // text muted
-          400:  "#8892A0", // text subtle
-          300:  "#0F1114", // WAS "primary text on dark bg" → remapped to near-black
-          200:  "#F0F2F4",
-          100:  "#F6F7F8", // hover surface
-          50:   "#FFFFFF", // page bg
+          // Dark-theme mapping. ink-1000 doubles as "text on accent" and
+          // the base for translucent fills (bg-ink-1000/10 = white 10%),
+          // so it is near-white. ink-300 is primary body text.
+          1000: "#F4F4F8", // text primary / on-accent (near-white)
+          950:  "#EDEDF3",
+          900:  "#D5D5E0",
+          800:  "#B9B9C8",
+          700:  "#9C9CAE",
+          600:  "#84849A",
+          500:  "#6E6E80", // text muted
+          400:  "#8B8B9E", // text subtle
+          300:  "#EDEDF3", // primary text on dark bg
+          200:  "#1B1B26",
+          100:  "#16161F", // hover surface
+          50:   "#0A0A0F", // page bg
         },
         // ── HAMR accent — REMAPPED from orange to graphite. Any component
         //    that reads `bg-koki-500` now paints charcoal instead of
         //    orange; the semantic slot ("brand accent") stays intact.
         koki: {
-          50:  "#F5F6F7",
-          100: "#E7E9EC",
-          200: "#C7CCD3",
-          300: "#9BA3AD",
-          400: "#6A7480",
-          500: "#2E353F", // primary accent (was #E55B14)
-          600: "#22282F",
-          700: "#181C22",
-          800: "#0F1216",
-          900: "#08090B",
+          50:  "#F5F3FF",
+          100: "#EDE9FE",
+          200: "#DDD6FE",
+          300: "#C4B5FD",
+          400: "#A78BFA",
+          500: "#8B5CF6", // primary accent (violet)
+          600: "#7C3AED",
+          700: "#6D28D9",
+          800: "#5B21B6",
+          900: "#4C1D95",
         },
+
         // ── Legacy alias for any lingering `claw-*` classes. Same scale
         //    as `koki` above so both render as charcoal grays.
         claw: {
-          50:  "#F5F6F7",
-          100: "#E7E9EC",
-          200: "#C7CCD3",
-          300: "#9BA3AD",
-          400: "#6A7480",
-          500: "#2E353F",
-          600: "#22282F",
-          700: "#181C22",
-          800: "#0F1216",
-          900: "#08090B",
+          50:  "#F5F3FF",
+          100: "#EDE9FE",
+          200: "#DDD6FE",
+          300: "#C4B5FD",
+          400: "#A78BFA",
+          500: "#8B5CF6", // primary accent (violet)
+          600: "#7C3AED",
+          700: "#6D28D9",
+          800: "#5B21B6",
+          900: "#4C1D95",
         },
+
         // ── Cream — REMAPPED to white / light-gray surfaces. Anywhere
         //    components used `bg-cream-50` for "card surface" now correctly
         //    gets pure white on the new light theme.
         cream: {
-          50:  "#FFFFFF",  // primary card surface
-          100: "#F6F7F8",  // hover / nested panel
-          200: "#F0F2F4",  // warmer light variant
+          50:  "#14141C",  // primary card surface (dark panel)
+          100: "#1B1B26",  // hover / nested panel
+          200: "#22222E",  // lighter dark variant
         },
         // ── Cool blue — kept intact for occasional data/info accents. ──
         sea: {
@@ -123,23 +128,23 @@ const config: Config = {
       },
       boxShadow: {
         "elev-1":
-          "0 1px 0 rgba(15,17,20,0.04) inset, 0 1px 2px rgba(15,17,20,0.06)",
+          "0 1px 0 rgba(255,255,255,0.03) inset, 0 1px 2px rgba(0,0,0,0.5)",
         "elev-2":
-          "0 1px 0 rgba(15,17,20,0.05) inset, 0 8px 24px -10px rgba(15,17,20,0.12)",
+          "0 1px 0 rgba(255,255,255,0.04) inset, 0 10px 28px -10px rgba(0,0,0,0.6)",
         "elev-3":
-          "0 1px 0 rgba(15,17,20,0.06) inset, 0 24px 48px -16px rgba(15,17,20,0.18)",
+          "0 1px 0 rgba(255,255,255,0.05) inset, 0 28px 56px -16px rgba(0,0,0,0.7)",
         glow:
-          "0 8px 30px -8px rgba(46,53,63,0.25)",
+          "0 8px 30px -8px rgba(139,92,246,0.45)",
         "glow-sea":
-          "0 8px 30px -8px rgba(59,143,250,0.25)",
+          "0 8px 30px -8px rgba(59,143,250,0.35)",
       },
       backgroundImage: {
         "radial-soft":
-          "radial-gradient(60% 50% at 50% 0%, rgba(46,53,63,0.06) 0%, rgba(255,255,255,0) 70%)",
+          "radial-gradient(60% 50% at 50% 0%, rgba(139,92,246,0.12) 0%, rgba(10,10,15,0) 70%)",
         "radial-cool":
-          "radial-gradient(60% 60% at 90% 10%, rgba(59,143,250,0.06) 0%, rgba(255,255,255,0) 60%)",
+          "radial-gradient(60% 60% at 90% 10%, rgba(59,143,250,0.08) 0%, rgba(10,10,15,0) 60%)",
         "border-fade":
-          "linear-gradient(180deg, rgba(15,17,20,0.06), rgba(15,17,20,0.02))",
+          "linear-gradient(180deg, rgba(244,244,248,0.08), rgba(244,244,248,0.02))",
       },
       keyframes: {
         "fade-in-up": {

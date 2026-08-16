@@ -353,7 +353,7 @@ function TokenCard({
 
         <div className="mt-auto pt-2 space-y-1.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-extrabold text-emerald-600">
+            <span className="text-[11px] font-extrabold text-emerald-400">
               {market
                 ? ethUsd
                   ? `MC ${formatUsd(market.mcapEth * ethUsd)}`

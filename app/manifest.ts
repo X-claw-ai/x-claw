@@ -13,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#E55B14",
-    theme_color: "#E55B14",
+    background_color: "#0A0A0F",
+    theme_color: "#8B5CF6",
     categories: ["finance", "productivity", "developer"],
     lang: "en",
     // Next.js auto-emits /icon (no extension) from app/icon.tsx, that's

@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -35,8 +35,8 @@ export function KokiWalletProvider({ children }: { children: ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
-          theme={lightTheme({
-            accentColor: "#2E353F", // HAMR charcoal
+          theme={darkTheme({
+            accentColor: "#8B5CF6", // HAMR violet
             accentColorForeground: "#FFFFFF",
             borderRadius: "medium",
             fontStack: "system",

@@ -53,7 +53,7 @@ export const viewport: Viewport = {
   // Match the page background so the URL bar / status bar on mobile
   // blends into the app. Pure white now that the site is a monochrome
   // light theme.
-  themeColor: "#FFFFFF",
+  themeColor: "#0A0A0F",
   colorScheme: "light",
 };
 
