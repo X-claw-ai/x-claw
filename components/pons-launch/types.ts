@@ -45,6 +45,12 @@ export interface LaunchResult {
   explorerUrl: string;
 }
 
+/** Which stage of the Auto-pilot pipeline is currently running. Drives
+ *  the staged progress UI on the concept step: "scanning" the instant
+ *  the user clicks, "drafting" once the viral post is locked and the
+ *  kit copywriter is running. */
+export type AutoPhase = "scanning" | "drafting" | null;
+
 export interface WizardState {
   step: WizardStep;
   concept: ConceptInput | null;
@@ -54,6 +60,7 @@ export interface WizardState {
   result: LaunchResult | null;
   error: string | null;
   loading: boolean;
+  autoPhase: AutoPhase;
 }
 
 export const INITIAL_WIZARD_STATE: WizardState = {
@@ -64,4 +71,5 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   result: null,
   error: null,
   loading: false,
+  autoPhase: null,
 };

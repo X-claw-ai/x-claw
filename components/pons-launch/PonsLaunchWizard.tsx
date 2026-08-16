@@ -13,6 +13,7 @@ import {
   type ConceptInput,
   type LaunchKit,
   type LaunchResult,
+  type AutoPhase,
 } from "./types";
 import { saveLaunch } from "@/lib/storage/launches";
 
@@ -33,7 +34,8 @@ type Action =
   | { type: "SET_INITIAL_BUY"; value: string }
   | { type: "SET_RESULT"; result: LaunchResult }
   | { type: "SET_ERROR"; error: string | null }
-  | { type: "SET_LOADING"; loading: boolean };
+  | { type: "SET_LOADING"; loading: boolean }
+  | { type: "SET_PHASE"; phase: AutoPhase };
 
 function reducer(state: WizardState, action: Action): WizardState {
   switch (action.type) {
@@ -48,9 +50,11 @@ function reducer(state: WizardState, action: Action): WizardState {
     case "SET_RESULT":
       return { ...state, result: action.result, step: "success" };
     case "SET_ERROR":
-      return { ...state, error: action.error, loading: false };
+      return { ...state, error: action.error, loading: false, autoPhase: null };
     case "SET_LOADING":
       return { ...state, loading: action.loading };
+    case "SET_PHASE":
+      return { ...state, autoPhase: action.phase };
   }
 }
 
@@ -105,6 +109,8 @@ export default function PonsLaunchWizard() {
     dispatch({ type: "SET_ERROR", error: null });
     try {
       if (concept.autoPilot) {
+        // Phase 1 — the instant the user clicks, show "scanning X".
+        dispatch({ type: "SET_PHASE", phase: "scanning" });
         const res = await fetch("/api/auto-launch", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -130,6 +136,10 @@ export default function PonsLaunchWizard() {
           );
         }
         dispatch({ type: "SET_CONCEPT", concept: derived });
+        // Phase 2 — post locked, the copywriter is running. The concept
+        // (name/ticker/X link) is already in state so the progress panel
+        // can show WHICH meme was picked while the kit drafts.
+        dispatch({ type: "SET_PHASE", phase: "drafting" });
 
         // Pull the viral post's own image through our server-side proxy
         // (pbs.twimg.com is CORS-blocked in the browser) so the meme that
@@ -191,6 +201,7 @@ export default function PonsLaunchWizard() {
       });
     } finally {
       dispatch({ type: "SET_LOADING", loading: false });
+      dispatch({ type: "SET_PHASE", phase: null });
     }
   }, []);
 
@@ -236,12 +247,15 @@ export default function PonsLaunchWizard() {
         <ConceptStep
           initial={state.concept}
           loading={state.loading}
+          phase={state.autoPhase}
+          picked={state.autoPhase === "drafting" ? state.concept : null}
           onNext={generateKit}
         />
       )}
       {state.step === "kit" && state.kit && (
         <KitStep
           kit={state.kit}
+          sourceXUrl={state.concept?.sourceUrl}
           loading={state.loading}
           onBack={() => dispatch({ type: "GO", step: "concept" })}
           onNext={(edited) => {

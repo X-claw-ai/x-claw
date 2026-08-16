@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, ArrowRight } from "lucide-react";
-import type { ConceptInput } from "../types";
+import { Sparkles, ArrowRight, ExternalLink, Loader2, Check } from "lucide-react";
+import type { ConceptInput, AutoPhase } from "../types";
 
 // Step 1: Concept. Two lanes:
 //   - Auto-pilot: HAMR agent scans X and picks a viral post itself.
@@ -15,9 +15,19 @@ interface Props {
   initial: ConceptInput | null;
   onNext: (input: ConceptInput) => void | Promise<void>;
   loading: boolean;
+  /** Auto-pilot pipeline stage — drives the staged progress panel. */
+  phase?: AutoPhase;
+  /** The concept Auto-pilot locked (set once phase === "drafting"). */
+  picked?: ConceptInput | null;
 }
 
-export default function ConceptStep({ initial, onNext, loading }: Props) {
+export default function ConceptStep({
+  initial,
+  onNext,
+  loading,
+  phase,
+  picked,
+}: Props) {
   const [autoPilot, setAutoPilot] = useState<boolean>(
     initial?.autoPilot ?? true,
   );
@@ -42,6 +52,12 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
       sourceUrl: sourceUrl.trim() || undefined,
       autoPilot,
     });
+  }
+
+  // Auto-pilot is running — replace the whole form with a staged
+  // progress panel so the user sees, instantly, what's happening.
+  if (loading && phase) {
+    return <AutoPilotProgress phase={phase} picked={picked ?? null} />;
   }
 
   return (
@@ -133,6 +149,108 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
         </button>
       </div>
     </form>
+  );
+}
+
+/** Staged progress panel shown while Auto-pilot runs.
+ *
+ *  scanning — searching X for the top viral post of the last 24h.
+ *  drafting — post locked; shows WHICH meme was picked (name, ticker,
+ *             idea, and a link to the original X post) while the full
+ *             launch kit is written. */
+function AutoPilotProgress({
+  phase,
+  picked,
+}: {
+  phase: NonNullable<AutoPhase>;
+  picked: ConceptInput | null;
+}) {
+  const scanningDone = phase === "drafting";
+  return (
+    <div className="card !p-6 space-y-5">
+      {/* Stage 1 — scan X */}
+      <div className="flex items-start gap-3">
+        <StageIcon done={scanningDone} active={phase === "scanning"} />
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-black tracking-tight">
+            Scanning X for the top viral meme right now
+          </div>
+          <p className="mt-0.5 text-[12px] text-ink-300/70 font-medium leading-snug">
+            Live search over the last 24 hours, ranked by raw view count.
+            Posts already used by earlier launches are excluded.
+          </p>
+        </div>
+      </div>
+
+      {/* Stage 2 — draft the kit */}
+      <div className="flex items-start gap-3">
+        <StageIcon done={false} active={phase === "drafting"} />
+        <div className="flex-1 min-w-0">
+          <div
+            className={`text-[14px] font-black tracking-tight ${
+              phase === "drafting" ? "" : "text-ink-300/40"
+            }`}
+          >
+            Drafting the full launch kit
+          </div>
+          {phase === "drafting" && picked ? (
+            <div className="mt-2 rounded-xl border border-[var(--border-strong)] bg-cream-50 p-3.5 space-y-1.5">
+              <div className="text-[15px] font-black tracking-tight truncate">
+                {picked.tokenName}{" "}
+                <span className="text-ink-300/60 font-extrabold">
+                  ${picked.ticker}
+                </span>
+              </div>
+              {picked.idea && (
+                <p className="text-[12px] text-ink-300/75 font-medium leading-snug line-clamp-3">
+                  {picked.idea}
+                </p>
+              )}
+              {picked.sourceUrl && (
+                <a
+                  href={picked.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-koki-500 hover:underline"
+                >
+                  View the viral post on X
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+          ) : (
+            <p className="mt-0.5 text-[12px] text-ink-300/40 font-medium">
+              Name, ticker, description, and 10 launch tweets.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-ink-300/50 font-medium">
+        Usually 30–60 seconds end to end. Nothing touches your wallet until
+        you approve the kit.
+      </p>
+    </div>
+  );
+}
+
+function StageIcon({ done, active }: { done: boolean; active: boolean }) {
+  if (done) {
+    return (
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-koki-500 text-white">
+        <Check className="h-3.5 w-3.5" />
+      </span>
+    );
+  }
+  if (active) {
+    return (
+      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-koki-500 text-koki-500">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      </span>
+    );
+  }
+  return (
+    <span className="mt-0.5 h-6 w-6 shrink-0 rounded-full border-2 border-[var(--border)]" />
   );
 }
 

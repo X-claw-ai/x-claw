@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, RefreshCw, ExternalLink } from "lucide-react";
 import type { LaunchKit } from "../types";
 
 // Step 2: Kit review. Shows what Grok drafted so the user can approve,
@@ -11,6 +11,8 @@ import type { LaunchKit } from "../types";
 
 interface Props {
   kit: LaunchKit;
+  /** Original viral X post this token is anchored on (Auto-pilot). */
+  sourceXUrl?: string;
   onBack: () => void;
   onNext: (edited: LaunchKit) => void;
   onRegenerate: () => void | Promise<void>;
@@ -19,6 +21,7 @@ interface Props {
 
 export default function KitStep({
   kit,
+  sourceXUrl,
   onBack,
   onNext,
   onRegenerate,
@@ -71,6 +74,17 @@ export default function KitStep({
           <div className="text-[12px] font-extrabold text-ink-300/70">
             ${ticker || "TICKER"}
           </div>
+          {sourceXUrl && (
+            <a
+              href={sourceXUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-extrabold text-koki-500 hover:underline"
+            >
+              View the viral post on X
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
         </div>
       </div>
 
