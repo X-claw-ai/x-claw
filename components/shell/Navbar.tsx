@@ -33,9 +33,14 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-bg/85 border-b border-[var(--border)]">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 h-20 flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-3 shrink-0">
-          <KokiLogo height={36} className="rounded-md overflow-hidden" />
+      <div className="mx-auto max-w-7xl px-3 md:px-6 h-16 md:h-20 flex items-center justify-between gap-2 md:gap-3">
+        <Link href="/" className="flex items-center gap-3 shrink-0 min-w-0">
+          <span className="md:hidden">
+            <KokiLogo height={26} />
+          </span>
+          <span className="hidden md:inline-flex">
+            <KokiLogo height={36} />
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
@@ -60,7 +65,7 @@ export default function Navbar() {
             rel="noopener noreferrer"
             aria-label="HAMR on X"
             title="@hamrdotfun"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
+            className="hidden md:inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-300/80 hover:text-ink-300 hover:bg-ink-1000/10 transition-colors"
           >
             <svg
               viewBox="0 0 1200 1227"
@@ -74,7 +79,7 @@ export default function Navbar() {
           <WalletPill />
           <Link
             href="/launch"
-            className="hidden sm:inline-flex btn btn-primary !py-1.5 !px-3 !text-xs"
+            className="hidden md:inline-flex btn btn-primary !py-1.5 !px-3 !text-xs"
           >
             Launch ↗
           </Link>
