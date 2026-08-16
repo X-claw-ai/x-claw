@@ -4,7 +4,7 @@ import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
 import { KokiWalletProvider } from "@/components/evm/WalletContext";
 
-const TITLE = "HAMR.fun, The Grok native Meme Coin Launch Agent";
+const TITLE = "HAMR.fun, The Autonomous Meme Coin Launch Agent";
 const DESCRIPTION =
   "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to a Pons launch on Robinhood Chain.";
 
@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     "Robinhood Chain",
     "Pons",
     "memecoin",
-    "Grok",
     "xAI",
     "AI agent",
     "launch agent",

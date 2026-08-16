@@ -112,15 +112,46 @@ export default function PonsLaunchWizard() {
         });
         if (!res.ok) throw new Error(`Auto-pilot failed (${res.status})`);
         const json = await res.json();
+        // /api/auto-launch returns { concept: {...} } — note originXUrl,
+        // not sourceUrl. It does NOT return a kit; we build the kit with
+        // a second call below, passing through the concept's theme and
+        // audience so the copywriter has the full brief.
+        const c = (json?.concept ?? {}) as Record<string, string | undefined>;
         const derived: ConceptInput = {
-          idea: json?.concept?.idea ?? "",
-          tokenName: json?.concept?.tokenName ?? "",
-          ticker: json?.concept?.ticker ?? "",
-          sourceUrl: json?.concept?.sourceUrl,
+          idea: c.idea ?? "",
+          tokenName: c.tokenName ?? "",
+          ticker: c.ticker ?? "",
+          sourceUrl: c.sourceUrl ?? c.originXUrl,
           autoPilot: true,
         };
+        if (!derived.tokenName || !derived.ticker) {
+          throw new Error(
+            "Auto-pilot could not lock a concept from X — run it again.",
+          );
+        }
         dispatch({ type: "SET_CONCEPT", concept: derived });
-        dispatch({ type: "SET_KIT", kit: coerceKit(json.kit ?? json) });
+
+        if (json.kit) {
+          dispatch({ type: "SET_KIT", kit: coerceKit(json) });
+        } else {
+          const kitRes = await fetch("/api/generate-launch-kit", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              idea: derived.idea,
+              tokenName: derived.tokenName,
+              ticker: derived.ticker,
+              chain: "robinhood",
+              theme: c.theme ?? "",
+              audience: c.audience ?? "",
+              launchStyle: c.launchStyle ?? "fair-launch",
+            }),
+          });
+          if (!kitRes.ok)
+            throw new Error(`Kit generation failed (${kitRes.status})`);
+          const kitJson = await kitRes.json();
+          dispatch({ type: "SET_KIT", kit: coerceKit(kitJson) });
+        }
       } else {
         dispatch({ type: "SET_CONCEPT", concept });
         const res = await fetch("/api/generate-launch-kit", {

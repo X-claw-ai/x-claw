@@ -8,7 +8,7 @@ import { ImageResponse } from "next/og";
 // White canvas + charcoal type matches the site's monochrome theme.
 
 export const runtime = "edge";
-export const alt = "HAMR.fun, Grok native meme coin launch agent";
+export const alt = "HAMR.fun, autonomous meme coin launch agent";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -84,7 +84,7 @@ export default function OpengraphImage() {
               display: "flex",
             }}
           >
-            Grok native meme coin launch agent. From X meme to Pons on
+            Autonomous meme coin launch agent. From X meme to Pons on
             Robinhood Chain in one signature.
           </div>
         </div>

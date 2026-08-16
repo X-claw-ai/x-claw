@@ -68,12 +68,12 @@ function EmptyState() {
         Live trends are connecting.
       </div>
       <p className="mt-3 text-[14px] text-ink-300/72 max-w-md mx-auto leading-relaxed font-medium">
-        Once X API + Grok trend search + onchain indexers are wired in,
+        Once X API + live trend search + onchain indexers are wired in,
         live trending memes appear here ready to be turned into launches.
       </p>
       <div className="mt-7 flex items-center justify-center gap-2 flex-wrap">
         <Badge tone="info">Pipeline, X API</Badge>
-        <Badge tone="info">Pipeline, Grok search</Badge>
+        <Badge tone="info">Pipeline, X search</Badge>
         <Badge tone="info">Pipeline, Onchain</Badge>
       </div>
       <p className="mt-7 text-[11px] text-ink-300/55 font-bold">

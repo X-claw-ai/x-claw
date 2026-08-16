@@ -52,7 +52,7 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
           onSelect={() => setAutoPilot(true)}
           eyebrow="Auto-pilot"
           title="HAMR picks the meme"
-          body="Grok scans X for the freshest viral moment, then drafts the whole launch kit for you."
+          body="The HAMR agent scans X for the freshest viral moment, then drafts the whole launch kit for you."
         />
         <LaneCard
           selected={!autoPilot}
@@ -70,7 +70,7 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               rows={3}
-              placeholder="e.g., X native community token for Grok-curious builders"
+              placeholder="e.g., X native community token for onchain builders"
               className="input min-h-[88px]"
             />
           </Field>
@@ -111,7 +111,7 @@ export default function ConceptStep({ initial, onNext, loading }: Props) {
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-300/70 font-medium">
-          Grok drafts a full Pons-ready launch kit — you review before any
+          The agent drafts a full Pons-ready launch kit — you review before any
           wallet touches anything.
         </p>
         <button

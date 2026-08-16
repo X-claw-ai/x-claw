@@ -28,7 +28,7 @@ export default function AttentionLayerSection() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <span className="text-[12px] font-bold text-ink-300/72">
-              Live X search via Grok’s x_search tool.
+              Live X search via the x_search tool.
             </span>
           </div>
         </div>
