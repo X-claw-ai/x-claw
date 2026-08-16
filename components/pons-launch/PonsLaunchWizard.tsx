@@ -50,7 +50,14 @@ function reducer(state: WizardState, action: Action): WizardState {
     case "SET_RESULT":
       return { ...state, result: action.result, step: "success" };
     case "SET_ERROR":
-      return { ...state, error: action.error, loading: false, autoPhase: null };
+      // Clearing the error (null) must NOT touch loading/phase — generateKit
+      // clears the previous error right after setting loading:true, and
+      // resetting loading here made the progress panel condition
+      // (loading && phase) permanently false. Only a REAL error tears the
+      // in-flight state down.
+      return action.error === null
+        ? { ...state, error: null }
+        : { ...state, error: action.error, loading: false, autoPhase: null };
     case "SET_LOADING":
       return { ...state, loading: action.loading };
     case "SET_PHASE":
