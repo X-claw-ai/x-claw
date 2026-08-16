@@ -206,38 +206,46 @@ contract HamrLaunchpad {
         require(!c.graduated, "Hamr: graduated - trade on Uniswap");
         require(msgValue > 0, "Hamr: zero buy");
 
-        // Cap the buy so realEth never exceeds the graduation raise.
-        // grossNeeded is the msg.value that lands exactly on the cap
-        // after the 1% fee comes off.
-        uint256 remaining = GRADUATION_RAISE - c.realEth;
-        uint256 grossNeeded = (remaining * BPS + (BPS - FEE_BPS) - 1) / (BPS - FEE_BPS); // ceil
-        uint256 effective = msgValue > grossNeeded ? grossNeeded : msgValue;
-        uint256 ethIn = (effective * (BPS - FEE_BPS)) / BPS;
-        if (ethIn > remaining) ethIn = remaining; // rounding belt & braces
-        uint256 fee = effective - ethIn;
-        uint256 refund = msgValue - effective;
+        // Block-scoped to stay under the EVM's 16-slot stack limit.
+        uint256 ethIn;
+        uint256 fee;
+        uint256 refund;
+        {
+            // Cap the buy so realEth never exceeds the graduation raise.
+            // grossNeeded is the msg.value that lands exactly on the cap
+            // after the 1% fee comes off.
+            uint256 remaining = GRADUATION_RAISE - c.realEth;
+            uint256 grossNeeded = (remaining * BPS + (BPS - FEE_BPS) - 1) / (BPS - FEE_BPS); // ceil
+            uint256 effective = msgValue > grossNeeded ? grossNeeded : msgValue;
+            ethIn = (effective * (BPS - FEE_BPS)) / BPS;
+            if (ethIn > remaining) ethIn = remaining; // rounding belt & braces
+            fee = effective - ethIn;
+            refund = msgValue - effective;
+        }
 
-        // Constant product: tokensOut = vTok − (vEth·vTok)/(vEth+ethIn)
-        uint256 vEth = c.virtualEth;
-        uint256 vTok = c.virtualToken;
-        uint256 newVTok = (vEth * vTok) / (vEth + ethIn);
-        uint256 tokensOut = vTok - newVTok;
-        uint256 curveLeft = CURVE_SUPPLY - c.tokensSold;
-        if (tokensOut > curveLeft) {
-            tokensOut = curveLeft; // rounding guard at the boundary
-            newVTok = vTok - tokensOut;
+        uint256 tokensOut;
+        {
+            // Constant product: tokensOut = vTok − (vEth·vTok)/(vEth+ethIn)
+            uint256 vEth = c.virtualEth;
+            uint256 vTok = c.virtualToken;
+            tokensOut = vTok - (vEth * vTok) / (vEth + ethIn);
+            uint256 curveLeft = CURVE_SUPPLY - c.tokensSold;
+            if (tokensOut > curveLeft) tokensOut = curveLeft; // boundary guard
+            // Effects (curve reserves)
+            c.virtualEth = uint128(vEth + ethIn);
+            c.virtualToken = uint128(vTok - tokensOut);
         }
         require(tokensOut >= minTokensOut, "Hamr: slippage");
         require(tokensOut > 0, "Hamr: dust buy");
 
-        // Effects
-        c.virtualEth = uint128(vEth + ethIn);
-        c.virtualToken = uint128(newVTok);
+        // Effects (accounting)
         c.realEth += uint128(ethIn);
         c.tokensSold += uint128(tokensOut);
-        uint256 creatorCut = (fee * CREATOR_BPS) / BPS;
-        creatorFeesEth[token] += creatorCut;
-        protocolFeesEth += fee - creatorCut;
+        {
+            uint256 creatorCut = (fee * CREATOR_BPS) / BPS;
+            creatorFeesEth[token] += creatorCut;
+            protocolFeesEth += fee - creatorCut;
+        }
 
         // Interactions
         require(HamrToken(token).transfer(buyer, tokensOut), "Hamr: token xfer");
@@ -266,24 +274,27 @@ contract HamrLaunchpad {
         require(tokenAmount > 0, "Hamr: zero sell");
         require(tokenAmount <= c.tokensSold, "Hamr: exceeds curve");
 
-        // Inverse curve move: ethOut = vEth − (vEth·vTok)/(vTok+amount)
-        uint256 vEth = c.virtualEth;
-        uint256 vTok = c.virtualToken;
-        uint256 newVEth = (vEth * vTok) / (vTok + tokenAmount);
-        uint256 ethGross = vEth - newVEth;
-        require(ethGross <= c.realEth, "Hamr: reserve"); // invariant belt
-        uint256 fee = (ethGross * FEE_BPS) / BPS;
-        uint256 ethNet = ethGross - fee;
-        require(ethNet >= minEthOut, "Hamr: slippage");
+        // Block-scoped to stay under the EVM's 16-slot stack limit.
+        uint256 ethNet;
+        {
+            // Inverse curve move: ethOut = vEth − (vEth·vTok)/(vTok+amount)
+            uint256 vEth = c.virtualEth;
+            uint256 vTok = c.virtualToken;
+            uint256 ethGross = vEth - (vEth * vTok) / (vTok + tokenAmount);
+            require(ethGross <= c.realEth, "Hamr: reserve"); // invariant belt
+            uint256 fee = (ethGross * FEE_BPS) / BPS;
+            ethNet = ethGross - fee;
 
-        // Effects
-        c.virtualEth = uint128(newVEth);
-        c.virtualToken = uint128(vTok + tokenAmount);
-        c.realEth -= uint128(ethGross);
-        c.tokensSold -= uint128(tokenAmount);
-        uint256 creatorCut = (fee * CREATOR_BPS) / BPS;
-        creatorFeesEth[token] += creatorCut;
-        protocolFeesEth += fee - creatorCut;
+            // Effects
+            c.virtualEth = uint128(vEth - ethGross);
+            c.virtualToken = uint128(vTok + tokenAmount);
+            c.realEth -= uint128(ethGross);
+            c.tokensSold -= uint128(tokenAmount);
+            uint256 creatorCut = (fee * CREATOR_BPS) / BPS;
+            creatorFeesEth[token] += creatorCut;
+            protocolFeesEth += fee - creatorCut;
+        }
+        require(ethNet >= minEthOut, "Hamr: slippage");
 
         // Interactions (transferFrom needs prior approve)
         require(
