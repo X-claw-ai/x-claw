@@ -34,7 +34,7 @@ export default function WalletPill() {
           return (
             <div
               aria-hidden="true"
-              className="hidden sm:block h-8 w-[128px] rounded-[10px] border border-[var(--border)] bg-cream-50/60 animate-pulse"
+              className="h-8 w-[128px] rounded-[10px] border border-[var(--border)] bg-cream-50/60 animate-pulse"
             />
           );
         }
@@ -44,10 +44,11 @@ export default function WalletPill() {
             <button
               type="button"
               onClick={openConnectModal}
-              className="hidden sm:inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[var(--border-strong)] bg-cream-50 px-3 h-8 text-[11px] font-extrabold text-ink-300 hover:bg-cream-100 transition-colors"
+              className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[var(--border-strong)] bg-cream-50 px-2.5 sm:px-3 h-8 text-[11px] font-extrabold text-ink-300 hover:bg-cream-100 transition-colors"
             >
               <Wallet className="h-3.5 w-3.5" />
-              Connect Wallet
+              <span className="hidden sm:inline">Connect Wallet</span>
+              <span className="sm:hidden">Connect</span>
             </button>
           );
         }
@@ -57,10 +58,11 @@ export default function WalletPill() {
             <button
               type="button"
               onClick={openChainModal}
-              className="hidden sm:inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-red-500/60 bg-red-500/10 px-3 h-8 text-[11px] font-extrabold text-red-400 hover:bg-red-500/20 transition-colors"
+              className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-red-500/60 bg-red-500/10 px-2.5 sm:px-3 h-8 text-[11px] font-extrabold text-red-400 hover:bg-red-500/20 transition-colors"
             >
               <Wallet className="h-3.5 w-3.5" />
-              Wrong network
+              <span className="hidden sm:inline">Wrong network</span>
+              <span className="sm:hidden">Wrong net</span>
             </button>
           );
         }
@@ -72,10 +74,10 @@ export default function WalletPill() {
           <button
             type="button"
             onClick={openAccountModal}
-            className="hidden sm:inline-flex items-center gap-2 rounded-[10px] border border-[var(--border-strong)] bg-cream-50 px-3 h-8 text-[11px] font-extrabold text-ink-300 hover:bg-cream-100 transition-colors"
+            className="inline-flex items-center gap-2 rounded-[10px] border border-[var(--border-strong)] bg-cream-50 px-2.5 sm:px-3 h-8 text-[11px] font-extrabold text-ink-300 hover:bg-cream-100 transition-colors"
           >
             <Wallet className="h-3.5 w-3.5" />
-            <span className="opacity-70">
+            <span className="hidden sm:inline opacity-70">
               {account.displayName?.split(".")[0] ?? "Wallet"}
             </span>
             <span className="font-mono">{short}</span>
