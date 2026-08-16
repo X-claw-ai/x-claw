@@ -5,6 +5,8 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagm
 import { parseEther, decodeEventLog } from "viem";
 import { ArrowLeft, Rocket } from "lucide-react";
 import { HAMR_CONTRACTS, HAMR_CURVE, hamrLaunchpadAbi } from "@/lib/hamr";
+import { readCurve } from "@/lib/hamr/read";
+import { getPublicClient } from "@/lib/robinhood/client";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import type { LaunchKit, LaunchResult } from "../types";
 
@@ -82,6 +84,68 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
 
   const [uploading, setUploading] = useState(false);
 
+  // ── Mobile-wallet safety net ──────────────────────────────────────
+  // On WalletConnect (mobile), the dapp regularly never receives the tx
+  // hash after the user confirms in their wallet app — the promise from
+  // writeContractAsync just hangs and the UI sticks on "Confirm in
+  // wallet…". So the moment we ask for a signature we also snapshot
+  // tokenCount() and poll the chain: if a NEW token appears whose curve
+  // creator is this wallet, the launch succeeded regardless of whether
+  // the RPC callback ever came home.
+  const [watchFrom, setWatchFrom] = useState<bigint | null>(null);
+
+  useEffect(() => {
+    if (watchFrom === null || handled || !address) return;
+    let cancelled = false;
+    const client = getPublicClient();
+
+    async function poll() {
+      try {
+        const count = await client.readContract({
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "tokenCount",
+        });
+        if (cancelled || count <= watchFrom!) return;
+        // Scan only the tokens minted since we started watching.
+        for (let i = Number(watchFrom); i < Number(count); i++) {
+          const token = await client.readContract({
+            address: HAMR_CONTRACTS.launchpad,
+            abi: hamrLaunchpadAbi,
+            functionName: "allTokens",
+            args: [BigInt(i)],
+          });
+          const curve = await readCurve(token);
+          if (
+            curve.exists &&
+            curve.creator.toLowerCase() === address!.toLowerCase()
+          ) {
+            if (cancelled) return;
+            setHandled(true);
+            onSuccess({
+              token,
+              pool: "0x0000000000000000000000000000000000000000",
+              txHash:
+                submittedHash ??
+                ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`),
+              ponsUrl: `/launches/${token}`,
+              explorerUrl: explorerUrl("token", token),
+            });
+            return;
+          }
+        }
+      } catch {
+        /* RPC hiccup — next tick retries */
+      }
+    }
+
+    const id = setInterval(poll, 4_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [watchFrom, handled, address, submittedHash, onSuccess]);
+
   async function handleSign() {
     setLocalError(null);
     resetWrite();
@@ -118,6 +182,18 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     }
 
     try {
+      // Snapshot BEFORE the signature request so the poller only ever
+      // matches tokens created after this moment.
+      try {
+        const count = await getPublicClient().readContract({
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "tokenCount",
+        });
+        setWatchFrom(count);
+      } catch {
+        setWatchFrom(0n);
+      }
       await writeContractAsync({
         address: HAMR_CONTRACTS.launchpad,
         abi: hamrLaunchpadAbi,

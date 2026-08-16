@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useReducer } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ConceptStep from "./steps/ConceptStep";
 import KitStep from "./steps/KitStep";
 import ConnectStep from "./steps/ConnectStep";
@@ -66,6 +66,7 @@ function reducer(state: WizardState, action: Action): WizardState {
 }
 
 export default function PonsLaunchWizard() {
+  const router = useRouter();
   const params = useSearchParams();
   const memeId = params.get("meme");
   const [state, dispatch] = useReducer(reducer, INITIAL_WIZARD_STATE);
@@ -248,8 +249,11 @@ export default function PonsLaunchWizard() {
         });
       }
       dispatch({ type: "SET_RESULT", result });
+      // Pump.fun behavior: the coin page IS the success screen. Jump
+      // straight to the live token the moment the launch confirms.
+      router.push(result.ponsUrl);
     },
-    [state.kit],
+    [state.kit, router],
   );
 
   return (
