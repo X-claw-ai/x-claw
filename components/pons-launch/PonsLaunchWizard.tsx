@@ -131,8 +131,24 @@ export default function PonsLaunchWizard() {
         }
         dispatch({ type: "SET_CONCEPT", concept: derived });
 
+        // Pull the viral post's own image through our server-side proxy
+        // (pbs.twimg.com is CORS-blocked in the browser) so the meme that
+        // trended IS the token logo. Runs in parallel with kit generation;
+        // best-effort — a broken image never blocks the launch flow.
+        const imagePromise: Promise<string | undefined> = c.originImageUrl
+          ? fetch(
+              `/api/fetch-x-image?url=${encodeURIComponent(c.originImageUrl)}`,
+            )
+              .then((r) => (r.ok ? r.json() : null))
+              .then((ij: { ok?: boolean; imageDataUrl?: string } | null) =>
+                ij?.ok && ij.imageDataUrl ? ij.imageDataUrl : undefined,
+              )
+              .catch(() => undefined)
+          : Promise.resolve(undefined);
+
+        let kit: LaunchKit;
         if (json.kit) {
-          dispatch({ type: "SET_KIT", kit: coerceKit(json) });
+          kit = coerceKit(json);
         } else {
           const kitRes = await fetch("/api/generate-launch-kit", {
             method: "POST",
@@ -150,8 +166,12 @@ export default function PonsLaunchWizard() {
           if (!kitRes.ok)
             throw new Error(`Kit generation failed (${kitRes.status})`);
           const kitJson = await kitRes.json();
-          dispatch({ type: "SET_KIT", kit: coerceKit(kitJson) });
+          kit = coerceKit(kitJson);
         }
+
+        const memeImage = await imagePromise;
+        if (memeImage && !kit.logoUrl) kit = { ...kit, logoUrl: memeImage };
+        dispatch({ type: "SET_KIT", kit });
       } else {
         dispatch({ type: "SET_CONCEPT", concept });
         const res = await fetch("/api/generate-launch-kit", {
