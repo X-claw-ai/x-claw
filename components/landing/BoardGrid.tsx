@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { Rocket, Search, ArrowUpRight, Loader2, Crown } from "lucide-react";
+import { Rocket, Search, ArrowUpRight, Loader2, Crown, Flame } from "lucide-react";
 import {
   readCurve,
   readTokenMeta,
@@ -329,8 +329,55 @@ export default function BoardGrid() {
     return out;
   }, [items, q, sort, markets, vol24h]);
 
+  // Hottest coins: real 24h volume first, then curve progress, then mcap.
+  const trending = useMemo(() => {
+    if (!items || items.length === 0) return [];
+    const score = (l: PublicLaunch) => {
+      const key = l.token_address.toLowerCase();
+      const m = markets[key];
+      return {
+        vol: vol24h[key] ?? 0,
+        prog: m?.progressBps ?? 0,
+        mcap: m?.mcapEth ?? 0,
+      };
+    };
+    return items
+      .slice()
+      .sort((a, b) => {
+        const sa = score(a);
+        const sb = score(b);
+        if (sb.vol !== sa.vol) return sb.vol - sa.vol;
+        if (sb.prog !== sa.prog) return sb.prog - sa.prog;
+        return sb.mcap - sa.mcap;
+      })
+      .slice(0, 4);
+  }, [items, markets, vol24h]);
+
   return (
     <section className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-8">
+      {/* Trending now — the hottest coins lead the page */}
+      {trending.length > 0 && (
+        <div className="mb-7">
+          <div className="flex items-center gap-2 mb-3">
+            <Flame className="h-4 w-4 text-koki-400" />
+            <h2 className="text-[15px] font-black tracking-tight">
+              Trending now
+            </h2>
+          </div>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+            {trending.map((l) => (
+              <TrendingCard
+                key={l.token_address}
+                launch={l}
+                market={markets[l.token_address.toLowerCase()]}
+                vol={vol24h[l.token_address.toLowerCase()] ?? 0}
+                ethUsd={ethUsd}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Controls row: tabs + search */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <TabGroup value={sort} onChange={setSort} />
@@ -426,6 +473,69 @@ function TabGroup({
 }
 
 /* ─────────── card ─────────── */
+
+function TrendingCard({
+  launch,
+  market,
+  vol,
+  ethUsd,
+}: {
+  launch: PublicLaunch;
+  market?: Market;
+  vol: number;
+  ethUsd: number | null;
+}) {
+  return (
+    <Link
+      href={`/launches/${launch.token_address}`}
+      className="group relative h-[168px] w-[280px] shrink-0 rounded-2xl overflow-hidden border border-[var(--border)] hover:border-koki-500/60 transition-colors"
+    >
+      {launch.logo_url ? (
+        <Image
+          src={launch.logo_url}
+          alt={launch.token_name}
+          fill
+          sizes="280px"
+          unoptimized
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-koki-600 to-koki-900">
+          <span className="text-white font-black text-[30px] tracking-tight">
+            ${launch.ticker}
+          </span>
+        </div>
+      )}
+      {/* Readability gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+
+      {vol > 0 && (
+        <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 backdrop-blur px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-koki-300">
+          <Flame className="h-2.5 w-2.5" />
+          Hot
+        </span>
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        <div className="text-[18px] font-black tracking-tight text-white tabular-nums leading-none">
+          {market
+            ? ethUsd
+              ? formatUsd(market.mcapEth * ethUsd)
+              : `${fmtEth(market.mcapEth)} ETH`
+            : "—"}
+          <span className="ml-1 text-[10px] font-extrabold text-white/55">MC</span>
+        </div>
+        <div className="mt-1 text-[13px] font-black text-white truncate">
+          {launch.token_name}{" "}
+          <span className="text-[11px] font-extrabold text-white/60">
+            ${launch.ticker}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 
 function TokenCard({
   launch,
