@@ -145,8 +145,6 @@ export async function POST(req: NextRequest) {
           : {}),
       });
 
-    let llmRes = await makeConceptCall(excludeXUrls);
-
     const parseOrLog = (content: string): AutoConceptResult => {
       try {
         return parseAutoConcept(content);
@@ -161,7 +159,23 @@ export async function POST(req: NextRequest) {
       }
     };
 
-    let concept = parseOrLog(llmRes.content);
+    // First attempt + ONE retry on failure. Truncated JSON and transient
+    // search hiccups were silently dumping users onto the deterministic
+    // mock concept — which looks like "the same coin again, no image, no
+    // link". One retry absorbs most of those. If BOTH fail, the outer
+    // catch still serves the mock as the last resort.
+    let llmRes: Awaited<ReturnType<typeof makeConceptCall>>;
+    let concept: AutoConceptResult;
+    try {
+      llmRes = await makeConceptCall(excludeXUrls);
+      concept = parseOrLog(llmRes.content);
+    } catch (firstErr) {
+      console.warn(
+        `[auto-launch] first attempt failed (${(firstErr as Error).message}) — retrying once`,
+      );
+      llmRes = await makeConceptCall(excludeXUrls);
+      concept = parseOrLog(llmRes.content);
+    }
 
     // Hard dedup check — if Grok ignored the exclude list and re-picked a
     // URL that's already taken (launched OR reserved), RETRY ONCE with the
@@ -373,16 +387,40 @@ async function reserveXUrl(xUrl: string, walletPubkey: string | undefined): Prom
   }
 }
 
-/** Deterministic, X native concept used when LLM is unavailable. */
+/** Last-resort concepts when the LLM is unavailable. Rotated randomly so
+ *  even total-outage fallbacks don't hand every user the identical coin. */
 function fallbackConcept(): AutoConceptResult {
-  return {
-    idea: "Grok native meme cat that watches X timelines 24/7. The patron saint of the AI agent era.",
-    tokenName: "Grok Cat",
-    ticker: "GROKCAT",
-    theme: "AI cat archetype, neon-on-dark, X native posting energy",
-    audience: "AI curious crypto natives, Grok power users, cat-meme posters",
-    launchStyle: "hype-raid",
-    reasoning:
-      "Cat memes are perennially X native; the AI agent overlay matches the cultural moment without overclaiming.",
-  };
+  const pool: AutoConceptResult[] = [
+    {
+      idea: "Meme cat that watches X timelines 24/7. The patron saint of the AI agent era.",
+      tokenName: "Timeline Cat",
+      ticker: "TLCAT",
+      theme: "Vigilant cat archetype, monochrome sketch energy, X native posting culture",
+      audience: "AI curious crypto natives, cat-meme posters, timeline lurkers",
+      launchStyle: "hype-raid",
+      reasoning:
+        "Cat memes are perennially X native; the always-watching overlay matches the agent era.",
+    },
+    {
+      idea: "The NPC who finally got a speaking role. One line, delivered badly, instantly iconic.",
+      tokenName: "SpeakingNPC",
+      ticker: "NPCUP",
+      theme: "Deadpan NPC face, speech-bubble motif, flat gray palette with one accent",
+      audience: "Shitposters, wojak-format enjoyers, gaming twitter",
+      launchStyle: "community-led",
+      reasoning:
+        "NPC formats resurface on X every cycle; giving the NPC a voice is a fresh twist on proven folklore.",
+    },
+    {
+      idea: "A frog that refuses to check the chart. Zen master of the timeline, unbothered since genesis.",
+      tokenName: "NoChartFrog",
+      ticker: "NOCHRT",
+      theme: "Meditating frog, soft greens, anti-hustle serenity as the joke",
+      audience: "Frog-meme lineage holders, burnout-humor accounts, degens in recovery",
+      launchStyle: "fair-launch",
+      reasoning:
+        "Frog memes are the most durable X archetype; the anti-chart angle inverts degen culture for the laugh.",
+    },
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
 }
