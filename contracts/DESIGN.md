@@ -72,6 +72,22 @@ metadata strings (logo URI, description, socials) readable on-chain.
 - WETH `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`
 - Fee tier 10000 (1%), tick spacing 200, full range ±887200.
 
+## Canonical build settings (verified compiling 2026-08-16)
+
+Compiled clean (0 errors) from `flat/HamrLaunchpad.flat.sol` with:
+
+| Setting | Value |
+|---|---|
+| solc | 0.8.24 (commit e11b9ed9) |
+| optimizer | enabled, runs 200 |
+| viaIR | **true** (required — legacy codegen hits stack-too-deep) |
+| evmVersion | paris |
+
+Bytecode sizes: HamrLaunchpad 16.8 KB, HamrFeeLocker 4.9 KB,
+HamrToken 5.9 KB — all under the 24 KB limit.
+
+**Use these EXACT settings for deployment AND Blockscout verification.**
+
 ## Rollout
 1. Foundry tests (curve math invariants, graduation, fee ledgers).
 2. Testnet deploy + full cycle: launch → buys/sells → graduate →
