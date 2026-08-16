@@ -25,6 +25,9 @@ const boardBuyEvent = parseAbiItem(
 const boardSellEvent = parseAbiItem(
   "event CurveSell(address indexed token, address indexed seller, uint256 tokensIn, uint256 ethOut, uint256 newVirtualEth)",
 );
+const boardLaunchEvent = parseAbiItem(
+  "event TokenLaunched(address indexed token, address indexed creator, string name, string symbol, string logo)",
+);
 import { formatEther, parseAbiItem } from "viem";
 
 // Pump.fun-style token board. Dense horizontal cards with LIVE on-chain
@@ -167,6 +170,48 @@ export default function BoardGrid() {
           const onchain = await listTokens(24);
           const known = new Set(launches.map((l) => l.token_address.toLowerCase()));
           const missing = onchain.filter((t) => !known.has(t.toLowerCase()));
+
+          // Creation time straight from the chain: the TokenLaunched
+          // event's block timestamp. One scan covers every token.
+          const bornAt = new Map<string, string>();
+          if (missing.length > 0) {
+            try {
+              const client = getPublicClient();
+              const logs = await client.getLogs({
+                address: HAMR_CONTRACTS.launchpad,
+                event: boardLaunchEvent,
+                fromBlock: 0n,
+                toBlock: "latest",
+              });
+              const blockOf = new Map<string, bigint>();
+              for (const l of logs) {
+                const tok = (l.args as { token?: string }).token;
+                if (tok) blockOf.set(tok.toLowerCase(), l.blockNumber);
+              }
+              const wanted = missing
+                .map((t) => t.toLowerCase())
+                .filter((t) => blockOf.has(t));
+              const uniqBlocks = [...new Set(wanted.map((t) => blockOf.get(t)!))];
+              const tsEntries = await Promise.all(
+                uniqBlocks.map(async (bn) => {
+                  try {
+                    const b = await client.getBlock({ blockNumber: bn });
+                    return [bn.toString(), Number(b.timestamp)] as const;
+                  } catch {
+                    return [bn.toString(), 0] as const;
+                  }
+                }),
+              );
+              const tsOfBlock = new Map(tsEntries);
+              for (const t of wanted) {
+                const ts = tsOfBlock.get(blockOf.get(t)!.toString()) ?? 0;
+                if (ts > 0) bornAt.set(t, new Date(ts * 1000).toISOString());
+              }
+            } catch {
+              /* timestamps stay unknown — cards fall back gracefully */
+            }
+          }
+
           const extras = await Promise.all(
             missing.map(async (t) => {
               try {
@@ -181,7 +226,7 @@ export default function BoardGrid() {
                   pons_url: null,
                   explorer_url: null,
                   source_x_url: null,
-                  created_at: "",
+                  created_at: bornAt.get(t.toLowerCase()) ?? "",
                 } satisfies PublicLaunch;
               } catch {
                 return null;
@@ -460,7 +505,7 @@ function TokenCard({
             {launch.wallet_address.slice(0, 4)}…{launch.wallet_address.slice(-4)}
           </span>
           <span className="shrink-0">
-            {launch.created_at ? `${relative(launch.created_at)}` : "on-chain"}
+            {launch.created_at ? `${relative(launch.created_at)} ago` : "—"}
           </span>
         </div>
         {/* Graduation progress */}
