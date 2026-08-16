@@ -30,6 +30,7 @@ import {
 } from "@/lib/hamr";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
+import PriceChart from "./PriceChart";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -189,6 +190,9 @@ export default function LaunchMonitorPage({ token }: Props) {
               </a>
             </div>
           </div>
+
+          {/* Price chart — reconstructed from on-chain trade events */}
+          {tokenAddr && <PriceChart token={tokenAddr} ethUsd={ethUsd} />}
 
           {/* Graduation bar */}
           <div className="card !p-5 space-y-3">
