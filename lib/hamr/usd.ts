@@ -43,7 +43,13 @@ export function formatUsd(v: number): string {
   if (n >= 1_000_000) return `${sign}$${trim(n / 1_000_000)}M`;
   if (n >= 1_000) return `${sign}$${trim(n / 1_000)}K`;
   if (n >= 1) return `${sign}$${n.toFixed(0)}`;
-  return `${sign}$${n.toFixed(2)}`;
+  if (n >= 0.01) return `${sign}$${n.toFixed(2)}`;
+  if (n === 0) return `${sign}$0`;
+  // Sub-cent memecoin prices — keep significant digits instead of "$0.00".
+  return `${sign}$${n.toLocaleString("en-US", {
+    maximumSignificantDigits: 3,
+    maximumFractionDigits: 12,
+  })}`;
 }
 
 function trim(n: number): string {
