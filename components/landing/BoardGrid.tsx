@@ -4,7 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Rocket, Search, ArrowUpRight, Loader2, Crown } from "lucide-react";
-import { readCurve, HAMR_CURVE, type HamrCurveState } from "@/lib/hamr";
+import {
+  readCurve,
+  readTokenMeta,
+  listTokens,
+  HAMR_CURVE,
+  type HamrCurveState,
+} from "@/lib/hamr";
 import { formatEther } from "viem";
 
 // Pump.fun-style token board. Dense horizontal cards with LIVE on-chain
@@ -60,7 +66,45 @@ export default function BoardGrid() {
           setError(`Failed to load launches (${r.status})`);
           return;
         }
-        const launches = json.launches ?? [];
+        let launches = json.launches ?? [];
+
+        // DB only knows launches made through the site. The chain is the
+        // source of truth — pull any token the DB missed straight from
+        // the factory so the board never lies.
+        try {
+          const onchain = await listTokens(24);
+          const known = new Set(launches.map((l) => l.token_address.toLowerCase()));
+          const missing = onchain.filter((t) => !known.has(t.toLowerCase()));
+          const extras = await Promise.all(
+            missing.map(async (t) => {
+              try {
+                const meta = await readTokenMeta(t);
+                return {
+                  token_address: t,
+                  pool_address: null,
+                  ticker: meta.symbol,
+                  token_name: meta.name,
+                  logo_url: meta.logo || null,
+                  wallet_address: meta.creator,
+                  pons_url: null,
+                  explorer_url: null,
+                  source_x_url: null,
+                  created_at: "",
+                } satisfies PublicLaunch;
+              } catch {
+                return null;
+              }
+            }),
+          );
+          launches = [
+            ...launches,
+            ...extras.filter((x): x is PublicLaunch => x !== null),
+          ];
+        } catch {
+          /* RPC down — DB list still renders */
+        }
+
+        if (cancelled) return;
         setItems(launches);
         setError(null);
 
@@ -275,8 +319,8 @@ function TokenCard({
               <span className="font-mono">
                 {launch.wallet_address.slice(0, 4)}…
                 {launch.wallet_address.slice(-4)}
-              </span>{" "}
-              · {relative(launch.created_at)} ago
+              </span>
+              {launch.created_at ? ` · ${relative(launch.created_at)} ago` : " · on-chain"}
             </div>
           </div>
           {market?.graduated && (
