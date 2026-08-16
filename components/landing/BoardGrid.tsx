@@ -381,25 +381,28 @@ export default function BoardGrid() {
       {/* Controls row: tabs + search */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <TabGroup value={sort} onChange={setSort} />
-        <div className="flex items-center gap-2 min-w-0">
+        <form
+          className="flex items-center gap-2 min-w-0"
+          onSubmit={(e) => e.preventDefault()}
+        >
           <label className="relative flex items-center min-w-[220px]">
             <Search className="h-3.5 w-3.5 absolute left-3 text-ink-300/55" />
             <input
-              type="text"
+              type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search token, ticker, or 0x…"
               className="input !py-2 !pl-8 !text-[12px] !h-9"
             />
           </label>
-          <Link
-            href="/launch"
+          <button
+            type="submit"
             className="btn btn-primary !py-2 !px-3 !text-xs shrink-0"
           >
-            <Rocket className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Launch</span>
-          </Link>
-        </div>
+            <Search className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Search</span>
+          </button>
+        </form>
       </div>
 
       {items === null ? (
