@@ -1,96 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { formatEther, parseAbiItem, type Address } from "viem";
-import { getPublicClient } from "@/lib/robinhood/client";
-import { HAMR_CONTRACTS, HAMR_CURVE, formatUsd } from "@/lib/hamr";
+import { useMemo } from "react";
+import { formatUsd } from "@/lib/hamr";
+import type { TradesData } from "./useTrades";
 
-// On-chain price chart for a bonding-curve token. No indexer needed:
-// every CurveBuy/CurveSell event carries `newVirtualEth`, and on a
-// constant-product curve price = vEth² / k, so the full price history
-// reconstructs exactly from the event log.
-
-const buyEvent = parseAbiItem(
-  "event CurveBuy(address indexed token, address indexed buyer, uint256 ethIn, uint256 tokensOut, uint256 newVirtualEth)",
-);
-const sellEvent = parseAbiItem(
-  "event CurveSell(address indexed token, address indexed seller, uint256 tokensIn, uint256 ethOut, uint256 newVirtualEth)",
-);
-
-interface Point {
-  price: number; // ETH per token
-  kind: "launch" | "buy" | "sell";
-}
-
-const K = HAMR_CURVE.virtualEthStart * HAMR_CURVE.virtualTokenStart; // ETH·tokens
-const LAUNCH_PRICE = HAMR_CURVE.virtualEthStart / HAMR_CURVE.virtualTokenStart;
-const MAX_POINTS = 240;
-
-function priceFromVirtualEth(newVirtualEthWei: bigint): number {
-  const vEth = Number(formatEther(newVirtualEthWei));
-  return (vEth * vEth) / K;
-}
+// Price chart for a bonding-curve token. Pure view — the trade history
+// comes in via props from the shared useTrades hook so the stat cards
+// and the chart never disagree.
 
 export default function PriceChart({
-  token,
+  data,
+  failed,
   ethUsd,
-  refreshKey,
 }: {
-  token: Address;
+  data: TradesData | null;
+  failed: boolean;
   ethUsd: number | null;
-  /** Bump to refetch (e.g. after the user trades). */
-  refreshKey?: number;
 }) {
-  const [points, setPoints] = useState<Point[] | null>(null);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const client = getPublicClient();
-        const common = {
-          address: HAMR_CONTRACTS.launchpad,
-          args: { token },
-          fromBlock: 0n,
-          toBlock: "latest",
-        } as const;
-        const [buys, sells] = await Promise.all([
-          client.getLogs({ ...common, event: buyEvent }),
-          client.getLogs({ ...common, event: sellEvent }),
-        ]);
-        if (cancelled) return;
-        const merged = [
-          ...buys.map((l) => ({ log: l, kind: "buy" as const })),
-          ...sells.map((l) => ({ log: l, kind: "sell" as const })),
-        ].sort((a, b) => {
-          const bn = Number(a.log.blockNumber - b.log.blockNumber);
-          if (bn !== 0) return bn;
-          return (a.log.logIndex ?? 0) - (b.log.logIndex ?? 0);
-        });
-        const pts: Point[] = [{ price: LAUNCH_PRICE, kind: "launch" }];
-        for (const { log, kind } of merged) {
-          const v = (log.args as { newVirtualEth?: bigint }).newVirtualEth;
-          if (typeof v === "bigint") {
-            pts.push({ price: priceFromVirtualEth(v), kind });
-          }
-        }
-        setPoints(pts.slice(-MAX_POINTS));
-        setFailed(false);
-      } catch {
-        if (!cancelled) setFailed(true);
-      }
-    }
-    void load();
-    const id = setInterval(load, 20_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [token, refreshKey]);
-
   const view = useMemo(() => {
-    if (!points || points.length === 0) return null;
+    if (!data || data.points.length === 0) return null;
+    const points = data.points;
     const w = 640;
     const h = 220;
     const padY = 14;
@@ -98,7 +27,6 @@ export default function PriceChart({
     let min = Math.min(...prices);
     let max = Math.max(...prices);
     if (max === min) {
-      // flat line — pad the range so it renders mid-chart
       min *= 0.9;
       max *= 1.1;
       if (max === 0) max = 1e-12;
@@ -108,14 +36,16 @@ export default function PriceChart({
     const y = (p: number) =>
       h - padY - ((p - min) / (max - min)) * (h - padY * 2);
     const line = points
-      .map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.price).toFixed(1)}`)
+      .map(
+        (p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.price).toFixed(1)}`,
+      )
       .join(" ");
     const area = `${line} L${w},${h} L0,${h} Z`;
     const last = points[n - 1].price;
     const first = points[0].price;
     const changePct = first > 0 ? ((last - first) / first) * 100 : 0;
     return { w, h, line, area, min, max, last, changePct, trades: n - 1 };
-  }, [points]);
+  }, [data]);
 
   const fmtPrice = (p: number) =>
     ethUsd

@@ -31,6 +31,7 @@ import {
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
 import PriceChart from "./PriceChart";
+import { useTrades } from "./useTrades";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -44,6 +45,7 @@ export default function LaunchMonitorPage({ token }: Props) {
   const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
   const tokenAddr = isEvmAddr ? (token as Address) : undefined;
   const { snap, loading, error, refresh } = useHamrToken(tokenAddr);
+  const { data: trades, failed: tradesFailed } = useTrades(tokenAddr);
   const [ethUsd, setEthUsd] = useState<number | null>(null);
 
   useEffect(() => {
@@ -192,7 +194,7 @@ export default function LaunchMonitorPage({ token }: Props) {
           </div>
 
           {/* Price chart — reconstructed from on-chain trade events */}
-          {tokenAddr && <PriceChart token={tokenAddr} ethUsd={ethUsd} />}
+          <PriceChart data={trades} failed={tradesFailed} ethUsd={ethUsd} />
 
           {/* Graduation bar */}
           <div className="card !p-5 space-y-3">
@@ -249,6 +251,42 @@ export default function LaunchMonitorPage({ token }: Props) {
                   ? formatUsd(marketCapEth * ethUsd)
                   : marketCapEth.toFixed(2) + " ETH"
               }
+            />
+            <StatCard
+              label="Liquidity"
+              value={
+                curve.graduated
+                  ? "Locked LP"
+                  : ethUsd
+                    ? formatUsd(raisedEth * ethUsd)
+                    : raisedEth.toFixed(4) + " ETH"
+              }
+            />
+            <StatCard
+              label="24h volume"
+              value={
+                trades
+                  ? ethUsd
+                    ? formatUsd(trades.volume24hEth * ethUsd)
+                    : trades.volume24hEth.toFixed(4) + " ETH"
+                  : "—"
+              }
+            />
+            <StatCard
+              label="ATH"
+              value={
+                trades
+                  ? ethUsd
+                    ? formatUsd(trades.athPriceEth * ethUsd)
+                    : trades.athPriceEth.toLocaleString(undefined, {
+                        maximumSignificantDigits: 3,
+                      }) + " ETH"
+                  : "—"
+              }
+            />
+            <StatCard
+              label="Trades"
+              value={trades ? String(trades.tradeCount) : "—"}
             />
             <StatCard
               label="Sold"
