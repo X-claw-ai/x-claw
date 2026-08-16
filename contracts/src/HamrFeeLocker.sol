@@ -15,8 +15,10 @@ contract HamrFeeLocker {
     uint256 public constant BPS = 10_000;
 
     INonfungiblePositionManager public immutable positionManager;
-    /// @notice HAMR treasury — immutable, set once at deploy.
-    address public immutable treasury;
+    /// @notice HAMR treasury. Rotatable ONLY by itself (setTreasury) —
+    ///         start from a dedicated EOA, hand off to a multisig later.
+    ///         Not an admin key: affects only the protocol's own 25%.
+    address public treasury;
     /// @notice The launchpad allowed to register graduated tokens.
     ///         One-shot wiring: settable exactly once by the deployer.
     address public launchpad;
@@ -47,6 +49,7 @@ contract HamrFeeLocker {
     event Harvested(address indexed token, uint256 amount0, uint256 amount1);
     event CreatorClaimed(address indexed token, address indexed currency, uint256 amount);
     event ProtocolClaimed(address indexed token, address indexed currency, uint256 amount);
+    event TreasuryRotated(address indexed from, address indexed to);
 
     modifier nonReentrant() {
         require(!_entered, "Locker: reentrant");
@@ -141,7 +144,7 @@ contract HamrFeeLocker {
         _payout(token, l.token1, creatorOwed, l.creator);
     }
 
-    /// @notice Anyone may trigger; funds always go to the immutable treasury.
+    /// @notice Anyone may trigger; funds always go to the current treasury.
     function claimProtocol(address token) external nonReentrant {
         Lock memory l = locks[token];
         require(l.exists, "Locker: unknown token");
@@ -170,6 +173,15 @@ contract HamrFeeLocker {
     function harvestAndDistribute(address token) external {
         harvest(token);
         this.claimProtocol(token);
+    }
+
+    /// @notice Self-rotation only: current treasury hands off to its
+    ///         successor. Mirrors HamrLaunchpad.setTreasury.
+    function setTreasury(address newTreasury) external {
+        require(msg.sender == treasury, "Locker: not treasury");
+        require(newTreasury != address(0), "Locker: zero treasury");
+        treasury = newTreasury;
+        emit TreasuryRotated(msg.sender, newTreasury);
     }
 
     /// @notice View helper for the dashboard "Claimable" card.

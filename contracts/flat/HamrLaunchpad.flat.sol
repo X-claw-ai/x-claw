@@ -197,8 +197,10 @@ contract HamrFeeLocker {
     uint256 public constant BPS = 10_000;
 
     INonfungiblePositionManager public immutable positionManager;
-    /// @notice HAMR treasury — immutable, set once at deploy.
-    address public immutable treasury;
+    /// @notice HAMR treasury. Rotatable ONLY by itself (setTreasury) —
+    ///         start from a dedicated EOA, hand off to a multisig later.
+    ///         Not an admin key: affects only the protocol's own 25%.
+    address public treasury;
     /// @notice The launchpad allowed to register graduated tokens.
     ///         One-shot wiring: settable exactly once by the deployer.
     address public launchpad;
@@ -229,6 +231,7 @@ contract HamrFeeLocker {
     event Harvested(address indexed token, uint256 amount0, uint256 amount1);
     event CreatorClaimed(address indexed token, address indexed currency, uint256 amount);
     event ProtocolClaimed(address indexed token, address indexed currency, uint256 amount);
+    event TreasuryRotated(address indexed from, address indexed to);
 
     modifier nonReentrant() {
         require(!_entered, "Locker: reentrant");
@@ -323,7 +326,7 @@ contract HamrFeeLocker {
         _payout(token, l.token1, creatorOwed, l.creator);
     }
 
-    /// @notice Anyone may trigger; funds always go to the immutable treasury.
+    /// @notice Anyone may trigger; funds always go to the current treasury.
     function claimProtocol(address token) external nonReentrant {
         Lock memory l = locks[token];
         require(l.exists, "Locker: unknown token");
@@ -354,6 +357,15 @@ contract HamrFeeLocker {
         this.claimProtocol(token);
     }
 
+    /// @notice Self-rotation only: current treasury hands off to its
+    ///         successor. Mirrors HamrLaunchpad.setTreasury.
+    function setTreasury(address newTreasury) external {
+        require(msg.sender == treasury, "Locker: not treasury");
+        require(newTreasury != address(0), "Locker: zero treasury");
+        treasury = newTreasury;
+        emit TreasuryRotated(msg.sender, newTreasury);
+    }
+
     /// @notice View helper for the dashboard "Claimable" card.
     function pendingCreator(
         address token
@@ -382,7 +394,7 @@ contract HamrFeeLocker {
 ///     pool's 1% swap fee accrues to the locker with the same split.
 ///
 /// Security posture: immutable, no owner, no pause, no fund-touching
-/// admin. Treasury is immutable. Pull payments only. Reentrancy guards
+/// admin. Treasury can only rotate itself. Pull payments only. Guards
 /// on all ETH paths. No unchecked math on value paths.
 contract HamrLaunchpad {
     // ── Curve economics (see contracts/DESIGN.md for derivation) ──────
@@ -405,7 +417,12 @@ contract HamrLaunchpad {
     IWETH9 public immutable weth;
     INonfungiblePositionManager public immutable positionManager;
     HamrFeeLocker public immutable locker;
-    address public immutable treasury;
+    /// @notice Recipient of the protocol's 25% + launch fees. Rotatable
+    ///         ONLY by itself (see setTreasury) so we can start from a
+    ///         dedicated EOA and hand off to a multisig later. This is
+    ///         NOT an admin key: it cannot touch curves, user funds, or
+    ///         creator fees — it only redirects where our own cut goes.
+    address public treasury;
 
     struct Curve {
         address creator;
@@ -457,6 +474,7 @@ contract HamrLaunchpad {
     );
     event CreatorFeesClaimed(address indexed token, address indexed creator, uint256 amount);
     event ProtocolFeesClaimed(uint256 amount);
+    event TreasuryRotated(address indexed from, address indexed to);
 
     modifier nonReentrant() {
         require(!_entered, "Hamr: reentrant");
@@ -806,7 +824,7 @@ contract HamrLaunchpad {
         emit CreatorFeesClaimed(token, msg.sender, amount);
     }
 
-    /// @notice Anyone may trigger; always pays the immutable treasury.
+    /// @notice Anyone may trigger; always pays the current treasury.
     function claimProtocolFees() external nonReentrant {
         uint256 amount = protocolFeesEth;
         require(amount > 0, "Hamr: nothing owed");
@@ -814,6 +832,16 @@ contract HamrLaunchpad {
         (bool ok, ) = treasury.call{value: amount}("");
         require(ok, "Hamr: eth xfer");
         emit ProtocolFeesClaimed(amount);
+    }
+
+    /// @notice Self-rotation only: the current treasury hands off to its
+    ///         successor (e.g. dedicated EOA → multisig). No other party
+    ///         can call this, and it affects only the protocol's own cut.
+    function setTreasury(address newTreasury) external {
+        require(msg.sender == treasury, "Hamr: not treasury");
+        require(newTreasury != address(0), "Hamr: zero treasury");
+        treasury = newTreasury;
+        emit TreasuryRotated(msg.sender, newTreasury);
     }
 
     // ─────────────────────────────────────────────────────────────────
