@@ -334,7 +334,7 @@ function TokenCard({
         <div className="mt-auto pt-2 space-y-1.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-extrabold text-emerald-600">
-              {market ? `MC ${fmtEth(market.mcapEth)} ETH` : " "}
+              {market ? `MC ${fmtEth(market.mcapEth)}` : " "}
             </span>
             {launch.source_x_url ? (
               <a
