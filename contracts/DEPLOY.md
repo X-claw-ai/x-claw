@@ -48,9 +48,27 @@ Contract → Verify & publish → single file:
 - solc 0.8.24, optimization yes (200), **via-IR yes**, EVM paris
 - Do this for all three deployed contracts (same file, pick contract name).
 
-## Deployed addresses (fill in)
+## Deployed addresses — MAINNET LIVE (2026-08-16)
 
-| Contract | Address | Tx |
+| Contract | Address | Deploy tx |
 |---|---|---|
-| HamrFeeLocker | `` | |
-| HamrLaunchpad | `` | |
+| HamrFeeLocker | `0x93dd19970Ca4CD2Bd405014c9247A0f33DA0f926` | `0x6b0b8e12577afc59e7e70bf28531901e727e8133535aae0b55cedbe76275b85c` |
+| HamrLaunchpad | `0xEac5CB9B5e7F32074Aa232EE54e62196cc236b8e` | `0x99055f1e9dc9dd8d3a9452d0b7e7fd716a3e7d701071b5ab7e327342018f228b` |
+
+Wiring: `setLaunchpad` tx `0x87ee792ae75690edc9a4d6c5cb3988b75c64a7a7bccf99f316e7665d9a595af4`
+— verified on-chain: `locker.launchpad() == launchpad` ✓
+
+Deployer/Treasury: `0xB0F74aaCC4D237371736E45Cb9A13dBE68Ef3391`
+
+### Smoke test — PASSED on mainnet
+- `launchToken("Hamr Test","HTEST",…)` with 0.0006 ETH
+  tx `0x12552aa5b5f686f65fa5cad595cf1ef40b03fe5c506b2f0d74cc795d9f64edb5`
+- Events: `TokenLaunched` + `CurveBuy` ✓
+- Fee ledgers verified to the wei:
+  `protocolFeesEth = 0.00050025` (launch fee + 25% of trade fee),
+  `creatorFeesEth = 0.00000075` (75% of trade fee) ✓
+- `quoteBuy`, `graduationProgressBps`, token balance reads all correct.
+
+### Remaining
+- [ ] Blockscout verify (flat file, solc 0.8.24, optimizer 200, viaIR, paris)
+- [ ] Frontend swap: `lib/hamr` client, curve buy/sell UI, remove Pons
