@@ -54,7 +54,7 @@ export default function KokiLogo({
       aria-label="hamr.fun"
     >
       <Image
-        src="/hamr-logo.jpg"
+        src="/hamr-logo.png"
         alt=""
         width={iconSize}
         height={iconSize}
@@ -62,8 +62,7 @@ export default function KokiLogo({
         style={{
           height: iconSize,
           width: iconSize,
-          borderRadius: Math.round(iconSize * 0.18),
-          objectFit: "cover",
+          objectFit: "contain",
         }}
       />
       <span style={{ fontSize: Math.round(height * 0.55), lineHeight: 1 }}>
