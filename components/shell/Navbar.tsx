@@ -10,9 +10,11 @@ import KokiLogo from "./KokiLogo";
 const NAV = [
   // /dashboard is wallet-scoped, only the connected wallet's own launches.
   // /launches is public, every coin every HAMR agent has ever shipped.
-  { href: "/dashboard", label: "My Launches" },
+  { href: "/autopilot", label: "Auto-pilot" },
   { href: "/launch", label: "Launch" },
   { href: "/launches", label: "All Launches" },
+  { href: "/dashboard", label: "My Launches" },
+  { href: "/docs", label: "Docs" },
 ];
 
 /** Official HAMR X account. Single source of truth so header + drawer + docs
