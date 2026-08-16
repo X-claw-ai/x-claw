@@ -80,6 +80,8 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     }
   }, [receipt, submittedHash, handled, onSuccess]);
 
+  const [uploading, setUploading] = useState(false);
+
   async function handleSign() {
     setLocalError(null);
     resetWrite();
@@ -90,6 +92,31 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     const s = kit.socials ?? {};
     const feeWei = parseEther(HAMR_CURVE.launchFeeEth);
     const buyWei = initialBuyEth ? parseEther(initialBuyEth) : 0n;
+
+    // Logos are stored ON-CHAIN as a string. A base64 data URL would be
+    // hundreds of KB of calldata — host it first and store the short URL.
+    let logoUrl = kit.logoUrl ?? "";
+    if (logoUrl.startsWith("data:")) {
+      setUploading(true);
+      try {
+        const res = await fetch("/api/upload-logo", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ dataUrl: logoUrl }),
+        });
+        const json = (await res.json()) as { ok?: boolean; url?: string; error?: string };
+        if (json.ok && json.url) {
+          logoUrl = json.url;
+        } else {
+          logoUrl = ""; // never send a data URL on-chain
+        }
+      } catch {
+        logoUrl = "";
+      } finally {
+        setUploading(false);
+      }
+    }
+
     try {
       await writeContractAsync({
         address: HAMR_CONTRACTS.launchpad,
@@ -99,7 +126,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           {
             name: kit.tokenName,
             symbol: kit.ticker,
-            logo: kit.logoUrl ?? "",
+            logo: logoUrl,
             description: kit.shortDescription,
             twitterUrl: s.twitter ?? "",
             telegramUrl: s.telegram ?? "",
@@ -121,7 +148,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     (writeError instanceof Error ? writeError.message : null) ??
     (receiptError instanceof Error ? receiptError.message : null);
 
-  const busy = writePending || mining;
+  const busy = writePending || mining || uploading;
 
   return (
     <div className="space-y-6">
@@ -177,11 +204,13 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           className="btn btn-primary !py-3 !px-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Rocket className="h-4 w-4" />
-          {writePending
-            ? "Confirm in wallet…"
-            : mining
-              ? "Launching on-chain…"
-              : "Launch now"}
+          {uploading
+            ? "Uploading logo…"
+            : writePending
+              ? "Confirm in wallet…"
+              : mining
+                ? "Launching on-chain…"
+                : "Launch now"}
         </button>
       </div>
     </div>

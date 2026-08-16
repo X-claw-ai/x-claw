@@ -3,15 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { Rocket, Search, Filter, ArrowUpRight, Loader2 } from "lucide-react";
+import { Rocket, Search, ArrowUpRight, Loader2, Crown } from "lucide-react";
+import { readCurve, HAMR_CURVE, type HamrCurveState } from "@/lib/hamr";
+import { formatEther } from "viem";
 
-// Pump.fun-style token board. Grid of cards, three sort tabs
-// (New / Trending / About to graduate), search box, live-refresh every
-// 20s. No marketing sections above or below — the grid IS the page.
+// Pump.fun-style token board. Dense horizontal cards with LIVE on-chain
+// numbers (market cap, graduation progress) pulled straight from the
+// bonding curve contract, three sort tabs, search, 20s refresh.
 //
-// Data comes from /api/launches. When Supabase isn't wired up the API
-// returns an empty list; we render an empty state that funnels straight
-// to the launch flow instead of a "coming soon" pretense.
+// Card data comes from /api/launches (name/logo/links); market data is
+// read client-side from the curve so the board always shows real state
+// even before any indexer exists.
 
 interface PublicLaunch {
   token_address: string;
@@ -26,12 +28,20 @@ interface PublicLaunch {
   created_at: string;
 }
 
+interface Market {
+  mcapEth: number;
+  progressBps: number;
+  graduated: boolean;
+}
+
 type Sort = "new" | "trending" | "graduating";
 
 const REFRESH_MS = 20_000;
+const MARKET_LIMIT = 36; // how many cards get live curve reads
 
 export default function BoardGrid() {
   const [items, setItems] = useState<PublicLaunch[] | null>(null);
+  const [markets, setMarkets] = useState<Record<string, Market>>({});
   const [error, setError] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("new");
   const [q, setQ] = useState("");
@@ -50,8 +60,39 @@ export default function BoardGrid() {
           setError(`Failed to load launches (${r.status})`);
           return;
         }
-        setItems(json.launches ?? []);
+        const launches = json.launches ?? [];
+        setItems(launches);
         setError(null);
+
+        // Live curve reads — fire-and-forget per token, merge as they land.
+        launches.slice(0, MARKET_LIMIT).forEach((l) => {
+          readCurve(l.token_address as `0x${string}`)
+            .then((c: HamrCurveState) => {
+              if (cancelled || !c.exists) return;
+              const vEth = Number(formatEther(c.virtualEth));
+              const vTok = Number(c.virtualToken) / 1e18;
+              const price = vTok > 0 ? vEth / vTok : 0;
+              const raised = Number(formatEther(c.realEth));
+              setMarkets((m) => ({
+                ...m,
+                [l.token_address.toLowerCase()]: {
+                  mcapEth: price * HAMR_CURVE.totalSupply,
+                  progressBps: c.graduated
+                    ? 10_000
+                    : Math.min(
+                        10_000,
+                        Math.round(
+                          (raised / HAMR_CURVE.graduationRaiseEth) * 10_000,
+                        ),
+                      ),
+                  graduated: c.graduated,
+                },
+              }));
+            })
+            .catch(() => {
+              /* RPC hiccup — card just shows without numbers */
+            });
+        });
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : String(err));
@@ -78,22 +119,23 @@ export default function BoardGrid() {
           l.token_address.toLowerCase().includes(needle),
       );
     }
-    // Sort variants — until we index live pool progress, "trending" and
-    // "graduating" fall back to newest-first (same as `new`). They stay
-    // in the UI so the tabs feel right, and get real ordering in a
-    // follow-up once the indexer populates a `graduation_progress` col.
-    if (sort === "trending" || sort === "graduating" || sort === "new") {
+    const mkt = (l: PublicLaunch) => markets[l.token_address.toLowerCase()];
+    if (sort === "graduating") {
+      out.sort((a, b) => (mkt(b)?.progressBps ?? -1) - (mkt(a)?.progressBps ?? -1));
+    } else if (sort === "trending") {
+      out.sort((a, b) => (mkt(b)?.mcapEth ?? -1) - (mkt(a)?.mcapEth ?? -1));
+    } else {
       out.sort(
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
     }
     return out;
-  }, [items, q, sort]);
+  }, [items, q, sort, markets]);
 
   return (
     <section className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-8">
-      {/* Controls row: tabs + search — matches Pump.fun's board header */}
+      {/* Controls row: tabs + search */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <TabGroup value={sort} onChange={setSort} />
         <div className="flex items-center gap-2 min-w-0">
@@ -128,9 +170,14 @@ export default function BoardGrid() {
           <EmptyBoard />
         )
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered!.map((l, i) => (
-            <TokenCard key={l.token_address} launch={l} idx={i} />
+            <TokenCard
+              key={l.token_address}
+              launch={l}
+              idx={i}
+              market={markets[l.token_address.toLowerCase()]}
+            />
           ))}
         </div>
       )}
@@ -171,71 +218,105 @@ function TabGroup({
           </button>
         );
       })}
-      <button
-        type="button"
-        title="Sort filters coming soon"
-        className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-ink-300/60 hover:text-ink-300 hover:bg-ink-1000/10"
-      >
-        <Filter className="h-3.5 w-3.5" />
-      </button>
     </div>
   );
 }
 
 /* ─────────── card ─────────── */
 
-function TokenCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
+function TokenCard({
+  launch,
+  idx,
+  market,
+}: {
+  launch: PublicLaunch;
+  idx: number;
+  market?: Market;
+}) {
+  const pct = market ? market.progressBps / 100 : null;
   return (
     <Link
       href={`/launches/${launch.token_address}`}
-      className="card card-hover group flex flex-col overflow-hidden !p-0 launch-card-anim"
+      className="card card-hover group flex gap-3 overflow-hidden !p-3 launch-card-anim relative"
       style={{ animationDelay: `${Math.min(idx, 20) * 40}ms` }}
     >
-      <div className="aspect-square w-full bg-koki-500 overflow-hidden relative border-b border-[var(--border-strong)]">
+      {/* Logo */}
+      <div className="relative h-[88px] w-[88px] shrink-0 rounded-xl overflow-hidden bg-koki-500 border border-[var(--border-strong)]">
         {launch.logo_url ? (
           <Image
             src={launch.logo_url}
             alt={launch.token_name}
             fill
-            sizes="220px"
+            sizes="88px"
             unoptimized
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.06]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-ink-1000 font-black text-[clamp(20px,3.5vw,36px)] tracking-tight">
+            <span className="text-ink-1000 font-black text-[15px] tracking-tight px-1 text-center break-all">
               ${launch.ticker}
             </span>
           </div>
         )}
       </div>
-      <div className="p-3 flex-1 flex flex-col gap-1.5">
-        <div className="flex items-baseline justify-between gap-2 min-w-0">
-          <div className="text-[13px] font-black tracking-tight truncate">
-            {launch.token_name}
+
+      {/* Body */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="min-w-0">
+            <div className="text-[13.5px] font-black tracking-tight truncate leading-snug">
+              {launch.token_name}{" "}
+              <span className="text-[11px] font-extrabold text-ink-300/55">
+                (${launch.ticker})
+              </span>
+            </div>
+            <div className="mt-0.5 text-[10.5px] font-bold text-ink-300/55">
+              by{" "}
+              <span className="font-mono">
+                {launch.wallet_address.slice(0, 4)}…
+                {launch.wallet_address.slice(-4)}
+              </span>{" "}
+              · {relative(launch.created_at)} ago
+            </div>
           </div>
-          <span className="text-[10px] font-extrabold text-ink-300/60 shrink-0">
-            ${launch.ticker}
-          </span>
-        </div>
-        <div className="text-[10px] text-ink-300/50 font-mono truncate">
-          {launch.token_address.slice(0, 6)}…{launch.token_address.slice(-4)}
-        </div>
-        <div className="flex items-center justify-between gap-2 mt-auto pt-1.5">
-          <span className="text-[10px] text-ink-300/50 font-bold">
-            {relative(launch.created_at)}
-          </span>
-          {launch.pons_url && (
-            <a
-              href={launch.pons_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
-            >
-              View <ArrowUpRight className="h-2.5 w-2.5" />
-            </a>
+          {market?.graduated && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-koki-500 text-ink-1000 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shrink-0">
+              <Crown className="h-2.5 w-2.5" />
+              Graduated
+            </span>
           )}
+        </div>
+
+        <div className="mt-auto pt-2 space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-extrabold text-emerald-600">
+              {market ? `MC ${fmtEth(market.mcapEth)} ETH` : " "}
+            </span>
+            {launch.source_x_url ? (
+              <a
+                href={launch.source_x_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-0.5 text-[10px] font-extrabold text-ink-300/60 hover:text-ink-300 hover:underline"
+              >
+                source <ArrowUpRight className="h-2.5 w-2.5" />
+              </a>
+            ) : (
+              <span className="text-[10px] font-bold text-ink-300/40">
+                {pct !== null ? `${pct.toFixed(0)}%` : ""}
+              </span>
+            )}
+          </div>
+          {/* Graduation progress */}
+          <div className="h-1.5 w-full rounded-full bg-ink-1000/10 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-[width] duration-700 ${
+                market?.graduated ? "bg-koki-500" : "bg-emerald-500"
+              }`}
+              style={{ width: `${pct ?? 0}%` }}
+            />
+          </div>
         </div>
       </div>
     </Link>
@@ -246,13 +327,14 @@ function TokenCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
 
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="card !p-0 overflow-hidden animate-pulse">
-          <div className="aspect-square w-full bg-koki-500/25 border-b border-[var(--border-strong)]" />
-          <div className="p-3 space-y-1.5">
-            <div className="h-3 bg-ink-1000/10 rounded w-3/4" />
-            <div className="h-2 bg-ink-1000/10 rounded w-1/2" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <div key={i} className="card !p-3 flex gap-3 animate-pulse">
+          <div className="h-[88px] w-[88px] rounded-xl bg-koki-500/25 shrink-0" />
+          <div className="flex-1 py-1 space-y-2">
+            <div className="h-3.5 bg-ink-1000/10 rounded w-2/3" />
+            <div className="h-2.5 bg-ink-1000/10 rounded w-1/2" />
+            <div className="h-1.5 bg-ink-1000/10 rounded w-full mt-6" />
           </div>
         </div>
       ))}
@@ -270,22 +352,14 @@ function EmptyBoard() {
         Board is empty. <span className="stamp">Be the first.</span>
       </div>
       <p className="text-[13px] text-ink-300/70 mt-2 max-w-md mx-auto font-medium">
-        Every token launched on HAMR lands here in real time.
-        Run Auto-pilot or bring your own idea to seed the board.
+        Every token launched on HAMR lands here in real time. Run
+        Auto-pilot or bring your own idea to seed the board.
       </p>
-      <div className="mt-6 flex flex-wrap justify-center gap-2">
+      <div className="mt-6 flex justify-center">
         <Link href="/launch" className="btn btn-primary !py-2.5 !px-4 !text-sm">
           <Rocket className="h-4 w-4" />
           Launch a coin
         </Link>
-        <a
-          href="/launch"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-secondary !py-2.5 !px-4 !text-sm"
-        >
-          Launch a coin
-        </a>
       </div>
     </div>
   );
@@ -309,6 +383,12 @@ function ErrorPanel({ message }: { message: string }) {
 }
 
 /* ─────────── helpers ─────────── */
+
+function fmtEth(v: number): string {
+  if (v >= 100) return v.toFixed(0);
+  if (v >= 1) return v.toFixed(2);
+  return v.toFixed(3);
+}
 
 function relative(iso: string): string {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);

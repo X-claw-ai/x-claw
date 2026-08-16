@@ -12,6 +12,12 @@ export interface ConceptInput {
   ticker: string;
   sourceUrl?: string;
   autoPilot?: boolean;
+  /** Manual lane: user-picked logo as a data URL (hosted at sign time). */
+  logoDataUrl?: string;
+  /** Manual lane socials — stored on-chain with the token. */
+  twitter?: string;
+  telegram?: string;
+  website?: string;
 }
 
 /** Minimal shape from /api/generate-launch-kit. We keep this local so

@@ -190,15 +190,27 @@ export default function PonsLaunchWizard() {
         if (memeImage && !kit.logoUrl) kit = { ...kit, logoUrl: memeImage };
         dispatch({ type: "SET_KIT", kit });
       } else {
+        // Manual lane — pump.fun style. The form IS the kit: no AI call,
+        // no review step. Straight to connect → sign.
         dispatch({ type: "SET_CONCEPT", concept });
-        const res = await fetch("/api/generate-launch-kit", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(concept),
+        dispatch({
+          type: "SET_KIT",
+          kit: {
+            tokenName: concept.tokenName,
+            ticker: concept.ticker,
+            shortDescription: concept.idea,
+            logoUrl: concept.logoDataUrl,
+            socials: {
+              twitter: concept.twitter,
+              telegram: concept.telegram,
+              website: concept.website,
+            },
+            mock: false,
+          },
         });
-        if (!res.ok) throw new Error(`Kit generation failed (${res.status})`);
-        const json = await res.json();
-        dispatch({ type: "SET_KIT", kit: coerceKit(json) });
+        dispatch({ type: "SET_LOADING", loading: false });
+        dispatch({ type: "GO", step: "connect" });
+        return;
       }
       dispatch({ type: "GO", step: "kit" });
     } catch (err) {
@@ -242,7 +254,10 @@ export default function PonsLaunchWizard() {
 
   return (
     <section className="mx-auto max-w-2xl px-6 py-12 md:py-16">
-      <StepHeader current={state.step} />
+      <StepHeader
+        current={state.step}
+        manual={state.concept ? !state.concept.autoPilot : false}
+      />
 
       {state.error && state.step !== "sign" && (
         <div className="card !p-4 !border-red-500/50 !bg-red-500/10 text-[12px] text-red-300 font-semibold leading-relaxed break-words mb-6">
@@ -278,7 +293,12 @@ export default function PonsLaunchWizard() {
           onInitialBuyChange={(v) =>
             dispatch({ type: "SET_INITIAL_BUY", value: v })
           }
-          onBack={() => dispatch({ type: "GO", step: "kit" })}
+          onBack={() =>
+            dispatch({
+              type: "GO",
+              step: state.concept?.autoPilot ? "kit" : "concept",
+            })
+          }
           onNext={() => dispatch({ type: "GO", step: "sign" })}
         />
       )}
@@ -341,10 +361,18 @@ function coerceKit(raw: Record<string, unknown>): LaunchKit {
   };
 }
 
-function StepHeader({ current }: { current: WizardState["step"] }) {
+function StepHeader({
+  current,
+  manual,
+}: {
+  current: WizardState["step"];
+  manual: boolean;
+}) {
+  // Manual launches skip the AI kit review entirely — don't show a step
+  // the user will never visit.
   const steps: { key: WizardState["step"]; label: string }[] = [
-    { key: "concept", label: "Concept" },
-    { key: "kit", label: "Kit" },
+    { key: "concept", label: manual ? "Coin" : "Concept" },
+    ...(manual ? [] : [{ key: "kit" as const, label: "Kit" }]),
     { key: "connect", label: "Connect" },
     { key: "sign", label: "Launch" },
     { key: "success", label: "Live" },

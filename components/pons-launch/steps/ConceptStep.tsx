@@ -1,7 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, ArrowRight, ExternalLink, Loader2, Check } from "lucide-react";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import {
+  Sparkles,
+  ArrowRight,
+  ExternalLink,
+  Loader2,
+  Check,
+  ImagePlus,
+  ChevronDown,
+} from "lucide-react";
 import type { ConceptInput, AutoPhase } from "../types";
 
 // Step 1: Concept. Two lanes:
@@ -34,13 +43,29 @@ export default function ConceptStep({
   const [idea, setIdea] = useState(initial?.idea ?? "");
   const [tokenName, setTokenName] = useState(initial?.tokenName ?? "");
   const [ticker, setTicker] = useState(initial?.ticker ?? "");
-  const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl ?? "");
+  const [logoDataUrl, setLogoDataUrl] = useState(initial?.logoDataUrl ?? "");
+  const [twitter, setTwitter] = useState(initial?.twitter ?? "");
+  const [telegram, setTelegram] = useState(initial?.telegram ?? "");
+  const [website, setWebsite] = useState(initial?.website ?? "");
+  const [showSocials, setShowSocials] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const canSubmit =
     autoPilot ||
-    (idea.trim().length > 0 &&
-      tokenName.trim().length > 0 &&
-      ticker.trim().length > 0);
+    (tokenName.trim().length > 0 &&
+      ticker.trim().length > 0 &&
+      logoDataUrl.length > 0);
+
+  function pickImage(file: File | undefined) {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      alert("Image must be under 4MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setLogoDataUrl(String(reader.result));
+    reader.readAsDataURL(file);
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,8 +74,11 @@ export default function ConceptStep({
       idea: idea.trim(),
       tokenName: tokenName.trim(),
       ticker: ticker.trim().toUpperCase(),
-      sourceUrl: sourceUrl.trim() || undefined,
       autoPilot,
+      logoDataUrl: logoDataUrl || undefined,
+      twitter: twitter.trim() || undefined,
+      telegram: telegram.trim() || undefined,
+      website: website.trim() || undefined,
     });
   }
 
@@ -81,54 +109,123 @@ export default function ConceptStep({
 
       {!autoPilot && (
         <div className="space-y-4">
-          <Field label="Project idea">
+          {/* Image upload — pump.fun style */}
+          <div className="flex items-start gap-4">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="relative h-24 w-24 shrink-0 rounded-2xl border-2 border-dashed border-[var(--border-strong)] hover:border-koki-500 transition-colors overflow-hidden bg-cream-50 flex items-center justify-center"
+            >
+              {logoDataUrl ? (
+                <Image
+                  src={logoDataUrl}
+                  alt="token logo"
+                  fill
+                  sizes="96px"
+                  unoptimized
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-1 text-ink-300/50">
+                  <ImagePlus className="h-6 w-6" />
+                  <span className="text-[10px] font-extrabold">image</span>
+                </div>
+              )}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              className="hidden"
+              onChange={(e) => pickImage(e.target.files?.[0])}
+            />
+            <div className="flex-1 space-y-3 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-3">
+                <Field label="Name">
+                  <input
+                    type="text"
+                    value={tokenName}
+                    onChange={(e) => setTokenName(e.target.value)}
+                    placeholder="Doge Prime"
+                    className="input"
+                    maxLength={40}
+                  />
+                </Field>
+                <Field label="Ticker">
+                  <input
+                    type="text"
+                    value={ticker}
+                    onChange={(e) =>
+                      setTicker(
+                        e.target.value.replace(/\s/g, "").toUpperCase().slice(0, 10),
+                      )
+                    }
+                    placeholder="DOGE"
+                    className="input font-mono"
+                    maxLength={10}
+                  />
+                </Field>
+              </div>
+            </div>
+          </div>
+
+          <Field label="Description">
             <textarea
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
               rows={3}
-              placeholder="e.g., X native community token for onchain builders"
-              className="input min-h-[88px]"
+              placeholder="What's the meme? One or two sentences — this goes on-chain."
+              className="input min-h-[80px]"
+              maxLength={500}
             />
           </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-3">
-            <Field label="Token name">
-              <input
-                type="text"
-                value={tokenName}
-                onChange={(e) => setTokenName(e.target.value)}
-                placeholder="NostalgiaHiroba"
-                className="input"
+
+          {/* Socials — collapsible like pump.fun's "show more options" */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowSocials((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-ink-300/70 hover:text-ink-300 transition-colors"
+            >
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${showSocials ? "rotate-180" : ""}`}
               />
-            </Field>
-            <Field label="Ticker">
-              <input
-                type="text"
-                value={ticker}
-                onChange={(e) =>
-                  setTicker(e.target.value.replace(/\s/g, "").toUpperCase().slice(0, 10))
-                }
-                placeholder="HIROBA"
-                className="input font-mono"
-                maxLength={10}
-              />
-            </Field>
+              {showSocials ? "Hide options" : "Show more options (socials)"}
+            </button>
+            {showSocials && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input
+                  type="url"
+                  value={twitter}
+                  onChange={(e) => setTwitter(e.target.value)}
+                  placeholder="X / Twitter link"
+                  className="input !text-[13px]"
+                />
+                <input
+                  type="url"
+                  value={telegram}
+                  onChange={(e) => setTelegram(e.target.value)}
+                  placeholder="Telegram link"
+                  className="input !text-[13px]"
+                />
+                <input
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="Website"
+                  className="input !text-[13px]"
+                />
+              </div>
+            )}
           </div>
-          <Field label="Source X post URL (optional)">
-            <input
-              type="url"
-              value={sourceUrl}
-              onChange={(e) => setSourceUrl(e.target.value)}
-              placeholder="https://x.com/..."
-              className="input"
-            />
-          </Field>
         </div>
       )}
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-300/70 font-medium">
-          The agent drafts a full launch kit — you review before any
-          wallet touches anything.
+          {autoPilot
+            ? "The agent drafts everything — you review before any wallet touches anything."
+            : "Costs 0.0005 ETH. Your wallet signs one transaction — token, curve, done."}
         </p>
         <button
           type="submit"
@@ -138,11 +235,11 @@ export default function ConceptStep({
           {loading ? (
             <>
               <Sparkles className="h-4 w-4 animate-pulse" />
-              {autoPilot ? "Scanning X…" : "Drafting kit…"}
+              {autoPilot ? "Scanning X…" : "Preparing…"}
             </>
           ) : (
             <>
-              {autoPilot ? "Run Auto-pilot" : "Generate launch kit"}
+              {autoPilot ? "Run Auto-pilot" : "Create coin"}
               <ArrowRight className="h-4 w-4" />
             </>
           )}
