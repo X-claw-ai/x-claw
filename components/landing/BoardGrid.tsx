@@ -10,10 +10,22 @@ import {
   listTokens,
   fetchEthUsd,
   formatUsd,
+  HAMR_CONTRACTS,
   HAMR_CURVE,
   type HamrCurveState,
 } from "@/lib/hamr";
-import { formatEther } from "viem";
+import { getPublicClient } from "@/lib/robinhood/client";
+
+// Board-wide 24h volume: one unfiltered log scan over the launchpad,
+// grouped per token. Cheap while the chain is young; swap for an
+// indexer when the board grows.
+const boardBuyEvent = parseAbiItem(
+  "event CurveBuy(address indexed token, address indexed buyer, uint256 ethIn, uint256 tokensOut, uint256 newVirtualEth)",
+);
+const boardSellEvent = parseAbiItem(
+  "event CurveSell(address indexed token, address indexed seller, uint256 tokensIn, uint256 ethOut, uint256 newVirtualEth)",
+);
+import { formatEther, parseAbiItem } from "viem";
 
 // Pump.fun-style token board. Dense horizontal cards with LIVE on-chain
 // numbers (market cap, graduation progress) pulled straight from the
@@ -42,7 +54,7 @@ interface Market {
   graduated: boolean;
 }
 
-type Sort = "new" | "trending" | "graduating";
+type Sort = "new" | "oldest" | "mcap" | "volume" | "graduating";
 
 const REFRESH_MS = 20_000;
 const MARKET_LIMIT = 36; // how many cards get live curve reads
@@ -54,6 +66,69 @@ export default function BoardGrid() {
   const [sort, setSort] = useState<Sort>("new");
   const [q, setQ] = useState("");
   const [ethUsd, setEthUsd] = useState<number | null>(null);
+  const [vol24h, setVol24h] = useState<Record<string, number>>({});
+
+  // 24h volume per token — single log scan every refresh cycle.
+  useEffect(() => {
+    let cancelled = false;
+    async function scan() {
+      try {
+        const client = getPublicClient();
+        const common = {
+          address: HAMR_CONTRACTS.launchpad,
+          fromBlock: 0n,
+          toBlock: "latest",
+        } as const;
+        const [buys, sells] = await Promise.all([
+          client.getLogs({ ...common, event: boardBuyEvent }),
+          client.getLogs({ ...common, event: boardSellEvent }),
+        ]);
+        const all = [
+          ...buys.map((l) => ({ l, buy: true })),
+          ...sells.map((l) => ({ l, buy: false })),
+        ];
+        const uniq = [...new Set(all.map((e) => e.l.blockNumber))].slice(-150);
+        const tsEntries = await Promise.all(
+          uniq.map(async (bn) => {
+            try {
+              const b = await client.getBlock({ blockNumber: bn });
+              return [bn.toString(), Number(b.timestamp)] as const;
+            } catch {
+              return [bn.toString(), 0] as const;
+            }
+          }),
+        );
+        if (cancelled) return;
+        const tsMap = new Map(tsEntries);
+        const cutoff = Math.floor(Date.now() / 1000) - 86_400;
+        const out: Record<string, number> = {};
+        for (const { l, buy } of all) {
+          const ts = tsMap.get(l.blockNumber.toString()) ?? 0;
+          if (ts < cutoff) continue;
+          const args = l.args as {
+            token?: string;
+            ethIn?: bigint;
+            ethOut?: bigint;
+          };
+          if (!args.token) continue;
+          const key = args.token.toLowerCase();
+          const amt = Number(
+            formatEther(buy ? (args.ethIn ?? 0n) : (args.ethOut ?? 0n)),
+          );
+          out[key] = (out[key] ?? 0) + amt;
+        }
+        setVol24h(out);
+      } catch {
+        /* volume sort degrades gracefully */
+      }
+    }
+    void scan();
+    const id = setInterval(scan, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -181,18 +256,25 @@ export default function BoardGrid() {
       );
     }
     const mkt = (l: PublicLaunch) => markets[l.token_address.toLowerCase()];
+    const ts = (l: PublicLaunch) =>
+      l.created_at ? new Date(l.created_at).getTime() : 0;
     if (sort === "graduating") {
       out.sort((a, b) => (mkt(b)?.progressBps ?? -1) - (mkt(a)?.progressBps ?? -1));
-    } else if (sort === "trending") {
+    } else if (sort === "mcap") {
       out.sort((a, b) => (mkt(b)?.mcapEth ?? -1) - (mkt(a)?.mcapEth ?? -1));
-    } else {
+    } else if (sort === "volume") {
       out.sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+          (vol24h[b.token_address.toLowerCase()] ?? 0) -
+          (vol24h[a.token_address.toLowerCase()] ?? 0),
       );
+    } else if (sort === "oldest") {
+      out.sort((a, b) => ts(a) - ts(b));
+    } else {
+      out.sort((a, b) => ts(b) - ts(a));
     }
     return out;
-  }, [items, q, sort, markets]);
+  }, [items, q, sort, markets, vol24h]);
 
   return (
     <section className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-8">
@@ -258,7 +340,9 @@ function TabGroup({
 }) {
   const tabs: { key: Sort; label: string }[] = [
     { key: "new", label: "New" },
-    { key: "trending", label: "Trending" },
+    { key: "oldest", label: "Oldest" },
+    { key: "mcap", label: "Market cap" },
+    { key: "volume", label: "Volume" },
     { key: "graduating", label: "About to graduate" },
   ];
   return (
