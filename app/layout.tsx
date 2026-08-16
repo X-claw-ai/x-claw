@@ -65,6 +65,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-bg">
       <body className="min-h-screen bg-bg text-ink-300 antialiased bg-app">
+        {/* PP Neue Montreal — site typeface. Hosted webfont; buy a PP
+            license before heavy production use. */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link href="https://fonts.cdnfonts.com/css/pp-neue-montreal" rel="stylesheet" />
         <KokiWalletProvider>
           <div className="min-h-screen flex flex-col">
             <Navbar />

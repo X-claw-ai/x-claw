@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
+          "PP Neue Montreal",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -20,6 +21,7 @@ const config: Config = {
           "sans-serif",
         ],
         display: [
+          "PP Neue Montreal",
           "Inter",
           "-apple-system",
           "SF Pro Display",
