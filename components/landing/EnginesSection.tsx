@@ -57,11 +57,11 @@ const ENGINES: Engine[] = [
   {
     num: "04",
     name: "Execution",
-    insight: "Three engines into one signature. Pons in a single shot.",
+    insight: "Three engines into one signature. Launched in a single shot.",
     capabilities: [
       "Token concept, ticker",
-      "Pons metadata (onchain)",
-      "Direct Pons launch",
+      "Onchain metadata",
+      "Direct onchain launch",
       "Live launch status",
     ],
     icon: Rocket,

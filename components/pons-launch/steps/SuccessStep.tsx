@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { LaunchResult, LaunchKit } from "../types";
 
 // Step 5: Success. Show the deployed token/pool/tx with jump links to
-// Blockscout + the Pons page. Also gives quick clipboard copies for
+// Blockscout + the live token page. Quick clipboard copies for
 // sharing the token address on X.
 
 interface Props {
@@ -25,27 +25,24 @@ export default function SuccessStep({ kit, result }: Props) {
           <span className="stamp">{kit.tokenName}</span> is live.
         </h2>
         <p className="mt-3 text-ink-300/80 text-base font-medium">
-          Deployed to Pons on Robinhood Chain. ${kit.ticker} is trading now.
+          Live on the HAMR launchpad. ${kit.ticker} is trading on the curve now.
         </p>
       </div>
 
       <div className="card !p-5 space-y-3">
         <Row label="Token" value={result.token} />
-        <Row label="Pool" value={result.pool} />
         <Row label="Tx" value={result.txHash} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <a
-          href={result.ponsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={`/launches/${result.token}`}
           className="btn btn-primary !py-3 !px-5"
         >
           <Rocket className="h-4 w-4" />
-          Trade on Pons
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+          Open token page
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
         <a
           href={result.explorerUrl}
           target="_blank"
@@ -55,13 +52,7 @@ export default function SuccessStep({ kit, result }: Props) {
           Blockscout
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
-        <Link
-          href={`/launches/${result.token}`}
-          className="btn btn-secondary !py-3 !px-5"
-        >
-          Open monitor
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+
       </div>
 
       {(kit.launchTweets?.length ?? 0) > 0 && (

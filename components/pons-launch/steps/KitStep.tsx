@@ -32,6 +32,11 @@ export default function KitStep({
   const [shortDescription, setShortDescription] = useState(
     kit.shortDescription ?? "",
   );
+  // Socials go on-chain with the token (immutable after launch) and show
+  // on the token page — same trio pump.fun collects.
+  const [twitter, setTwitter] = useState(kit.socials?.twitter ?? "");
+  const [telegram, setTelegram] = useState(kit.socials?.telegram ?? "");
+  const [website, setWebsite] = useState(kit.socials?.website ?? "");
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +45,12 @@ export default function KitStep({
       tokenName: tokenName.trim(),
       ticker: ticker.trim().toUpperCase(),
       shortDescription: shortDescription.trim(),
+      socials: {
+        ...kit.socials,
+        twitter: twitter.trim(),
+        telegram: telegram.trim(),
+        website: website.trim(),
+      },
     });
   }
 
@@ -120,6 +131,36 @@ export default function KitStep({
           maxLength={500}
         />
       </Field>
+
+      {/* Socials — written on-chain at launch, shown on the token page. */}
+      <div>
+        <div className="text-[10px] font-extrabold uppercase tracking-wider text-ink-300/72 mb-1.5">
+          Socials <span className="normal-case font-semibold text-ink-300/50">(optional · stored on-chain)</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input
+            type="url"
+            value={twitter}
+            onChange={(e) => setTwitter(e.target.value)}
+            placeholder="X / Twitter link"
+            className="input !text-[13px]"
+          />
+          <input
+            type="url"
+            value={telegram}
+            onChange={(e) => setTelegram(e.target.value)}
+            placeholder="Telegram link"
+            className="input !text-[13px]"
+          />
+          <input
+            type="url"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="Website"
+            className="input !text-[13px]"
+          />
+        </div>
+      </div>
 
       {(kit.launchTweets?.length ?? 0) > 0 && (
         <details className="card !p-4">

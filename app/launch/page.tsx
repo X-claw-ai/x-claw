@@ -8,8 +8,8 @@ import { PhaseProgress } from "@/components/ui/PhaseProgress";
 export const dynamic = "force-dynamic";
 
 // /launch, Phase 03 (Generate) and Phase 04 (Launch) of the agent loop.
-// Wired to the Pons launch wizard: Grok drafts the launch kit, then the
-// user's wallet signs one transaction to the Pons factory on Robinhood
+// Launch wizard: the agent drafts the kit, then the
+// user's wallet signs one transaction to the HAMR factory on Robinhood
 // Chain. See components/pons-launch/PonsLaunchWizard for the state
 // machine.
 export default function LaunchPage() {
@@ -18,7 +18,7 @@ export default function LaunchPage() {
       <PageHeader
         eyebrow="Generate, Launch"
         title="Launch your memecoin"
-        description="Drop your meme idea (or arrive from the radar). The HAMR agent drafts the launch kit. You review, sign once, and the agent launches it on Pons on Robinhood Chain. Your wallet is the only signer."
+        description="Drop your meme idea (or arrive from the radar). The HAMR agent drafts the launch kit. You review, sign once, and the agent launches it on the HAMR launchpad on Robinhood Chain. Your wallet is the only signer."
         breadcrumbs={[
           { href: "/", label: "HAMR" },
           { label: "Launch" },

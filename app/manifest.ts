@@ -6,10 +6,10 @@ import type { MetadataRoute } from "next";
 // Robinhood Wallet, Blowfish) that this is a real, intentional web app.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "HAMR.fun, Grok native Meme Coin Launch Agent",
+    name: "HAMR.fun, Autonomous Meme Coin Launch Agent",
     short_name: "HAMR.fun",
     description:
-      "Grok native AI agent that detects X memes, generates launch kits, and ships tokens to Pons on Robinhood Chain in one signature.",
+      "Autonomous AI agent that detects X memes, generates launch kits, and ships tokens on Robinhood Chain in one signature.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

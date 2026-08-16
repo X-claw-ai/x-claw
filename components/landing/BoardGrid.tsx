@@ -233,7 +233,7 @@ function TokenCard({ launch, idx }: { launch: PublicLaunch; idx: number }) {
               onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
             >
-              Pons <ArrowUpRight className="h-2.5 w-2.5" />
+              View <ArrowUpRight className="h-2.5 w-2.5" />
             </a>
           )}
         </div>
@@ -270,7 +270,7 @@ function EmptyBoard() {
         Board is empty. <span className="stamp">Be the first.</span>
       </div>
       <p className="text-[13px] text-ink-300/70 mt-2 max-w-md mx-auto font-medium">
-        Every token the HAMR agent ships on Pons lands here in real time.
+        Every token launched on HAMR lands here in real time.
         Run Auto-pilot or bring your own idea to seed the board.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -279,12 +279,12 @@ function EmptyBoard() {
           Launch a coin
         </Link>
         <a
-          href="https://www.ponsfamily.com/launchpad"
+          href="/launch"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-secondary !py-2.5 !px-4 !text-sm"
         >
-          Browse Pons
+          Launch a coin
         </a>
       </div>
     </div>

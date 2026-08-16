@@ -2,28 +2,36 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ExternalLink,
-  Rocket,
-  Sparkles,
-  ArrowUpRight,
+  Globe,
+  Send,
   Loader2,
+  ArrowDownUp,
+  Flame,
 } from "lucide-react";
-import type { Address } from "viem";
-import { usePonsToken } from "@/lib/pons/hooks";
-import { PONS_LAUNCH_PARAMS } from "@/lib/pons";
+import { formatEther, parseEther, type Address } from "viem";
+import {
+  useAccount,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useReadContract,
+} from "wagmi";
+import { useHamrToken, useTokenBalance } from "@/lib/hamr/hooks";
+import { quoteBuy, quoteSell } from "@/lib/hamr/read";
+import {
+  HAMR_CONTRACTS,
+  HAMR_CURVE,
+  hamrLaunchpadAbi,
+  hamrTokenAbi,
+} from "@/lib/hamr";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
 
-// Live monitor for a Pons launch. Polls token meta + graduation + pool
-// price every 20s. Handles the "not a Pons token" case gracefully by
-// falling through to a Blockscout jump so bookmarks still lead somewhere
-// useful.
-//
-// The route param comes in as `token` (was `mint` on the Solana era).
-// Non-EVM strings show a friendly "invalid address" state instead of
-// exploding.
+// Token page for a HAMR launchpad coin. Live curve state + a pump.fun
+// style trade box: buy with ETH along the curve, sell back any time,
+// watch the graduation bar fill toward the locked Uniswap V3 pool.
 
 interface Props {
   token: string;
@@ -32,34 +40,28 @@ interface Props {
 export default function LaunchMonitorPage({ token }: Props) {
   const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
   const tokenAddr = isEvmAddr ? (token as Address) : undefined;
-  const snap = usePonsToken(tokenAddr);
+  const { snap, loading, error, refresh } = useHamrToken(tokenAddr);
 
   const tokenExplorer = useMemo(
     () => (isEvmAddr ? explorerUrl("token", token) : null),
     [isEvmAddr, token],
   );
-  const poolExplorer = useMemo(
-    () => (snap.meta?.pool ? explorerUrl("address", snap.meta.pool) : null),
-    [snap.meta?.pool],
-  );
 
   if (!isEvmAddr) {
     return (
-      <section className="mx-auto max-w-4xl px-6 py-12">
+      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
         <div className="card !p-8">
-          <div className="eyebrow">Not a Robinhood Chain address</div>
+          <div className="eyebrow">Not a token address</div>
           <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
-            The route <code className="font-mono">{token}</code> isn&apos;t an
-            EVM address, so there&apos;s nothing to poll on Pons. If you
-            arrived from a bookmark from the Solana era, that token lived
-            on Pump.fun and isn&apos;t reachable from this page.
+            <code className="font-mono">{token}</code> isn&apos;t an EVM
+            address, so there&apos;s nothing to load.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/launches" className="btn btn-primary !py-2.5 !px-4">
               All launches
             </Link>
             <Link href="/launch" className="btn btn-secondary !py-2.5 !px-4">
-              Launch a new one
+              Launch a coin
             </Link>
           </div>
         </div>
@@ -67,276 +69,491 @@ export default function LaunchMonitorPage({ token }: Props) {
     );
   }
 
-  if (snap.loading) {
+  if (loading) {
     return (
-      <section className="mx-auto max-w-4xl px-6 py-12">
+      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
         <div className="card !p-10 flex flex-col items-center gap-3 text-ink-300/70">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-[13px] font-semibold">
-            Reading Pons state on Robinhood Chain…
-          </p>
+          <p className="text-[13px] font-semibold">Reading the curve…</p>
         </div>
       </section>
     );
   }
 
-  const hasMeta = Boolean(snap.meta);
-
-  return (
-    <section className="mx-auto max-w-4xl px-6 py-12 space-y-6">
-      {/* Header */}
-      <div className="card !p-6 flex items-center gap-5 flex-wrap">
-        <div className="h-16 w-16 shrink-0 rounded-2xl bg-koki-500 border border-[var(--border-strong)] overflow-hidden relative">
-          {snap.meta?.logo ? (
-            <Image
-              src={snap.meta.logo}
-              alt={snap.meta.name}
-              fill
-              sizes="64px"
-              unoptimized
-              className="object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center font-black text-ink-1000 text-lg">
-              {snap.meta?.symbol?.slice(0, 3) ?? "?"}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-display text-[26px] leading-tight truncate">
-            {snap.meta?.name ?? "Unknown token"}
-          </div>
-          <div className="text-[12px] font-extrabold text-ink-300/70">
-            ${snap.meta?.symbol ?? "-"} · Pons · Robinhood Chain
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge tone={snap.graduation?.graduated ? "live" : "neutral"}>
-            {snap.graduation?.graduated ? "Graduated" : "Bonding"}
-          </Badge>
-        </div>
-      </div>
-
-      {snap.error && (
-        <div className="card !p-4 !border-red-500/50 !bg-red-500/10 text-[12px] text-red-300 font-semibold break-words">
-          {snap.error}
-        </div>
-      )}
-
-      {/* Graduation progress */}
-      {snap.graduation && (
-        <div className="card !p-5 space-y-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <div>
-              <div className="eyebrow !text-[10px]">Graduation</div>
-              <div className="mt-1 text-[15px] font-black tracking-tight">
-                {snap.graduation.progressPercent}% of{" "}
-                {PONS_LAUNCH_PARAMS.graduationThresholdEth} ETH
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-[11px] font-bold text-ink-300/60 uppercase tracking-wider">
-                Paired
-              </div>
-              <div className="text-[13px] font-extrabold tabular-nums">
-                {Number(snap.graduation.pairedPrincipalEth).toFixed(4)} ETH
-              </div>
-            </div>
-          </div>
-          <div className="h-2 w-full rounded-full bg-ink-1000/40 overflow-hidden">
-            <div
-              className="h-full bg-koki-500 transition-all duration-500"
-              style={{ width: `${snap.graduation.progressPercent}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Price + fundamentals grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <StatCard
-          label="Price (WETH)"
-          value={
-            snap.priceWeth !== null
-              ? snap.priceWeth.toLocaleString(undefined, {
-                  maximumSignificantDigits: 4,
-                })
-              : "-"
-          }
-          hint="Live pool price"
-        />
-        <StatCard
-          label="Fixed supply"
-          value={PONS_LAUNCH_PARAMS.supplyHumanReadable.toLocaleString()}
-          hint="1B tokens · 18 decimals"
-        />
-        <StatCard
-          label="Pool fee"
-          value="1%"
-          hint="Uniswap V3 fee tier"
-        />
-        <StatCard
-          label="Restrictions end"
-          value={snap.launch ? `#${snap.launch.restrictionsEndBlock}` : "-"}
-          hint="Wallet-cap window (first 2 blocks)"
-        />
-      </div>
-
-      {/* Contract references */}
-      <div className="card !p-5 space-y-3">
-        <div className="eyebrow !text-[10px]">Contracts</div>
-        <RefRow
-          label="Token"
-          value={token}
-          href={tokenExplorer ?? undefined}
-        />
-        {snap.meta?.pool && (
-          <RefRow
-            label="Pool"
-            value={snap.meta.pool}
-            href={poolExplorer ?? undefined}
-          />
-        )}
-        {snap.launch?.deployer && (
-          <RefRow
-            label="Deployer"
-            value={snap.launch.deployer}
-            href={
-              snap.launch.deployer
-                ? explorerUrl("address", snap.launch.deployer)
-                : undefined
-            }
-          />
-        )}
-      </div>
-
-      {/* CTAs */}
-      {hasMeta && (
-        <div className="flex flex-wrap items-center gap-3">
+  if (!snap) {
+    return (
+      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
+        <div className="card !p-8">
+          <div className="eyebrow">Unknown token</div>
+          <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
+            This address wasn&apos;t launched through the HAMR launchpad.
+            {error ? ` (${error})` : ""}
+          </p>
           <a
-            href={`https://www.ponsfamily.com/launchpad/${token}`}
+            href={tokenExplorer ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-primary !py-3 !px-5"
+            className="mt-5 inline-flex btn btn-secondary !py-2 !px-3.5 !text-xs"
           >
-            <Rocket className="h-4 w-4" />
-            Trade on Pons
-            <ExternalLink className="h-3.5 w-3.5" />
+            Check on Blockscout
+            <ExternalLink className="h-3 w-3" />
           </a>
-          {snap.meta?.socials?.twitter && (
-            <a
-              href={
-                snap.meta.socials.twitter.startsWith("http")
-                  ? snap.meta.socials.twitter
-                  : `https://x.com/${snap.meta.socials.twitter.replace(/^@/, "")}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary !py-3 !px-5"
-            >
-              <Sparkles className="h-4 w-4" />
-              X account
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          )}
-          {tokenExplorer && (
-            <a
-              href={tokenExplorer}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary !py-3 !px-5"
-            >
-              Blockscout
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          )}
         </div>
-      )}
+      </section>
+    );
+  }
 
-      {!hasMeta && (
-        <div className="card !p-6">
-          <div className="eyebrow">No Pons state yet</div>
-          <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
-            HAMR couldn&apos;t find this address in the current or legacy
-            Pons factory. It may not have launched yet, or it lives outside
-            the Pons protocol. Check Blockscout directly:
-          </p>
-          {tokenExplorer && (
-            <a
-              href={tokenExplorer}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex btn btn-primary !py-2.5 !px-4"
-            >
-              Open on Blockscout
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
+  const { meta, curve, progressBps } = snap;
+  const raisedEth = Number(formatEther(curve.realEth));
+  const marketCapEth = snap.priceEth * HAMR_CURVE.totalSupply;
+
+  return (
+    <section className="mx-auto max-w-5xl px-4 md:px-6 py-8 md:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 items-start">
+        {/* ── Left column: identity + curve state ─────────────────── */}
+        <div className="space-y-5 min-w-0">
+          {/* Header */}
+          <div className="card !p-5 md:!p-6">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="h-16 w-16 shrink-0 rounded-2xl bg-koki-500 border border-[var(--border-strong)] overflow-hidden relative">
+                {meta.logo ? (
+                  <Image
+                    src={meta.logo}
+                    alt={meta.name}
+                    fill
+                    sizes="64px"
+                    unoptimized
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center font-black text-ink-1000 text-lg">
+                    {meta.symbol.slice(0, 3)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-display text-[26px] leading-tight truncate">
+                  {meta.name}
+                </div>
+                <div className="text-[12px] font-extrabold text-ink-300/70">
+                  ${meta.symbol} · HAMR launchpad
+                </div>
+              </div>
+              <Badge tone={curve.graduated ? "live" : "neutral"}>
+                {curve.graduated ? "Graduated" : "Bonding"}
+              </Badge>
+            </div>
+
+            {meta.description && (
+              <p className="mt-4 text-[13px] text-ink-300/85 font-medium leading-relaxed">
+                {meta.description}
+              </p>
+            )}
+
+            {/* Socials — read from chain, set at launch */}
+            <div className="mt-4 flex items-center gap-2 flex-wrap">
+              {meta.twitterUrl && (
+                <SocialChip href={meta.twitterUrl} label="X / Twitter" />
+              )}
+              {meta.telegramUrl && (
+                <SocialChip href={meta.telegramUrl} label="Telegram" icon="tg" />
+              )}
+              {meta.websiteUrl && (
+                <SocialChip href={meta.websiteUrl} label="Website" icon="web" />
+              )}
+              <a
+                href={tokenExplorer ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] font-extrabold text-ink-300/80 hover:text-ink-300 hover:border-[var(--border-strong)] transition-colors"
+              >
+                Blockscout
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
+
+          {/* Graduation bar */}
+          <div className="card !p-5 space-y-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <div>
+                <div className="eyebrow !text-[10px]">Bonding curve</div>
+                <div className="mt-1 text-[16px] font-black tracking-tight">
+                  {(progressBps / 100).toFixed(1)}%{" "}
+                  <span className="text-ink-300/50 font-bold">
+                    to graduation
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[11px] font-bold text-ink-300/60 uppercase tracking-wider">
+                  Raised
+                </div>
+                <div className="text-[13px] font-extrabold tabular-nums">
+                  {raisedEth.toFixed(4)} / {HAMR_CURVE.graduationRaiseEth} ETH
+                </div>
+              </div>
+            </div>
+            <div className="h-2.5 w-full rounded-full bg-ink-1000/15 overflow-hidden">
+              <div
+                className="h-full bg-koki-500 transition-all duration-700"
+                style={{ width: `${Math.max(1, progressBps / 100)}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-ink-300/55 font-medium leading-relaxed">
+              At {HAMR_CURVE.graduationRaiseEth} ETH the curve closes:
+              200M tokens + the raise open a Uniswap V3 pool and the LP is
+              locked forever. Creator keeps earning 75% of every trade fee.
+            </p>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <StatCard
+              label="Price"
+              value={
+                snap.priceEth > 0
+                  ? snap.priceEth.toLocaleString(undefined, {
+                      maximumSignificantDigits: 3,
+                    }) + " ETH"
+                  : "—"
+              }
+            />
+            <StatCard
+              label="Market cap"
+              value={marketCapEth.toFixed(2) + " ETH"}
+            />
+            <StatCard
+              label="Sold"
+              value={
+                (Number(curve.tokensSold) / 1e18 / 1e6).toFixed(1) + "M"
+              }
+            />
+            <StatCard label="Supply" value="1B fixed" />
+          </div>
+        </div>
+
+        {/* ── Right column: trade box ─────────────────────────────── */}
+        <div className="lg:sticky lg:top-24">
+          {curve.graduated ? (
+            <div className="card !p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Flame className="h-4 w-4 text-koki-500" />
+                <div className="text-[14px] font-black tracking-tight">
+                  Graduated to Uniswap
+                </div>
+              </div>
+              <p className="text-[12px] text-ink-300/75 font-medium leading-relaxed">
+                The curve is complete. Liquidity is locked in Uniswap V3 —
+                trade there from any DEX interface.
+              </p>
+              <a
+                href={tokenExplorer ?? "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary w-full !py-2.5"
+              >
+                View pool on Blockscout
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          ) : (
+            <TradeBox
+              token={tokenAddr!}
+              symbol={meta.symbol}
+              onTraded={refresh}
+            />
           )}
         </div>
-      )}
+      </div>
     </section>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  hint,
+// ── Trade box ────────────────────────────────────────────────────────
+
+function TradeBox({
+  token,
+  symbol,
+  onTraded,
 }: {
-  label: string;
-  value: string;
-  hint?: string;
+  token: Address;
+  symbol: string;
+  onTraded: () => void;
 }) {
+  const { address, isConnected } = useAccount();
+  const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [amount, setAmount] = useState("");
+  const [quote, setQuote] = useState<bigint | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const {
+    writeContractAsync,
+    data: txHash,
+    isPending,
+    reset,
+  } = useWriteContract();
+  const { isLoading: mining, isSuccess: mined } = useWaitForTransactionReceipt({
+    hash: txHash,
+    query: { enabled: Boolean(txHash) },
+  });
+
+  const balance = useTokenBalance(token, address, txHash ?? "init");
+
+  const { data: allowance } = useReadContract({
+    address: token,
+    abi: hamrTokenAbi,
+    functionName: "allowance",
+    args: address ? [address, HAMR_CONTRACTS.launchpad] : undefined,
+    query: { enabled: Boolean(address) && side === "sell" },
+  });
+
+  // Refresh parent after a confirmed trade (once per hash).
+  const [lastRefreshed, setLastRefreshed] = useState<string | null>(null);
+  useEffect(() => {
+    if (mined && txHash && lastRefreshed !== txHash) {
+      setLastRefreshed(txHash);
+      onTraded();
+    }
+  }, [mined, txHash, lastRefreshed, onTraded]);
+
+  async function updateQuote(next: string, s: "buy" | "sell") {
+    setAmount(next);
+    setQuote(null);
+    const n = Number(next);
+    if (!next || Number.isNaN(n) || n <= 0) return;
+    setQuoting(true);
+    try {
+      const q =
+        s === "buy"
+          ? await quoteBuy(token, parseEther(next))
+          : await quoteSell(token, parseEther(next));
+      setQuote(q);
+    } catch {
+      setQuote(null);
+    } finally {
+      setQuoting(false);
+    }
+  }
+
+  async function submit() {
+    setLocalError(null);
+    reset();
+    if (!isConnected || !address) {
+      setLocalError("Connect your wallet first.");
+      return;
+    }
+    const n = Number(amount);
+    if (!amount || Number.isNaN(n) || n <= 0) {
+      setLocalError("Enter an amount.");
+      return;
+    }
+    try {
+      if (side === "buy") {
+        const minOut = quote ? (quote * 98n) / 100n : 0n; // 2% slippage
+        await writeContractAsync({
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "buy",
+          args: [token, minOut],
+          value: parseEther(amount),
+        });
+      } else {
+        const tokenWei = parseEther(amount);
+        if ((allowance ?? 0n) < tokenWei) {
+          // One-time max approve, then the sell in a second signature.
+          await writeContractAsync({
+            address: token,
+            abi: hamrTokenAbi,
+            functionName: "approve",
+            args: [HAMR_CONTRACTS.launchpad, 2n ** 256n - 1n],
+          });
+        }
+        const minOut = quote ? (quote * 98n) / 100n : 0n;
+        await writeContractAsync({
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "sell",
+          args: [token, tokenWei, minOut],
+        });
+      }
+      setAmount("");
+      setQuote(null);
+    } catch (err) {
+      setLocalError(
+        err instanceof Error ? err.message.split("\n")[0] : "Trade failed",
+      );
+    }
+  }
+
+  const busy = isPending || mining;
+  const balNum = balance !== null ? Number(balance) / 1e18 : null;
+
   return (
-    <div className="card !p-4">
-      <div className="text-[10px] font-extrabold uppercase tracking-wider text-ink-300/72">
-        {label}
+    <div className="card !p-5 space-y-4">
+      {/* Buy / Sell tabs */}
+      <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-ink-1000/10">
+        {(["buy", "sell"] as const).map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => {
+              setSide(s);
+              setAmount("");
+              setQuote(null);
+              setLocalError(null);
+            }}
+            className={`py-2 rounded-lg text-[13px] font-black tracking-tight transition-colors ${
+              side === s
+                ? s === "buy"
+                  ? "bg-koki-500 text-white"
+                  : "bg-ink-300 text-white"
+                : "text-ink-300/60 hover:text-ink-300"
+            }`}
+          >
+            {s === "buy" ? "Buy" : "Sell"}
+          </button>
+        ))}
       </div>
-      <div className="mt-1.5 text-[17px] font-black tabular-nums tracking-tight">
-        {value}
+
+      {/* Amount */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-ink-300/72">
+            {side === "buy" ? "Spend (ETH)" : `Sell (${symbol})`}
+          </span>
+          {side === "sell" && balNum !== null && (
+            <button
+              type="button"
+              onClick={() =>
+                updateQuote((balNum > 0 ? balNum : 0).toString(), "sell")
+              }
+              className="text-[10px] font-extrabold text-koki-500 hover:underline"
+            >
+              Max {balNum.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            </button>
+          )}
+        </div>
+        <input
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="any"
+          value={amount}
+          onChange={(e) => updateQuote(e.target.value, side)}
+          placeholder="0.0"
+          className="input font-mono !text-[16px]"
+        />
+        {side === "buy" && (
+          <div className="mt-2 flex gap-1.5">
+            {["0.01", "0.05", "0.1", "0.5"].map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => updateQuote(v, "buy")}
+                className="flex-1 py-1.5 rounded-md border border-[var(--border)] text-[11px] font-extrabold text-ink-300/75 hover:border-[var(--border-strong)] hover:text-ink-300 transition-colors"
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {hint && (
-        <div className="mt-1 text-[10px] font-semibold text-ink-300/55">
-          {hint}
+
+      {/* Quote */}
+      <div className="flex items-center justify-between rounded-lg bg-ink-1000/8 px-3 py-2.5">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-300/60">
+          <ArrowDownUp className="h-3 w-3" />
+          You receive
+        </span>
+        <span className="text-[13px] font-extrabold tabular-nums">
+          {quoting ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : quote !== null ? (
+            side === "buy" ? (
+              `${(Number(quote) / 1e18).toLocaleString(undefined, { maximumFractionDigits: 0 })} ${symbol}`
+            ) : (
+              `${Number(formatEther(quote)).toFixed(5)} ETH`
+            )
+          ) : (
+            "—"
+          )}
+        </span>
+      </div>
+
+      {localError && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-[11px] text-red-400 font-semibold break-words">
+          {localError}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={submit}
+        disabled={busy}
+        className={`w-full !py-3 btn ${side === "buy" ? "btn-primary" : "btn-secondary"} disabled:opacity-50`}
+      >
+        {busy ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {isPending ? "Confirm in wallet…" : "Trading…"}
+          </>
+        ) : side === "buy" ? (
+          `Buy ${symbol}`
+        ) : (
+          `Sell ${symbol}`
+        )}
+      </button>
+
+      <p className="text-[10px] text-ink-300/45 font-medium text-center">
+        1% fee per trade — 75% goes to the creator · 2% max slippage
+      </p>
     </div>
   );
 }
 
-function RefRow({
-  label,
-  value,
+// ── Bits ─────────────────────────────────────────────────────────────
+
+function SocialChip({
   href,
+  label,
+  icon,
 }: {
+  href: string;
   label: string;
-  value: string;
-  href?: string;
+  icon?: "tg" | "web";
 }) {
-  const inner = (
-    <div className="flex items-center justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <div className="text-[10px] font-extrabold uppercase tracking-wider text-ink-300/72">
-          {label}
-        </div>
-        <div className="font-mono text-[12px] text-ink-300 truncate mt-0.5">
-          {value}
-        </div>
-      </div>
-      {href && (
-        <ExternalLink className="h-3.5 w-3.5 shrink-0 text-ink-300/60" />
-      )}
-    </div>
-  );
-  if (!href) return inner;
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="block rounded-md -mx-2 px-2 py-1 hover:bg-ink-1000/10 transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] font-extrabold text-ink-300/80 hover:text-ink-300 hover:border-[var(--border-strong)] transition-colors"
     >
-      {inner}
+      {icon === "tg" ? (
+        <Send className="h-3 w-3" />
+      ) : icon === "web" ? (
+        <Globe className="h-3 w-3" />
+      ) : (
+        <svg viewBox="0 0 1200 1227" className="h-3 w-3 fill-current" aria-hidden="true">
+          <path d="M714.163 519.284 1160.89 0H1055.03L667.137 450.887 357.328 0H0L468.492 681.821 0 1226.37H105.866L515.491 750.218 842.672 1226.37H1200L714.137 519.284h.026ZM569.165 687.828l-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721H892.476L569.165 687.854v-.026Z" />
+        </svg>
+      )}
+      {label}
     </a>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="card !p-3.5">
+      <div className="text-[10px] font-extrabold uppercase tracking-wider text-ink-300/55">
+        {label}
+      </div>
+      <div className="mt-1 text-[15px] font-black tracking-tight tabular-nums truncate">
+        {value}
+      </div>
+    </div>
   );
 }

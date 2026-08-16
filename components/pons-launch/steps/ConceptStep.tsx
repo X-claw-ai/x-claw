@@ -127,7 +127,7 @@ export default function ConceptStep({
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <p className="text-[12px] text-ink-300/70 font-medium">
-          The agent drafts a full Pons-ready launch kit — you review before any
+          The agent drafts a full launch kit — you review before any
           wallet touches anything.
         </p>
         <button

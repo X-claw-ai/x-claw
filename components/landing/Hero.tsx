@@ -36,7 +36,7 @@ export default function Hero() {
           <span className="text-koki-500">@X</span> and,{" "}
           <span className="text-koki-500">with one click</span>, creates
           everything from token concepts and launch kits to a{" "}
-          <span className="text-koki-500">Pons launch on Robinhood Chain</span>.
+          <span className="text-koki-500">live launch on Robinhood Chain</span>.
         </p>
 
         <div className="mt-7 flex flex-wrap items-center gap-3">

@@ -6,7 +6,7 @@ import { KokiWalletProvider } from "@/components/evm/WalletContext";
 
 const TITLE = "HAMR.fun, The Autonomous Meme Coin Launch Agent";
 const DESCRIPTION =
-  "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to a Pons launch on Robinhood Chain.";
+  "An autonomous AI agent that detects viral memes on @X and, with one click, creates everything from token concepts and launch kits to a live launch on Robinhood Chain.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   generator: "Next.js",
   keywords: [
     "Robinhood Chain",
-    "Pons",
+    "launchpad",
     "memecoin",
     "xAI",
     "AI agent",

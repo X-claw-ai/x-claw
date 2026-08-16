@@ -24,7 +24,7 @@ export default function LiveLaunchesSection() {
           </h2>
           <p className="mt-6 text-ink-300/80 text-base md:text-lg leading-relaxed max-w-2xl font-medium">
             Every memecoin shipped through the HAMR agent, indexed straight
-            off the Pons factory on Robinhood Chain — with live pool price,
+            off the HAMR launchpad on Robinhood Chain — with live curve price,
             graduation progress, and Blockscout links.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -33,12 +33,12 @@ export default function LiveLaunchesSection() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="https://www.ponsfamily.com/launchpad"
+              href="/launches"
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-secondary !py-3 !px-5"
             >
-              Explore Pons
+              All launches
             </a>
           </div>
         </div>

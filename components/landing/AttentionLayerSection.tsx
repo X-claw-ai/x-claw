@@ -17,7 +17,7 @@ export default function AttentionLayerSection() {
           </h2>
           <p className="mt-6 text-ink-300/80 text-base md:text-lg leading-relaxed max-w-2xl text-balance font-medium">
             HAMR reads X meme signals, community momentum, and onchain
-            relevance before drafting a launch kit and preparing Pons
+            relevance before drafting a launch kit and preparing the
             execution on Robinhood Chain. You start at the top of the funnel,
             not a blank form.
           </p>

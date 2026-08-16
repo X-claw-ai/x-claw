@@ -67,7 +67,7 @@ export default function SafetySection() {
           <span className="font-extrabold">Hard rules:</span>{" "}
           HAMR does not store private keys. Does not ask for seed phrases.
           Does not move funds without your explicit signature. Does not claim
-          partnership with xAI, X, Pons, Robinhood, or Uniswap.
+          partnership with xAI, X, Robinhood, or Uniswap.
           Memecoin launches involve risk; you are the final decision maker.
         </div>
       </div>

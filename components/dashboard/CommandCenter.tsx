@@ -99,7 +99,7 @@ export default function CommandCenter() {
               {isConnected && address
                 ? `${address.slice(0, 6)}…${address.slice(-4)}`
                 : "your wallet"}
-              , on Pons on Robinhood Chain.
+              , on Robinhood Chain.
             </p>
           </div>
           <Link href="/launch" className="btn btn-primary !py-2.5 !px-4 !text-sm">
@@ -187,7 +187,7 @@ function TokenCard({ launch, idx }: { launch: SavedLaunch; idx: number }) {
               onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1 text-[10px] font-extrabold text-ink-300/72 hover:text-ink-300 hover:underline"
             >
-              Pons <ArrowUpRight className="h-2.5 w-2.5" />
+              View <ArrowUpRight className="h-2.5 w-2.5" />
             </a>
           )}
         </div>

@@ -2,7 +2,7 @@ import PageHeader from "@/components/shell/PageHeader";
 import LaunchMonitorPage from "@/components/launches/LaunchMonitorPage";
 import { PhaseProgress } from "@/components/ui/PhaseProgress";
 
-// Monitor page polls Pons contracts via viem — must render in the browser
+// Monitor page polls the HAMR launchpad via viem — must render in the browser
 // only, otherwise wagmi's WalletConnect init crashes prerender on indexedDB.
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export default function LaunchByMintPage({
       <PageHeader
         eyebrow="Monitor, Phase 05"
         title="Post-launch monitor"
-        description="Live Pons state on Robinhood Chain — pool price, graduation progress, deployer, and Blockscout links, all polled straight from the factory."
+        description="Live curve state on Robinhood Chain — price, graduation progress, and Blockscout links, polled straight from the HAMR launchpad."
         breadcrumbs={[
           { href: "/", label: "HAMR" },
           { href: "/launches", label: "Launches" },

@@ -146,7 +146,7 @@ VARIETY MATTERS. Do NOT default to archetypes already burned in past runs ("Grok
 
 Hard rules:
 - Safe and inoffensive. No real-person names. No politics. No racism / sexism / harassment. No copyrighted IP (Disney, Pokemon, etc.). No "guaranteed", "100x", "moon", "to-the-moon", "LP locked = safe", or any pump-promise language.
-- No claim of partnership with X / xAI / Grok / Pons / Robinhood / Uniswap. Use "X-native" / "Robinhood-Chain-native" framing instead.
+- No claim of partnership with X / xAI / Grok / HAMR launchpad / Robinhood / Uniswap. Use "X-native" / "Robinhood-Chain-native" framing instead.
 - Ticker: 3–6 uppercase letters/numbers, memorable, NOT a real major ticker (no BTC/ETH/USDC/USDT/PONS/HOOD/etc) and NOT the same ticker as the source post (if the post mentions one, that's a red flag — pick a different post).
 - originXUrl: ONLY a real direct post URL from your x_search results, ONLY if that post is organic cultural content (rule #2 above). Otherwise null. Never fabricate.
 - Output STRICT JSON ONLY. No markdown fences. No commentary outside JSON.

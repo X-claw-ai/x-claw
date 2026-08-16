@@ -4,7 +4,7 @@ import { useAccount, useBalance } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ArrowLeft, ArrowRight, Wallet, AlertTriangle } from "lucide-react";
 import { formatEther } from "viem";
-import { PONS_LAUNCH_PARAMS } from "@/lib/pons";
+import { HAMR_CURVE } from "@/lib/hamr";
 import { ROBINHOOD_CHAIN_ID } from "@/lib/robinhood/chain";
 
 // Step 3: Connect + review deploy cost. This is a soft step — no signing
@@ -33,7 +33,7 @@ export default function ConnectStep({
     query: { enabled: Boolean(address) && !wrongChain },
   });
 
-  const launchFee = Number(PONS_LAUNCH_PARAMS.launchFeeEth);
+  const launchFee = Number(HAMR_CURVE.launchFeeEth);
   const buyAmt = Number(initialBuyEth) || 0;
   const total = launchFee + buyAmt;
   const balanceEth = bal ? Number(formatEther(bal.value)) : 0;
@@ -68,7 +68,7 @@ export default function ConnectStep({
         <div className="card !p-4 !border-red-500/60 !bg-red-500/10 flex items-start gap-3">
           <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
           <div className="text-[12px] text-red-400 font-semibold leading-relaxed">
-            Your wallet is on the wrong network. Pons launches only work on
+            Your wallet is on the wrong network. Launches settle on
             Robinhood Chain (id {ROBINHOOD_CHAIN_ID}). Use the connect button
             above to switch.
           </div>
@@ -80,7 +80,7 @@ export default function ConnectStep({
         <Row label="Supply" value={`${(1_000_000_000).toLocaleString()} (fixed)`} />
         <Row label="Pool fee" value="1%" />
         <Row label="Quote token" value="WETH" />
-        <Row label="Graduation threshold" value={`${PONS_LAUNCH_PARAMS.graduationThresholdEth} ETH`} />
+        <Row label="Graduation threshold" value={`${HAMR_CURVE.graduationRaiseEth} ETH`} />
 
         <label className="block pt-2">
           <span className="block text-[10px] font-extrabold uppercase tracking-wider text-ink-300/72 mb-1.5">
@@ -101,7 +101,7 @@ export default function ConnectStep({
         </label>
 
         <div className="border-t border-[var(--border)] pt-3 space-y-1.5">
-          <Row label="Launch fee" value={`${PONS_LAUNCH_PARAMS.launchFeeEth} ETH`} />
+          <Row label="Launch fee" value={`${HAMR_CURVE.launchFeeEth} ETH`} />
           <Row label="Your first buy" value={`${buyAmt.toFixed(4)} ETH`} />
           <Row
             label="You will spend"

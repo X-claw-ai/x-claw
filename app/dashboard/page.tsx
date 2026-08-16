@@ -3,7 +3,7 @@ import { Rocket } from "lucide-react";
 import PageHeader from "@/components/shell/PageHeader";
 import CommandCenter from "@/components/dashboard/CommandCenter";
 
-// "My Launches" — wallet-scoped gallery of every Pons token this user has
+// "My Launches" — wallet-scoped gallery of every token this user has
 // shipped via the HAMR agent. Mirrors the public /launches view, filtered
 // to the connected wallet.
 //
@@ -18,7 +18,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow="Your HAMR agent"
         title="My Launches"
-        description="Every memecoin you've shipped through the HAMR agent. Real launches on Robinhood Chain mainnet, and quick links to the live monitor on Pons."
+        description="Every memecoin you've shipped through the HAMR agent. Real launches on Robinhood Chain mainnet, and quick links to each live token page."
         actions={
           <Link
             href="/launch"

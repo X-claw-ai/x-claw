@@ -84,7 +84,7 @@ export default function OpengraphImage() {
               display: "flex",
             }}
           >
-            Autonomous meme coin launch agent. From X meme to Pons on
+            Autonomous meme coin launch agent. From X meme to launch on
             Robinhood Chain in one signature.
           </div>
         </div>

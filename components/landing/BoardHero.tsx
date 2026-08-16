@@ -16,7 +16,7 @@ export default function BoardHero() {
           <div className="text-[15px] md:text-[17px] font-black tracking-tight text-ink-300 leading-tight">
             Ship a memecoin in one signature.
             <span className="ml-2 opacity-60 font-bold">
-              Pons on Robinhood Chain.
+              Own launchpad on Robinhood Chain.
             </span>
           </div>
           <div className="mt-1 text-[11px] font-bold text-ink-300/60">
