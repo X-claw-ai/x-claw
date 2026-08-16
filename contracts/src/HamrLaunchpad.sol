@@ -131,30 +131,37 @@ contract HamrLaunchpad {
     // Launch
     // ─────────────────────────────────────────────────────────────────
 
+    /// @dev Packed into a struct to keep launchToken's stack shallow —
+    ///      eight loose string params blow the EVM's 16-slot limit
+    ///      ("stack too deep"). Same pattern Pons uses.
+    struct LaunchParams {
+        string name;
+        string symbol;
+        string logo;
+        string description;
+        string twitterUrl;
+        string telegramUrl;
+        string websiteUrl;
+    }
+
     /// @notice Deploy a new memecoin and open its bonding curve.
     ///         Any ETH beyond LAUNCH_FEE becomes the creator's first buy.
     function launchToken(
-        string calldata name_,
-        string calldata symbol_,
-        string calldata logo_,
-        string calldata description_,
-        string calldata twitterUrl_,
-        string calldata telegramUrl_,
-        string calldata websiteUrl_,
+        LaunchParams calldata p,
         uint256 minFirstBuyTokens
     ) external payable nonReentrant returns (address token) {
         require(msg.value >= LAUNCH_FEE, "Hamr: launch fee");
-        require(bytes(name_).length > 0 && bytes(symbol_).length > 0, "Hamr: empty meta");
+        require(bytes(p.name).length > 0 && bytes(p.symbol).length > 0, "Hamr: empty meta");
 
         token = address(
             new HamrToken(
-                name_,
-                symbol_,
-                logo_,
-                description_,
-                twitterUrl_,
-                telegramUrl_,
-                websiteUrl_,
+                p.name,
+                p.symbol,
+                p.logo,
+                p.description,
+                p.twitterUrl,
+                p.telegramUrl,
+                p.websiteUrl,
                 msg.sender,
                 TOTAL_SUPPLY
             )
@@ -172,7 +179,7 @@ contract HamrLaunchpad {
         allTokens.push(token);
         protocolFeesEth += LAUNCH_FEE;
 
-        emit TokenLaunched(token, msg.sender, name_, symbol_, logo_);
+        emit TokenLaunched(token, msg.sender, p.name, p.symbol, p.logo);
 
         uint256 firstBuy = msg.value - LAUNCH_FEE;
         if (firstBuy > 0) {
@@ -303,6 +310,8 @@ contract HamrLaunchpad {
         _graduate(token);
     }
 
+    /// @dev Split across two frames (_graduate → _mintLp) so neither
+    ///      blows the EVM's 16-slot stack limit without needing viaIR.
     function _graduate(address token) internal {
         Curve storage c = curves[token];
         c.graduated = true; // effects first
@@ -314,57 +323,76 @@ contract HamrLaunchpad {
         weth.deposit{value: ethAmount}();
 
         // 2) Pool ordering + closing price. price(eth per token) = vEth/vTok.
-        address t0 = token < address(weth) ? token : address(weth);
-        address t1 = t0 == token ? address(weth) : token;
-        uint160 sqrtPriceX96 = _sqrtPriceX96(
-            t0 == token, // token0 is the memecoin?
-            c.virtualEth,
-            c.virtualToken
+        bool tokenIs0 = token < address(weth);
+
+        positionManager.createAndInitializePoolIfNecessary(
+            tokenIs0 ? token : address(weth),
+            tokenIs0 ? address(weth) : token,
+            POOL_FEE,
+            _sqrtPriceX96(tokenIs0, c.virtualEth, c.virtualToken)
         );
 
-        positionManager.createAndInitializePoolIfNecessary(t0, t1, POOL_FEE, sqrtPriceX96);
-
         // 3) Approvals + full-range mint, LP straight into the locker.
-        require(HamrToken(token).approve(address(positionManager), LP_SUPPLY), "Hamr: approve");
-        require(weth.approve(address(positionManager), ethAmount), "Hamr: approve w");
+        HamrToken(token).approve(address(positionManager), LP_SUPPLY);
+        weth.approve(address(positionManager), ethAmount);
 
-        (uint256 amount0Desired, uint256 amount1Desired) = t0 == token
+        (uint256 tokenId, uint256 tokenUsed, uint256 wethUsed) = _mintLp(
+            token,
+            tokenIs0,
+            ethAmount
+        );
+
+        // 4) Register the lock so harvest/claims know the creator.
+        locker.register(
+            token,
+            c.creator,
+            tokenId,
+            tokenIs0 ? token : address(weth),
+            tokenIs0 ? address(weth) : token
+        );
+
+        // 5) Dust: unpaired tokens are burned (dead address), unpaired
+        //    WETH goes to the treasury. Amounts here are rounding-level.
+        if (LP_SUPPLY > tokenUsed) {
+            HamrToken(token).transfer(
+                0x000000000000000000000000000000000000dEaD,
+                LP_SUPPLY - tokenUsed
+            );
+        }
+        if (ethAmount > wethUsed) {
+            weth.transfer(treasury, ethAmount - wethUsed);
+        }
+
+        emit Graduated(token, address(0), tokenId, wethUsed, tokenUsed);
+    }
+
+    function _mintLp(
+        address token,
+        bool tokenIs0,
+        uint256 ethAmount
+    ) internal returns (uint256 tokenId, uint256 tokenUsed, uint256 wethUsed) {
+        (uint256 a0, uint256 a1) = tokenIs0
             ? (LP_SUPPLY, ethAmount)
             : (ethAmount, LP_SUPPLY);
 
-        (uint256 tokenId, , uint256 used0, uint256 used1) = positionManager.mint(
+        (uint256 id, , uint256 used0, uint256 used1) = positionManager.mint(
             INonfungiblePositionManager.MintParams({
-                token0: t0,
-                token1: t1,
+                token0: tokenIs0 ? token : address(weth),
+                token1: tokenIs0 ? address(weth) : token,
                 fee: POOL_FEE,
                 tickLower: TICK_LOWER,
                 tickUpper: TICK_UPPER,
-                amount0Desired: amount0Desired,
-                amount1Desired: amount1Desired,
+                amount0Desired: a0,
+                amount1Desired: a1,
                 amount0Min: 0,
                 amount1Min: 0,
                 recipient: address(locker),
                 deadline: block.timestamp
             })
         );
-
-        // 4) Register the lock so harvest/claims know the creator.
-        locker.register(token, c.creator, tokenId, t0, t1);
-
-        // 5) Dust: unpaired tokens are burned (dead address), unpaired
-        //    WETH goes to the treasury. Amounts here are rounding-level.
-        uint256 tokenUsed = t0 == token ? used0 : used1;
-        uint256 wethUsed = t0 == token ? used1 : used0;
-        uint256 tokenDust = LP_SUPPLY - tokenUsed;
-        uint256 wethDust = ethAmount - wethUsed;
-        if (tokenDust > 0) {
-            HamrToken(token).transfer(0x000000000000000000000000000000000000dEaD, tokenDust);
-        }
-        if (wethDust > 0) {
-            weth.transfer(treasury, wethDust);
-        }
-
-        emit Graduated(token, _poolOf(t0, t1), tokenId, wethUsed, tokenUsed);
+        tokenId = id;
+        tokenUsed = tokenIs0 ? used0 : used1;
+        wethUsed = tokenIs0 ? used1 : used0;
     }
 
     /// @dev sqrtPriceX96 = sqrt(price1/0) · 2^96 at the curve's close.
@@ -393,11 +421,6 @@ contract HamrLaunchpad {
         }
     }
 
-    function _poolOf(address, address) internal pure returns (address) {
-        // Emitted for indexer convenience; read path resolves the pool
-        // from the position instead, so a zero here is acceptable.
-        return address(0);
-    }
 
     // ─────────────────────────────────────────────────────────────────
     // Fee claims (pull payments)
