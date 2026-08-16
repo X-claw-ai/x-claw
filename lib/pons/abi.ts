@@ -48,14 +48,27 @@ export const ponsTokenLaunchedEvent = parseAbiItem(
 );
 
 // -------- Write side --------
-// PLACEHOLDER — waiting on verified ABI from Robinhood Blockscout for the
-// exact `create/launch` function selector. Do not treat this as final;
-// the wizard imports `createLaunchAbi` so we can swap this the second we
-// confirm the real signature by inspecting a live launch transaction on
-// the explorer. `TokenLaunched` will still surface reliably regardless.
+// VERIFIED 2026-08-16 against the PonsLaunchFactory source published on
+// Robinhood Blockscout (contract 0xA5aA…1feB, is_verified: true).
+//
+//   launchToken(
+//     (string name, string symbol, string logo, string description,
+//      (string twitter, string telegram, string discord, string website,
+//       string farcaster) socials,
+//      address feeWallet) params,
+//     uint256 launchConfigId,
+//     uint256 dexId,
+//     bytes32 salt
+//   ) payable returns (address)
+//
+// ⚠️ ACCESS CONTROL: the factory enforces a launcher whitelist. Every
+// recent non-whitelisted launchToken tx on Blockscout reverted with
+// custom error NotWhitelisted() (selector 0x584a7938). Direct signing
+// from arbitrary user wallets will revert until HAMR's launcher address
+// is whitelisted by the Pons team — see PONS_DIRECT_LAUNCH_ENABLED in
+// lib/pons/write.ts.
 export const createLaunchAbi = parseAbi([
-  // Reserved shape: (name, symbol, logoUrl, description, socials, initialBuyEth)
-  // TODO(pons-live): confirm via Blockscout ABI + first-launch tx before
-  //                  removing the placeholder guard in lib/pons/write.ts.
-  "function launch(string name, string symbol, string logo, string description, string twitter, string telegram, string discord, string website) payable returns (address token)",
+  "struct PonsSocials { string twitter; string telegram; string discord; string website; string farcaster; }",
+  "struct PonsLaunchParams { string name; string symbol; string logo; string description; PonsSocials socials; address feeWallet; }",
+  "function launchToken(PonsLaunchParams params, uint256 launchConfigId, uint256 dexId, bytes32 salt) payable returns (address token)",
 ]);

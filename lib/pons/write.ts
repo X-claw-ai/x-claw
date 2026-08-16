@@ -6,11 +6,16 @@
 // components, or an injected signer server-side for the auto-pilot
 // worker) and call `.writeContract(prepared)`.
 //
-// IMPORTANT: the exact `launch` function signature is not published in
-// the Pons docs surface. We ship a placeholder here that mirrors the
-// reserved shape and gate it behind `PONS_LAUNCH_ABI_VERIFIED`. When we
-// confirm the real ABI on Robinhood Blockscout the guard flips off in
-// one place and the caller path stays identical.
+// STATUS (2026-08-16): the real ABI IS now verified from the published
+// PonsLaunchFactory source on Robinhood Blockscout — launchToken(params
+// tuple, launchConfigId, dexId, salt) payable. See lib/pons/abi.ts.
+//
+// The remaining blocker is ACCESS CONTROL, not the ABI: the factory
+// whitelists launcher addresses, and every non-whitelisted launchToken
+// call on mainnet reverts with custom error NotWhitelisted(). Until the
+// Pons team whitelists a HAMR launcher, direct in-app signing would just
+// burn the user's gas — so the gate below stays closed and the wizard
+// hands off to the official Pons launchpad UI instead.
 
 import { parseEther, type Address, type WalletClient } from "viem";
 import { getPublicClient } from "../robinhood/client";
@@ -21,8 +26,16 @@ import {
   PONS_LAUNCH_PARAMS,
 } from "./constants";
 
-/** Flip this to `true` once the launch ABI is verified from a real tx. */
-export const PONS_LAUNCH_ABI_VERIFIED = false;
+/** The launchToken ABI is confirmed against the verified factory source. */
+export const PONS_LAUNCH_ABI_VERIFIED = true;
+
+/**
+ * Master gate for in-app signing. Flip to true ONLY after the Pons team
+ * whitelists a HAMR launcher address — the factory reverts with
+ * NotWhitelisted() for everyone else, so enabling this early would send
+ * users a transaction that is guaranteed to fail.
+ */
+export const PONS_DIRECT_LAUNCH_ENABLED = false;
 
 export interface LaunchArgs {
   name: string;
@@ -34,9 +47,19 @@ export interface LaunchArgs {
     telegram?: string;
     discord?: string;
     website?: string;
+    farcaster?: string;
   };
+  /** Recipient of the creator's 70% fee share. Usually the signer. */
+  feeWallet: Address;
   /** Optional creator "first buy" in ETH — helps warm the pool immediately. */
   initialBuyEth?: string;
+}
+
+/** Random 32-byte salt for the deterministic token address derivation. */
+export function randomLaunchSalt(): `0x${string}` {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return `0x${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}` as `0x${string}`;
 }
 
 /**
@@ -47,12 +70,12 @@ export interface LaunchArgs {
  *   const hash = await walletClient.writeContract(prepared);
  */
 export function buildLaunchTx(args: LaunchArgs) {
-  if (!PONS_LAUNCH_ABI_VERIFIED) {
-    // Loud fail is better than silent wrong-selector. The wizard should
-    // surface a "Pons launch temporarily unavailable" banner while we
-    // finalize the ABI. Reads keep working.
+  if (!PONS_DIRECT_LAUNCH_ENABLED) {
+    // Loud fail is better than a guaranteed NotWhitelisted() revert that
+    // costs the user gas. The wizard surfaces the official-launchpad
+    // handoff while HAMR's launcher whitelist request is pending.
     throw new Error(
-      "[pons/write] launch ABI not yet verified — waiting on Blockscout confirmation before enabling mainnet launches.",
+      "[pons/write] direct launches are gated — the Pons factory only accepts whitelisted launcher addresses (NotWhitelisted). Use the official Pons launchpad handoff.",
     );
   }
 
@@ -64,17 +87,26 @@ export function buildLaunchTx(args: LaunchArgs) {
   return {
     address: PONS_CONTRACTS.factory,
     abi: createLaunchAbi,
-    functionName: "launch" as const,
+    functionName: "launchToken" as const,
     args: [
-      args.name,
-      args.symbol,
-      args.logo,
-      args.description,
-      s.twitter ?? "",
-      s.telegram ?? "",
-      s.discord ?? "",
-      s.website ?? "",
-    ],
+      {
+        name: args.name,
+        symbol: args.symbol,
+        logo: args.logo,
+        description: args.description,
+        socials: {
+          twitter: s.twitter ?? "",
+          telegram: s.telegram ?? "",
+          discord: s.discord ?? "",
+          website: s.website ?? "",
+          farcaster: s.farcaster ?? "",
+        },
+        feeWallet: args.feeWallet,
+      },
+      0n, // launchConfigId — the default WETH config (observed in live txs)
+      0n, // dexId — Uniswap V3 (observed in live txs)
+      randomLaunchSalt(),
+    ] as const,
     value,
   };
 }

@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseEther } from "viem";
+
 import { ArrowLeft, Rocket, ExternalLink, AlertTriangle } from "lucide-react";
 import {
-  PONS_CONTRACTS,
   PONS_LAUNCH_PARAMS,
-  PONS_LAUNCH_ABI_VERIFIED,
-  createLaunchAbi,
+  PONS_DIRECT_LAUNCH_ENABLED,
+  buildLaunchTx,
   decodeLaunchReceipt,
 } from "@/lib/pons";
 import { explorerUrl } from "@/lib/robinhood/chain";
@@ -17,13 +16,17 @@ import type { LaunchKit, LaunchResult } from "../types";
 // Step 4: Sign & submit.
 //
 // Two paths:
-//   1. PONS_LAUNCH_ABI_VERIFIED = true  → wallet signs the write directly
-//   2. PONS_LAUNCH_ABI_VERIFIED = false → guided handoff to the official
-//      Pons launchpad UI at ponsfamily.com/launchpad/create. The kit
-//      copies to clipboard so paste-in is one action.
+//   1. PONS_DIRECT_LAUNCH_ENABLED = true  → wallet signs launchToken()
+//      on the factory directly (ABI verified from Blockscout source).
+//   2. PONS_DIRECT_LAUNCH_ENABLED = false → guided handoff to the
+//      official Pons launchpad UI. This is the CURRENT state: the Pons
+//      factory whitelists launcher addresses and reverts everyone else
+//      with NotWhitelisted(), so in-app signing would only burn gas.
+//      The kit copies to clipboard so paste-in is one action.
 //
-// Once we confirm the real launch selector on Blockscout, flipping the
-// flag switches every user to in-app signing without touching this UI.
+// The moment Pons whitelists a HAMR launcher, flipping the flag in
+// lib/pons/write.ts switches every user to in-app signing without
+// touching this UI.
 
 interface Props {
   kit: LaunchKit;
@@ -86,9 +89,9 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
   async function handleSign() {
     setLocalError(null);
     resetWrite();
-    if (!PONS_LAUNCH_ABI_VERIFIED) {
+    if (!PONS_DIRECT_LAUNCH_ENABLED) {
       setLocalError(
-        "Pons launch selector is still being finalized. Use the manual handoff below for now.",
+        "The Pons factory currently only accepts whitelisted launcher addresses — use the official launchpad handoff below while HAMR's whitelist request is pending.",
       );
       return;
     }
@@ -96,26 +99,17 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       setLocalError("Connect your wallet first.");
       return;
     }
-    const s = kit.socials ?? {};
-    const feeWei = parseEther(PONS_LAUNCH_PARAMS.launchFeeEth);
-    const buyWei = initialBuyEth ? parseEther(initialBuyEth) : 0n;
     try {
-      await writeContractAsync({
-        address: PONS_CONTRACTS.factory,
-        abi: createLaunchAbi,
-        functionName: "launch",
-        args: [
-          kit.tokenName,
-          kit.ticker,
-          kit.logoUrl ?? "",
-          kit.shortDescription,
-          s.twitter ?? "",
-          s.telegram ?? "",
-          s.discord ?? "",
-          s.website ?? "",
-        ],
-        value: feeWei + buyWei,
+      const prepared = buildLaunchTx({
+        name: kit.tokenName,
+        symbol: kit.ticker,
+        logo: kit.logoUrl ?? "",
+        description: kit.shortDescription,
+        socials: kit.socials,
+        feeWallet: address,
+        initialBuyEth: initialBuyEth || undefined,
       });
+      await writeContractAsync(prepared);
     } catch (err) {
       setLocalError(
         err instanceof Error ? err.message : "Wallet rejected the launch tx",
@@ -176,12 +170,12 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
         </ol>
       </div>
 
-      {!PONS_LAUNCH_ABI_VERIFIED && (
+      {!PONS_DIRECT_LAUNCH_ENABLED && (
         <div className="card !p-5 !border-amber-500/40 !bg-amber-500/5 space-y-3">
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
             <div className="text-[12px] font-semibold text-amber-200 leading-relaxed">
-              In-app signing is being enabled. For now, copy the kit and
+              Pons currently allows launches only from whitelisted launcher addresses (the factory reverts everyone else). While HAMR's whitelist request is pending, copy the kit and
               finish on the official Pons launchpad — you get the same
               token address either way.
             </div>
@@ -226,7 +220,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
         <button
           type="button"
           onClick={handleSign}
-          disabled={busy || !PONS_LAUNCH_ABI_VERIFIED}
+          disabled={busy || !PONS_DIRECT_LAUNCH_ENABLED}
           className="btn btn-primary !py-2.5 !px-5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Rocket className={`h-3.5 w-3.5 ${busy ? "animate-pulse" : ""}`} />
