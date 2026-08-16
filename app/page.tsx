@@ -1,4 +1,3 @@
-import BoardHero from "@/components/landing/BoardHero";
 import BoardGrid from "@/components/landing/BoardGrid";
 
 // HAMR.fun home — Pump.fun-style board page. The token grid IS the home;
@@ -14,10 +13,5 @@ import BoardGrid from "@/components/landing/BoardGrid";
 export const dynamic = "force-dynamic";
 
 export default function LandingPage() {
-  return (
-    <>
-      <BoardHero />
-      <BoardGrid />
-    </>
-  );
+  return <BoardGrid />;
 }
