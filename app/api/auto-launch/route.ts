@@ -117,59 +117,88 @@ export async function POST(req: NextRequest) {
     const oneDayAgo = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000);
     const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
-    const llmRes = await callLLM({
-      messages: buildAutoConceptMessages({ excludeXUrls: excludeXUrls }),
-      responseFormat: "json",
-      // 1500 (was 800) to give Grok room to emit the full JSON shape after
-      // walking 30-50 candidates through the priority order. Truncated JSON
-      // = parseAutoConcept throws = mock fallback. Reproduced once in prod.
-      maxTokens: 1500,
-      temperature: 0.95, // higher = more variety so we don't keep getting the same idea
-      model: searchModel,
-      feature: "auto-launch",
-      walletPubkey,
-      // ALWAYS attach Live Search, the whole point of Auto-pilot is that
-      // Grok scans X in real time and the picked post is genuinely fresh.
-      // We keep the env override for emergencies (xAI outage), but the
-      // default is now ON.
-      ...(wantLiveSearch || true
-        ? {
-            liveSearch: {
-              fromDate: isoDate(oneDayAgo),
-              toDate: isoDate(today),
-              maxResults: 40, // bigger pool, most candidates will fail the 500K-view floor
-              enableImageUnderstanding: true,
-            },
-          }
-        : {}),
-    });
+    const makeConceptCall = (exclude: string[]) =>
+      callLLM({
+        messages: buildAutoConceptMessages({ excludeXUrls: exclude }),
+        responseFormat: "json",
+        // 1500 (was 800) to give Grok room to emit the full JSON shape after
+        // walking 30-50 candidates through the priority order. Truncated JSON
+        // = parseAutoConcept throws = mock fallback. Reproduced once in prod.
+        maxTokens: 1500,
+        temperature: 0.95, // higher = more variety so we don't keep getting the same idea
+        model: searchModel,
+        feature: "auto-launch",
+        walletPubkey,
+        // ALWAYS attach Live Search, the whole point of Auto-pilot is that
+        // Grok scans X in real time and the picked post is genuinely fresh.
+        // We keep the env override for emergencies (xAI outage), but the
+        // default is now ON.
+        ...(wantLiveSearch || true
+          ? {
+              liveSearch: {
+                fromDate: isoDate(oneDayAgo),
+                toDate: isoDate(today),
+                maxResults: 40, // bigger pool, most candidates will fail the 500K-view floor
+                enableImageUnderstanding: true,
+              },
+            }
+          : {}),
+      });
 
-    let concept: AutoConceptResult;
-    try {
-      concept = parseAutoConcept(llmRes.content);
-    } catch (parseErr) {
-      // Surface the actual Grok output so we can see WHY parse failed
-      // (truncated? prose explanation? missing fields?). Without this log
-      // the 200-with-mock looked like a successful run from outside.
-      console.error(
-        `[auto-launch] parseAutoConcept failed: ${(parseErr as Error).message}\nraw Grok content (first 1500 chars):\n${(llmRes.content || "").slice(0, 1500)}`,
-      );
-      throw parseErr;
-    }
+    let llmRes = await makeConceptCall(excludeXUrls);
 
-    // Hard dedup check, if Grok ignored the exclude list and re-picked a
-    // URL that's already taken (launched OR reserved), refuse to anchor on
-    // it. Drop the X attribution; the wizard will use a safe ticker-search
-    // Pons URL as the token's Twitter link instead. Better an
-    // unattributed launch than a duplicate.
+    const parseOrLog = (content: string): AutoConceptResult => {
+      try {
+        return parseAutoConcept(content);
+      } catch (parseErr) {
+        // Surface the actual Grok output so we can see WHY parse failed
+        // (truncated? prose explanation? missing fields?). Without this log
+        // the 200-with-mock looked like a successful run from outside.
+        console.error(
+          `[auto-launch] parseAutoConcept failed: ${(parseErr as Error).message}\nraw Grok content (first 1500 chars):\n${(content || "").slice(0, 1500)}`,
+        );
+        throw parseErr;
+      }
+    };
+
+    let concept = parseOrLog(llmRes.content);
+
+    // Hard dedup check — if Grok ignored the exclude list and re-picked a
+    // URL that's already taken (launched OR reserved), RETRY ONCE with the
+    // offending URL added to the exclude list. The old behavior (strip the
+    // attribution but keep the concept) meant users saw the SAME meme again
+    // — now with no image and no link, the worst of both worlds. A retry
+    // costs one more LLM round-trip but actually delivers a fresh post.
     const excludeSet = new Set(excludeXUrls);
     if (concept.originXUrl && excludeSet.has(concept.originXUrl)) {
       console.warn(
-        `[auto-launch] Grok returned an excluded URL (${concept.originXUrl}), dropping attribution`,
+        `[auto-launch] Grok returned an excluded URL (${concept.originXUrl}) — retrying once with it force-excluded`,
       );
-      concept.originXUrl = undefined;
-      concept.originXAuthor = undefined;
-      concept.originImageUrl = undefined;
+      try {
+        const retryRes = await makeConceptCall([
+          ...excludeXUrls,
+          concept.originXUrl,
+        ]);
+        const retryConcept = parseOrLog(retryRes.content);
+        if (
+          retryConcept.originXUrl &&
+          !excludeSet.has(retryConcept.originXUrl) &&
+          retryConcept.originXUrl !== concept.originXUrl
+        ) {
+          llmRes = retryRes;
+          concept = retryConcept;
+        } else {
+          // Retry still collided (or came back unattributed) — fall back to
+          // the stripped-attribution behavior rather than a third call.
+          concept.originXUrl = undefined;
+          concept.originXAuthor = undefined;
+          concept.originImageUrl = undefined;
+        }
+      } catch {
+        concept.originXUrl = undefined;
+        concept.originXAuthor = undefined;
+        concept.originImageUrl = undefined;
+      }
     }
 
     // Reserve the URL IMMEDIATELY so the next concurrent caller (within

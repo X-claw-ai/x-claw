@@ -107,14 +107,25 @@ The test: could a stranger on X read your summary, recognize WHICH POST you mean
 
 STEP 4 — ORGANIC CONTENT FILTER. The post you anchor on MUST be:
    ✓ Organic cultural content — a joke, image, observation, video clip, screenshot, take, format, character
-   ✓ Has at least one attached image (we'll use it as the token logo)
+   ✓ HAS AT LEAST ONE ATTACHED IMAGE — NON-NEGOTIABLE. The image becomes the
+     token logo, so a post without a visible pbs.twimg.com image URL in your
+     search results is DISQUALIFIED no matter how viral it is. Text-only
+     posts and video-only posts (no poster image) are OUT.
    ✗ NOT a token shill post (no "$TICKER buy now", "CA:", contract addresses, pump.fun / pons.family / uniswap links, dexscreener links, "send it" calls, "fair launch live")
    ✗ NOT from a memecoin alpha account, pump caller, or known shill account
    ✗ NOT a screenshot of a token chart or transaction
    ✗ NOT a reply chain promoting an existing coin
 The cleanest signal: would this post still be funny/interesting if crypto didn't exist? If yes → eligible. If no → skip.
 
-STEP 5 — PICK THE BIGGEST. Start at the TOP of your view-count-descending ranked list and walk down. The first candidate that also passes STEPS 3 + 4 is your pick. Do NOT skip a 10M-view post because a 600K-view one is "more your taste" — virality #1 always. Cuteness, aesthetic, niche fit are all secondary. Raw view count wins.
+STEP 5 — BUILD THE TOP TIER, THEN PICK AT RANDOM.
+Walk your view-count-descending list and keep every candidate that passes
+STEPS 3 + 4 until you have up to 8 qualifying posts (the "TOP TIER").
+Then pick ONE from the TOP TIER **AT RANDOM** — use the request_id in the
+user message as your randomness seed so different calls land on different
+posts. Do NOT always take #1: every call should be able to surface a
+different member of the day's top tier. All of them are already massive,
+so variety costs nothing. What you must NEVER do is dip below the
+engagement floor for variety — random WITHIN the tier, never outside it.
 
 STEP 6 — BUILD OUR CONCEPT on top of that exact post: name, ticker, theme, visual direction.
 
@@ -155,8 +166,12 @@ Output schema:
 }`;
 
   // Inject a tiny salt so the model doesn't keep returning the same concept.
+  // STEP 5 tells the model to use this as its randomness seed when picking
+  // from the top tier, so back-to-back calls land on different posts.
   const salt = Math.random().toString(36).slice(2, 8);
   const user = `Generate ONE memecoin launch concept right now. Variety matters — pick something I couldn't have come up with alone. Avoid generic AI/cat/dog defaults unless you have a specific, fresh angle. Anchor it to a memorable visual hook.
+
+Remember STEP 5: build the top tier, then use the request_id below as your randomness seed to pick one member of the tier at random — do NOT default to the #1 biggest every time. The post MUST have an attached image (it becomes the logo).
 
 Output JSON only. (request_id: ${salt})`;
 
