@@ -19,6 +19,10 @@
  * `HamrLogo` once the rebrand settles.
  */
 import Image from "next/image";
+import { Silkscreen } from "next/font/google";
+
+// Pixel wordmark — retro terminal bitmap look.
+const pixel = Silkscreen({ weight: "400", subsets: ["latin"] });
 
 export default function KokiLogo({
   height = 32,
@@ -45,10 +49,7 @@ export default function KokiLogo({
         gap: Math.round(height * 0.2),
         height,
         color: "var(--text)",
-        fontFamily:
-          "'Inter','Manrope','Hanken Grotesk',-apple-system,'SF Pro Display',system-ui,sans-serif",
-        fontWeight: 900,
-        letterSpacing: "-0.03em",
+        letterSpacing: "0.02em",
       }}
       role="img"
       aria-label="hamr.fun"
@@ -65,8 +66,11 @@ export default function KokiLogo({
           objectFit: "contain",
         }}
       />
-      <span style={{ fontSize: Math.round(height * 0.55), lineHeight: 1 }}>
-        hamr<span style={{ opacity: 0.6 }}>.fun</span>
+      <span
+        className={pixel.className}
+        style={{ fontSize: Math.round(height * 0.52), lineHeight: 1 }}
+      >
+        HAMR<span style={{ opacity: 0.6 }}>.FUN</span>
       </span>
     </span>
   );
