@@ -27,7 +27,7 @@ export function PhaseProgress({
   const idx = ORDER.indexOf(current);
   return (
     <div className={cn("w-full", className)}>
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
         {ORDER.map((p, i) => {
           const m = META[p];
           const done = i < idx;
@@ -44,7 +44,7 @@ export function PhaseProgress({
             <Wrap key={p}>
               <div
                 className={cn(
-                  "px-3 py-2.5 text-center border border-[var(--border-strong)] rounded-[10px] transition-all",
+                  "px-1 sm:px-3 py-2 sm:py-2.5 text-center border border-[var(--border-strong)] rounded-[10px] transition-all overflow-hidden",
                   active && "bg-ink-1000",
                   !active && done && "bg-cream-50",
                   !active && !done && "bg-cream-50 hover:bg-cream-100"
@@ -52,7 +52,7 @@ export function PhaseProgress({
               >
                 <div
                   className={cn(
-                    "text-[10px] font-extrabold tracking-[0.16em]",
+                    "text-[8px] sm:text-[10px] font-extrabold tracking-[0.08em] sm:tracking-[0.16em]",
                     active ? "text-koki-500" : "text-ink-300/70"
                   )}
                 >
@@ -60,7 +60,7 @@ export function PhaseProgress({
                 </div>
                 <div
                   className={cn(
-                    "mt-0.5 text-[13px] font-black tracking-tight",
+                    "mt-0.5 text-[10px] sm:text-[13px] font-black tracking-tight truncate",
                     active ? "text-koki-500" : "text-ink-300"
                   )}
                 >
