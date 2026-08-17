@@ -10,6 +10,8 @@ import {
   Loader2,
   ArrowDownUp,
   Flame,
+  Copy,
+  Check,
 } from "lucide-react";
 import { formatEther, parseEther, type Address } from "viem";
 import {
@@ -172,6 +174,7 @@ export default function LaunchMonitorPage({ token }: Props) {
 
             {/* Socials — read from chain, set at launch */}
             <div className="mt-4 flex items-center gap-2 flex-wrap">
+              <CopyCa address={token} />
               {meta.twitterUrl && (
                 <SocialChip href={meta.twitterUrl} label="X / Twitter" />
               )}
@@ -620,5 +623,31 @@ function StatCard({ label, value }: { label: string; value: string }) {
         {value}
       </div>
     </div>
+  );
+}
+
+
+/** Contract address chip — click to copy the full CA. */
+function CopyCa({ address }: { address: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void navigator.clipboard?.writeText(address).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1600);
+        });
+      }}
+      title={address}
+      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] font-extrabold text-ink-300/80 hover:text-ink-300 hover:border-koki-500/60 transition-colors font-mono"
+    >
+      CA: {address.slice(0, 6)}…{address.slice(-4)}
+      {copied ? (
+        <Check className="h-3 w-3 text-emerald-400" />
+      ) : (
+        <Copy className="h-3 w-3" />
+      )}
+    </button>
   );
 }
