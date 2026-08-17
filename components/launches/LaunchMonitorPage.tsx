@@ -34,6 +34,7 @@ import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
 import PriceChart from "./PriceChart";
 import { useTrades } from "./useTrades";
+import HoldersTable from "./HoldersTable";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -299,6 +300,11 @@ export default function LaunchMonitorPage({ token }: Props) {
             />
             <StatCard label="Supply" value="1B fixed" />
           </div>
+
+          {/* Holders — rebuilt live from Transfer events */}
+          {tokenAddr && (
+            <HoldersTable token={tokenAddr} creator={meta.creator} />
+          )}
         </div>
 
         {/* ── Right column: trade box ─────────────────────────────── */}
