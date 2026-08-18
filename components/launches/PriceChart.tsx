@@ -106,6 +106,9 @@ export default function PriceChart({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const [interval, setIntervalSec] = useState<number>(300);
+  // Chart mounts via async import — data must not be pushed until the
+  // series exists, and the push effect must re-run once it does.
+  const [chartReady, setChartReady] = useState(false);
 
   const candles = useMemo(
     () => (data ? buildCandles(data, interval, ethUsd) : []),
@@ -183,6 +186,7 @@ export default function PriceChart({
       });
       chartRef.current = chart;
       seriesRef.current = series;
+      setChartReady(true);
 
       const ro = new ResizeObserver(() => {
         chart.applyOptions({ width: el.clientWidth });
@@ -193,6 +197,7 @@ export default function PriceChart({
         chart.remove();
         chartRef.current = null;
         seriesRef.current = null;
+        setChartReady(false);
       };
     }
 
@@ -203,12 +208,13 @@ export default function PriceChart({
     };
   }, []);
 
-  // Push candles whenever data / interval / price scale changes.
+  // Push candles whenever data / interval / price scale changes — and
+  // once more the moment the chart finishes mounting.
   useEffect(() => {
-    if (!seriesRef.current || candles.length === 0) return;
+    if (!chartReady || !seriesRef.current || candles.length === 0) return;
     seriesRef.current.setData(candles);
     chartRef.current?.timeScale().fitContent();
-  }, [candles]);
+  }, [candles, chartReady]);
 
   return (
     <div className="card !p-5">
