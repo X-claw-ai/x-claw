@@ -51,27 +51,44 @@ function buildCandles(
       c.close = price;
     }
   }
-  const out = [...buckets.values()].sort((a, b) => a.time - b.time);
+  const sparse = [...buckets.values()].sort((a, b) => a.time - b.time);
   // Candle continuity: each bucket opens at the previous close, the way
   // an exchange feed would render it.
-  for (let i = 1; i < out.length; i++) {
-    out[i].open = out[i - 1].close;
-    out[i].high = Math.max(out[i].high, out[i].open);
-    out[i].low = Math.min(out[i].low, out[i].open);
+  for (let i = 1; i < sparse.length; i++) {
+    sparse[i].open = sparse[i - 1].close;
+    sparse[i].high = Math.max(sparse[i].high, sparse[i].open);
+    sparse[i].low = Math.min(sparse[i].low, sparse[i].open);
   }
-  // Extend the last price to "now" so a quiet market still shows a
-  // current candle instead of ending in the past.
-  const last = out[out.length - 1];
-  const nowBucket =
-    Math.floor(Date.now() / 1000 / intervalSec) * intervalSec;
-  if (nowBucket > last.time) {
-    out.push({
-      time: nowBucket as UTCTimestamp,
-      open: last.close,
-      high: last.close,
-      low: last.close,
-      close: last.close,
-    });
+
+  // Gap-fill: quiet intervals become flat candles at the previous
+  // close, so a token with 2 trades a day still draws a continuous
+  // chart instead of two invisible dots. Capped so a long-lived token
+  // on a small interval can't allocate silly amounts of candles.
+  const nowBucket = Math.floor(Date.now() / 1000 / intervalSec) * intervalSec;
+  const end = Math.max(nowBucket, sparse[sparse.length - 1].time as number);
+  const span = end - (sparse[0].time as number);
+  const MAX_CANDLES = 2000;
+  if (span / intervalSec + 1 > MAX_CANDLES) {
+    // Too many buckets to fill — return the sparse set untouched.
+    return sparse;
+  }
+  const out: Candle[] = [];
+  let si = 0;
+  let lastClose = sparse[0].open;
+  for (let t = sparse[0].time as number; t <= end; t += intervalSec) {
+    if (si < sparse.length && (sparse[si].time as number) === t) {
+      out.push(sparse[si]);
+      lastClose = sparse[si].close;
+      si++;
+    } else {
+      out.push({
+        time: t as UTCTimestamp,
+        open: lastClose,
+        high: lastClose,
+        low: lastClose,
+        close: lastClose,
+      });
+    }
   }
   return out;
 }
