@@ -34,7 +34,12 @@ export const wagmiConfig = getDefaultConfig({
   projectId: WC_PROJECT_ID,
   chains: [robinhoodChain],
   transports: {
-    [robinhoodChain.id]: http(),
+    [robinhoodChain.id]: http(undefined, {
+      batch: { wait: 16 },
+      retryCount: 5,
+      retryDelay: 400,
+      timeout: 15_000,
+    }),
   },
   ssr: true,
 }) as ReturnType<typeof createConfig>;

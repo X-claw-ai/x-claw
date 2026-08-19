@@ -16,7 +16,15 @@ export function getPublicClient(): PublicClient {
   if (cached) return cached;
   cached = createPublicClient({
     chain: robinhoodChain,
-    transport: http(),
+    // The public Robinhood RPC intermittently returns HTTP 4xx under
+    // load. Batch JSON-RPC calls to cut request count and retry with
+    // backoff so a transient limiter never surfaces as a user error.
+    transport: http(undefined, {
+      batch: { wait: 16 },
+      retryCount: 5,
+      retryDelay: 400,
+      timeout: 15_000,
+    }),
   }) as PublicClient;
   return cached;
 }
