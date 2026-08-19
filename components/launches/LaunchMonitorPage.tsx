@@ -32,6 +32,7 @@ import {
   V2_PARAMS,
   quoteV2,
   swapRouterAbi,
+  ROUTER_ADDRESS_THIS,
 } from "@/lib/hamr/v2";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { getPublicClient } from "@/lib/robinhood/client";
@@ -343,9 +344,7 @@ export default function LaunchMonitorPage({ token }: Props) {
 
 // ── Trade box — canonical Uniswap SwapRouter, same path as any bot ──
 
-const DEADLINE_S = 600n;
 const MAX_UINT = 2n ** 256n - 1n;
-const ZERO_ADDR = "0x0000000000000000000000000000000000000000" as Address;
 
 function TradeBox({
   token,
@@ -433,7 +432,6 @@ function TradeBox({
       setLocalError("Enter an amount.");
       return;
     }
-    const deadline = BigInt(Math.floor(Date.now() / 1000)) + DEADLINE_S;
     const minOut = quote ? (quote * 98n) / 100n : 0n; // 2% slippage
     try {
       if (side === "buy") {
@@ -462,7 +460,6 @@ function TradeBox({
           tokenOut: token,
           fee: V2_PARAMS.poolFee,
           recipient: address,
-          deadline,
           amountIn: value,
           amountOutMinimum: minOut,
           sqrtPriceLimitX96: 0n,
@@ -511,8 +508,9 @@ function TradeBox({
             ...aFees,
           });
         }
-        // Token → WETH lands on the router (recipient 0 = router), then
-        // unwrapWETH9 sends native ETH home. Single multicall signature.
+        // Token → WETH lands ON the router (SwapRouter02 sentinel
+        // address(2) = the router itself), then unwrapWETH9 sends
+        // native ETH home. Single multicall signature.
         const swapData = encodeFunctionData({
           abi: swapRouterAbi,
           functionName: "exactInputSingle",
@@ -521,8 +519,7 @@ function TradeBox({
               tokenIn: token,
               tokenOut: HAMR_V2.weth,
               fee: V2_PARAMS.poolFee,
-              recipient: ZERO_ADDR,
-              deadline,
+              recipient: ROUTER_ADDRESS_THIS,
               amountIn: tokenWei,
               amountOutMinimum: minOut,
               sqrtPriceLimitX96: 0n,

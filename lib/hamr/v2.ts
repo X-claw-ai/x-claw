@@ -65,13 +65,23 @@ export const quoterV2Abi = parseAbi([
   "function quoteExactInputSingle(QuoteExactInputSingleParams params) returns (uint256 amountOut, uint160 sqrtPriceX96After, uint32 initializedTicksCrossed, uint256 gasEstimate)",
 ]);
 
+// NOTE: the router on Robinhood Chain is SwapRouter02 — its
+// exactInputSingle has NO deadline field (verified on-chain: the
+// classic 0x414bf389 selector reverts, 0x04e45aaf succeeds). Special
+// recipient values also differ from the classic router: address(1) =
+// msg.sender, address(2) = the router itself (used before unwrapWETH9).
 export const swapRouterAbi = parseAbi([
-  "struct ExactInputSingleParams { address tokenIn; address tokenOut; uint24 fee; address recipient; uint256 deadline; uint256 amountIn; uint256 amountOutMinimum; uint160 sqrtPriceLimitX96; }",
+  "struct ExactInputSingleParams { address tokenIn; address tokenOut; uint24 fee; address recipient; uint256 amountIn; uint256 amountOutMinimum; uint160 sqrtPriceLimitX96; }",
   "function exactInputSingle(ExactInputSingleParams params) payable returns (uint256 amountOut)",
   "function unwrapWETH9(uint256 amountMinimum, address recipient) payable",
   "function multicall(bytes[] data) payable returns (bytes[] results)",
   "function refundETH() payable",
 ]);
+
+/** SwapRouter02 sentinel: swap output stays ON the router (for a
+ *  follow-up unwrapWETH9 in the same multicall). */
+export const ROUTER_ADDRESS_THIS =
+  "0x0000000000000000000000000000000000000002" as Address;
 
 // ── Price math ───────────────────────────────────────────────────────
 

@@ -68,13 +68,12 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     if (buyWei > 0n && address) {
       setBuying(true);
       try {
-        const deadline = BigInt(Math.floor(Date.now() / 1000)) + 600n;
+        // SwapRouter02 — no deadline field on exactInputSingle.
         const params = {
           tokenIn: HAMR_V2.weth,
           tokenOut: token,
           fee: V2_PARAMS.poolFee,
           recipient: address,
-          deadline,
           amountIn: buyWei,
           amountOutMinimum: 0n, // creator's own launch — no slippage guard
           sqrtPriceLimitX96: 0n,
