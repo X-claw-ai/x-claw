@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { WagmiProvider, useAccount, useReconnect } from "wagmi";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { WagmiProvider, useAccount, useConnect, useReconnect } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@rainbow-me/rainbowkit/styles.css";
@@ -29,31 +29,72 @@ import { wagmiConfig } from "@/lib/evm/wagmi-config";
 function MobileSessionResume() {
   const { isConnected } = useAccount();
   const { reconnect } = useReconnect();
+  const { connectAsync, connectors } = useConnect();
+  const adopting = useRef(false);
 
   useEffect(() => {
     if (isConnected) return;
+    let cancelled = false;
     let timers: ReturnType<typeof setTimeout>[] = [];
+    let wcProvider: {
+      session?: unknown;
+      accounts?: string[];
+      on?: (ev: string, cb: () => void) => void;
+      removeListener?: (ev: string, cb: () => void) => void;
+    } | null = null;
+
+    // Adopt a WalletConnect session that settled while this page was
+    // frozen or even fully reloaded. Booting the provider re-subscribes
+    // to the relay, which delivers the queued approval; if a live
+    // session is there, hand it to wagmi WITHOUT opening any modal.
+    const adopt = async () => {
+      if (cancelled || adopting.current) return;
+      const wc = connectors.find((c) => c.id === "walletConnect");
+      if (!wc) return;
+      try {
+        adopting.current = true;
+        wcProvider = (await wc.getProvider()) as typeof wcProvider;
+        if (cancelled || !wcProvider) return;
+        if (wcProvider.session && (wcProvider.accounts?.length ?? 0) > 0) {
+          await connectAsync({ connector: wc });
+          return;
+        }
+        // Session may still be settling — adopt the moment it lands.
+        const onConnect = () => {
+          void connectAsync({ connector: wc }).catch(() => {});
+        };
+        wcProvider.on?.("connect", onConnect);
+      } catch {
+        /* no pending session — nothing to adopt */
+      } finally {
+        adopting.current = false;
+      }
+    };
 
     const kick = () => {
       if (document.visibilityState !== "visible") return;
       timers.forEach(clearTimeout);
-      // Immediate + a couple of delayed retries while the WC relay
-      // websocket comes back up.
-      timers = [0, 1200, 3500].map((ms) =>
-        setTimeout(() => reconnect(), ms),
+      // Immediate + delayed retries while the relay socket re-opens.
+      timers = [0, 1500, 4000].map((ms) =>
+        setTimeout(() => {
+          reconnect();
+          void adopt();
+        }, ms),
       );
     };
 
+    kick(); // also run on plain page load (mobile reload case)
     document.addEventListener("visibilitychange", kick);
     window.addEventListener("focus", kick);
     window.addEventListener("pageshow", kick);
     return () => {
+      cancelled = true;
       timers.forEach(clearTimeout);
       document.removeEventListener("visibilitychange", kick);
       window.removeEventListener("focus", kick);
       window.removeEventListener("pageshow", kick);
     };
-  }, [isConnected, reconnect]);
+  }, [isConnected, reconnect, connectAsync, connectors]);
 
   return null;
 }
