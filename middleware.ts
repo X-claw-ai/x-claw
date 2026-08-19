@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Flip this single flag to open/close the site. While true, every page
 // rewrites to /coming-soon. APIs, static assets, and _next stay live so
 // the launch flip is instant with no cold surprises.
-const COMING_SOON = true;
+const COMING_SOON = false;
 
 export function middleware(req: NextRequest) {
   if (!COMING_SOON) return NextResponse.next();
