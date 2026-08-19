@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { wagmiConfig } from "@/lib/evm/wagmi-config";
-import WcDebugPanel from "@/components/debug/WcDebugPanel";
 
 // Wallet provider boundary. Wraps the entire app so any client component
 // can call wagmi hooks (useAccount / useSignMessage / useWriteContract).
@@ -123,7 +122,6 @@ export function KokiWalletProvider({ children }: { children: ReactNode }) {
           }}
         >
           <MobileSessionResume />
-          <WcDebugPanel />
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>
