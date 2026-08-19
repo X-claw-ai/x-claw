@@ -34,7 +34,9 @@ export const wagmiConfig = getDefaultConfig({
   projectId: WC_PROJECT_ID,
   chains: [robinhoodChain],
   transports: {
-    [robinhoodChain.id]: http(undefined, {
+    // Same-origin proxy — see app/api/rpc/route.ts. wagmi config only
+    // ever runs in the browser, so the relative URL is always valid.
+    [robinhoodChain.id]: http("/api/rpc", {
       batch: { wait: 16 },
       retryCount: 5,
       retryDelay: 400,

@@ -14,12 +14,14 @@ let cached: PublicClient | null = null;
 
 export function getPublicClient(): PublicClient {
   if (cached) return cached;
+  // Browsers go through our same-origin /api/rpc proxy — the public
+  // Robinhood RPC geo/rate-blocks some visitors' IPs directly, and the
+  // proxy sidesteps that entirely. Server-side code talks to the RPC
+  // directly (Vercel egress is not blocked).
+  const url = typeof window !== "undefined" ? "/api/rpc" : undefined;
   cached = createPublicClient({
     chain: robinhoodChain,
-    // The public Robinhood RPC intermittently returns HTTP 4xx under
-    // load. Batch JSON-RPC calls to cut request count and retry with
-    // backoff so a transient limiter never surfaces as a user error.
-    transport: http(undefined, {
+    transport: http(url, {
       batch: { wait: 16 },
       retryCount: 5,
       retryDelay: 400,
