@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/Badge";
 import PriceChart from "./PriceChart";
 import { useTrades } from "./useTrades";
 import HoldersTable from "./HoldersTable";
+import TradesTable from "./TradesTable";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -300,6 +301,9 @@ export default function LaunchMonitorPage({ token }: Props) {
             />
             <StatCard label="Supply" value="1B fixed" />
           </div>
+
+          {/* Live trade feed — same on-chain events as the chart */}
+          <TradesTable data={trades} failed={tradesFailed} />
 
           {/* Holders — rebuilt live from Transfer events */}
           {tokenAddr && (

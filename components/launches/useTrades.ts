@@ -25,6 +25,11 @@ export interface TradePoint {
   ts: number; // unix seconds (0 when unknown)
   ethAmount: number; // trade size in ETH
   kind: "launch" | "buy" | "sell";
+  /** Wallet that made the trade (undefined for the launch point). */
+  trader?: string;
+  /** Token amount bought/sold, in whole tokens. */
+  tokenAmount?: number;
+  txHash?: string;
 }
 
 export interface TradesData {
@@ -105,6 +110,10 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
             newVirtualEth?: bigint;
             ethIn?: bigint;
             ethOut?: bigint;
+            buyer?: string;
+            seller?: string;
+            tokensOut?: bigint;
+            tokensIn?: bigint;
           };
           if (typeof args.newVirtualEth !== "bigint") continue;
           const vEth = Number(formatEther(args.newVirtualEth));
@@ -115,6 +124,13 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
               formatEther(kind === "buy" ? (args.ethIn ?? 0n) : (args.ethOut ?? 0n)),
             ),
             kind,
+            trader: kind === "buy" ? args.buyer : args.seller,
+            tokenAmount: Number(
+              formatEther(
+                kind === "buy" ? (args.tokensOut ?? 0n) : (args.tokensIn ?? 0n),
+              ),
+            ),
+            txHash: log.transactionHash ?? undefined,
           });
         }
 
