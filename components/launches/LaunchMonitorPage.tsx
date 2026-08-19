@@ -34,6 +34,7 @@ import {
   swapRouterAbi,
 } from "@/lib/hamr/v2";
 import { explorerUrl } from "@/lib/robinhood/chain";
+import { getPublicClient } from "@/lib/robinhood/client";
 import { Badge } from "@/components/ui/Badge";
 import PriceChart from "./PriceChart";
 import { useTrades } from "./useTrades";
@@ -438,6 +439,24 @@ function TradeBox({
       if (side === "buy") {
         // ETH in → router wraps to WETH internally (tokenIn = WETH9).
         const value = parseEther(amount);
+        // Preflight: on this chain an underfunded estimate surfaces as a
+        // bare "reverted", which tells the user nothing. Check the REAL
+        // balance first and say exactly what's missing.
+        try {
+          const bal = await getPublicClient().getBalance({ address });
+          const gasBuffer = parseEther("0.00003");
+          if (bal < value + gasBuffer) {
+            setLocalError(
+              `Not enough ETH on Robinhood Chain — this wallet holds ${Number(
+                formatEther(bal),
+              ).toFixed(5)} ETH, but this buy needs ${amount} ETH + gas. ` +
+                "Bridge or top up Robinhood Chain ETH and try again.",
+            );
+            return;
+          }
+        } catch {
+          /* balance read hiccup — let the wallet handle it */
+        }
         const params = {
           tokenIn: HAMR_V2.weth,
           tokenOut: token,
@@ -466,6 +485,14 @@ function TradeBox({
         });
       } else {
         const tokenWei = parseEther(amount);
+        if (balance !== null && balance < tokenWei) {
+          setLocalError(
+            `You hold ${(Number(balance) / 1e18).toLocaleString(undefined, {
+              maximumFractionDigits: 0,
+            })} ${symbol} — can't sell ${amount}.`,
+          );
+          return;
+        }
         if ((allowance ?? 0n) < tokenWei) {
           // One-time max approve, then the sell in a second signature.
           const approveArgs = [HAMR_V2.swapRouter, MAX_UINT] as const;

@@ -17,6 +17,11 @@ export function humanizeTxError(err: unknown): string {
   if (m.includes("http client error") || m.includes("http request failed")) {
     return "Network hiccup talking to the chain — wait a few seconds and try again.";
   }
+  if (m.includes("reverted")) {
+    // On this chain an underfunded wallet often surfaces as a bare
+    // revert during gas estimation — say so instead of showing nothing.
+    return "The chain rejected this transaction in simulation. Most common cause: not enough ETH on Robinhood Chain for the amount + gas. Top up and retry; if it persists, try a smaller amount.";
+  }
   // Fallback: first line only, no calldata walls.
   return msg.split("\n")[0].slice(0, 200);
 }
