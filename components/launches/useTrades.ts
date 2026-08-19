@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { formatEther, type Address } from "viem";
 import { getPublicClient } from "@/lib/robinhood/client";
 import {
+  HAMR_V2,
   poolSwapEvent,
   priceEthFromSqrt,
   readPoolOf,
@@ -43,6 +44,13 @@ export interface TradesData {
 
 const MAX_EVENTS = 300;
 const MAX_BLOCK_LOOKUPS = 120;
+const MAX_SENDER_LOOKUPS = 60;
+
+// txHash → real trader (tx origin). Sells route through the router, so
+// the Swap event's `recipient` is the ROUTER, not the person — resolve
+// the actual wallet from the transaction itself. Cached forever (a
+// mined tx never changes).
+const senderCache = new Map<string, string>();
 
 export function useTrades(token?: Address, refreshMs = 20_000) {
   const [data, setData] = useState<TradesData | null>(null);
@@ -136,6 +144,34 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
             tokenAmount: Math.abs(Number(formatEther(tokenDelta))),
             txHash: l.transactionHash ?? undefined,
           });
+        }
+
+        // Fix attribution: whenever the event's recipient is the router
+        // (all sells, some aggregator buys), swap in the tx origin.
+        const routerLc = HAMR_V2.swapRouter.toLowerCase();
+        const needsOrigin = points.filter(
+          (p) =>
+            p.txHash &&
+            (p.trader ?? "").toLowerCase() === routerLc &&
+            !senderCache.has(p.txHash),
+        );
+        await Promise.all(
+          needsOrigin.slice(-MAX_SENDER_LOOKUPS).map(async (p) => {
+            try {
+              const tx = await client.getTransaction({
+                hash: p.txHash as `0x${string}`,
+              });
+              senderCache.set(p.txHash!, tx.from);
+            } catch {
+              /* keep the router label rather than lying */
+            }
+          }),
+        );
+        if (cancelled) return;
+        for (const p of points) {
+          if (p.txHash && senderCache.has(p.txHash)) {
+            p.trader = senderCache.get(p.txHash);
+          }
         }
 
         const cutoff = Math.floor(Date.now() / 1000) - 86_400;
