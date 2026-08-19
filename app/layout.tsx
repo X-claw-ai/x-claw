@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/shell/Navbar";
 import Footer from "@/components/shell/Footer";
+import ChatBox from "@/components/shell/ChatBox";
 import { KokiWalletProvider } from "@/components/evm/WalletContext";
 
 const TITLE = "HAMR.fun, The Autonomous Meme Coin Launch Agent";
@@ -74,6 +75,7 @@ export default function RootLayout({
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
+            <ChatBox />
           </div>
         </KokiWalletProvider>
       </body>
