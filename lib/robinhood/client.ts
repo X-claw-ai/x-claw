@@ -8,7 +8,7 @@
 // on every RPC call.
 
 import { createPublicClient, http, type PublicClient } from "viem";
-import { robinhoodChain } from "./chain";
+import { robinhoodChain, ROBINHOOD_DIRECT_RPC } from "./chain";
 
 let cached: PublicClient | null = null;
 
@@ -18,7 +18,8 @@ export function getPublicClient(): PublicClient {
   // Robinhood RPC geo/rate-blocks some visitors' IPs directly, and the
   // proxy sidesteps that entirely. Server-side code talks to the RPC
   // directly (Vercel egress is not blocked).
-  const url = typeof window !== "undefined" ? "/api/rpc" : undefined;
+  const url =
+    typeof window !== "undefined" ? "/api/rpc" : ROBINHOOD_DIRECT_RPC;
   cached = createPublicClient({
     chain: robinhoodChain,
     transport: http(url, {

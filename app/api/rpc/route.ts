@@ -17,6 +17,8 @@ import { NextResponse, type NextRequest } from "next/server";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
+// NOTE: must stay the DIRECT endpoint — the chain config's default RPC
+// now points at this proxy, so reading it here would loop.
 const UPSTREAM =
   process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
 

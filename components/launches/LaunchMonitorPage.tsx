@@ -36,6 +36,7 @@ import PriceChart from "./PriceChart";
 import { useTrades } from "./useTrades";
 import HoldersTable from "./HoldersTable";
 import TradesTable from "./TradesTable";
+import { prepareFees } from "@/lib/hamr/txfees";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -430,30 +431,57 @@ function TradeBox({
     try {
       if (side === "buy") {
         const minOut = quote ? (quote * 98n) / 100n : 0n; // 2% slippage
+        const value = parseEther(amount);
+        const fees = await prepareFees({
+          account: address,
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "buy",
+          args: [token, minOut],
+          value,
+        });
         await writeContractAsync({
           address: HAMR_CONTRACTS.launchpad,
           abi: hamrLaunchpadAbi,
           functionName: "buy",
           args: [token, minOut],
-          value: parseEther(amount),
+          value,
+          ...fees,
         });
       } else {
         const tokenWei = parseEther(amount);
         if ((allowance ?? 0n) < tokenWei) {
           // One-time max approve, then the sell in a second signature.
+          const approveArgs = [HAMR_CONTRACTS.launchpad, 2n ** 256n - 1n] as const;
+          const aFees = await prepareFees({
+            account: address,
+            address: token,
+            abi: hamrTokenAbi,
+            functionName: "approve",
+            args: approveArgs,
+          });
           await writeContractAsync({
             address: token,
             abi: hamrTokenAbi,
             functionName: "approve",
-            args: [HAMR_CONTRACTS.launchpad, 2n ** 256n - 1n],
+            args: approveArgs,
+            ...aFees,
           });
         }
         const minOut = quote ? (quote * 98n) / 100n : 0n;
+        const sFees = await prepareFees({
+          account: address,
+          address: HAMR_CONTRACTS.launchpad,
+          abi: hamrLaunchpadAbi,
+          functionName: "sell",
+          args: [token, tokenWei, minOut],
+        });
         await writeContractAsync({
           address: HAMR_CONTRACTS.launchpad,
           abi: hamrLaunchpadAbi,
           functionName: "sell",
           args: [token, tokenWei, minOut],
+          ...sFees,
         });
       }
       setAmount("");

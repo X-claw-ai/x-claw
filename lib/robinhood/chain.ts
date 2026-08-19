@@ -11,15 +11,25 @@ import { defineChain } from "viem";
 
 export const ROBINHOOD_CHAIN_ID = 4663 as const;
 
+/** Direct upstream RPC — server-side reads and the /api/rpc proxy hit
+ *  this. Browsers and wallets should use the proxy instead. */
+export const ROBINHOOD_DIRECT_RPC =
+  process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
+
 export const robinhoodChain = defineChain({
   id: ROBINHOOD_CHAIN_ID,
   name: "Robinhood Chain",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
+    // The default RPC is our same-origin proxy. This is what
+    // wallet_addEthereumChain hands to MetaMask/Rabby when a user adds
+    // Robinhood Chain from the site — so THEIR wallet's internal reads
+    // (fee estimation, blocks) also route through hamr.fun instead of
+    // the public endpoint, which geo/rate-blocks some users.
     default: {
       http: [
         process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL ||
-          "https://rpc.mainnet.chain.robinhood.com",
+          "https://hamr.fun/api/rpc",
       ],
     },
   },

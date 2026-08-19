@@ -5,6 +5,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagm
 import { parseEther, decodeEventLog } from "viem";
 import { ArrowLeft, Rocket } from "lucide-react";
 import { HAMR_CONTRACTS, HAMR_CURVE, hamrLaunchpadAbi } from "@/lib/hamr";
+import { prepareFees } from "@/lib/hamr/txfees";
 import { readCurve } from "@/lib/hamr/read";
 import { getPublicClient } from "@/lib/robinhood/client";
 import { explorerUrl } from "@/lib/robinhood/chain";
@@ -194,23 +195,37 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       } catch {
         setWatchFrom(0n);
       }
+      const launchArgs = [
+        {
+          name: kit.tokenName,
+          symbol: kit.ticker,
+          logo: logoUrl,
+          description: kit.shortDescription,
+          twitterUrl: s.twitter ?? "",
+          telegramUrl: s.telegram ?? "",
+          websiteUrl: s.website ?? "",
+        },
+        0n, // minFirstBuyTokens — creator sets their own slippage at 0
+      ] as const;
+      // Gas + fees via OUR rpc proxy — the user's wallet may have a
+      // broken RPC configured for this chain, and viem would otherwise
+      // route these reads through it (the "eth_getBlockByNumber" launch
+      // failures some users hit).
+      const fees = await prepareFees({
+        account: address,
+        address: HAMR_CONTRACTS.launchpad,
+        abi: hamrLaunchpadAbi,
+        functionName: "launchToken",
+        args: launchArgs,
+        value: feeWei + buyWei,
+      });
       await writeContractAsync({
         address: HAMR_CONTRACTS.launchpad,
         abi: hamrLaunchpadAbi,
         functionName: "launchToken",
-        args: [
-          {
-            name: kit.tokenName,
-            symbol: kit.ticker,
-            logo: logoUrl,
-            description: kit.shortDescription,
-            twitterUrl: s.twitter ?? "",
-            telegramUrl: s.telegram ?? "",
-            websiteUrl: s.website ?? "",
-          },
-          0n, // minFirstBuyTokens — creator sets their own slippage at 0
-        ],
+        args: launchArgs,
         value: feeWei + buyWei,
+        ...fees,
       });
     } catch (err) {
       setLocalError(
