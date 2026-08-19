@@ -23,7 +23,7 @@ export const ROBINHOOD_DIRECT_RPC =
 // to a relative proxy path, anchor it to the production origin.
 const rawPublicRpc =
   process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL || "https://hamr.fun/api/rpc";
-const PUBLIC_RPC_ABSOLUTE = rawPublicRpc.startsWith("http")
+export const PUBLIC_RPC_ABSOLUTE = rawPublicRpc.startsWith("http")
   ? rawPublicRpc
   : `https://hamr.fun${rawPublicRpc.startsWith("/") ? "" : "/"}${rawPublicRpc}`;
 

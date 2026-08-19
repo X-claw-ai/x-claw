@@ -16,7 +16,7 @@
 
 import { createConfig, http } from "wagmi";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { robinhoodChain } from "../robinhood/chain";
+import { robinhoodChain, PUBLIC_RPC_ABSOLUTE } from "../robinhood/chain";
 
 /** WalletConnect Cloud project id. Free tier is fine. */
 const WC_PROJECT_ID =
@@ -34,9 +34,11 @@ export const wagmiConfig = getDefaultConfig({
   projectId: WC_PROJECT_ID,
   chains: [robinhoodChain],
   transports: {
-    // Same-origin proxy — see app/api/rpc/route.ts. wagmi config only
-    // ever runs in the browser, so the relative URL is always valid.
-    [robinhoodChain.id]: http("/api/rpc", {
+    // ABSOLUTE proxy URL. wagmi's WalletConnect connector feeds this
+    // transport URL into the WC provider's rpcMap (extractRpcUrls
+    // prefers transports over chain.rpcUrls), and WalletConnect throws
+    // on relative paths — which silently broke every mobile connect.
+    [robinhoodChain.id]: http(PUBLIC_RPC_ABSOLUTE, {
       batch: { wait: 16 },
       retryCount: 5,
       retryDelay: 400,
