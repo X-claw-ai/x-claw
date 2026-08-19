@@ -16,21 +16,29 @@ export const ROBINHOOD_CHAIN_ID = 4663 as const;
 export const ROBINHOOD_DIRECT_RPC =
   process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
 
+// The chain's default RPC MUST be an absolute URL: WalletConnect's
+// provider builds an HTTP client from it and throws on relative paths
+// ("Provided URL is not compatible with HTTP connection: /api/rpc"),
+// which silently killed every mobile wallet connect. If the env is set
+// to a relative proxy path, anchor it to the production origin.
+const rawPublicRpc =
+  process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL || "https://hamr.fun/api/rpc";
+const PUBLIC_RPC_ABSOLUTE = rawPublicRpc.startsWith("http")
+  ? rawPublicRpc
+  : `https://hamr.fun${rawPublicRpc.startsWith("/") ? "" : "/"}${rawPublicRpc}`;
+
 export const robinhoodChain = defineChain({
   id: ROBINHOOD_CHAIN_ID,
   name: "Robinhood Chain",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
-    // The default RPC is our same-origin proxy. This is what
-    // wallet_addEthereumChain hands to MetaMask/Rabby when a user adds
-    // Robinhood Chain from the site — so THEIR wallet's internal reads
-    // (fee estimation, blocks) also route through hamr.fun instead of
-    // the public endpoint, which geo/rate-blocks some users.
+    // The default RPC is our same-origin proxy (absolute form). This is
+    // what wallet_addEthereumChain hands to MetaMask/Rabby when a user
+    // adds Robinhood Chain from the site — so THEIR wallet's internal
+    // reads (fee estimation, blocks) also route through hamr.fun instead
+    // of the public endpoint, which geo/rate-blocks some users.
     default: {
-      http: [
-        process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL ||
-          "https://hamr.fun/api/rpc",
-      ],
+      http: [PUBLIC_RPC_ABSOLUTE],
     },
   },
   blockExplorers: {
