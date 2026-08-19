@@ -6,6 +6,7 @@ import { parseEther, decodeEventLog } from "viem";
 import { ArrowLeft, Rocket } from "lucide-react";
 import { HAMR_CONTRACTS, HAMR_CURVE, hamrLaunchpadAbi } from "@/lib/hamr";
 import { prepareFees } from "@/lib/hamr/txfees";
+import { humanizeTxError } from "@/lib/hamr/errors";
 import { readCurve } from "@/lib/hamr/read";
 import { getPublicClient } from "@/lib/robinhood/client";
 import { explorerUrl } from "@/lib/robinhood/chain";
@@ -228,16 +229,14 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
         ...fees,
       });
     } catch (err) {
-      setLocalError(
-        err instanceof Error ? err.message : "Wallet rejected the launch tx",
-      );
+      setLocalError(humanizeTxError(err));
     }
   }
 
   const errMsg =
     localError ??
-    (writeError instanceof Error ? writeError.message : null) ??
-    (receiptError instanceof Error ? receiptError.message : null);
+    (writeError ? humanizeTxError(writeError) : null) ??
+    (receiptError ? humanizeTxError(receiptError) : null);
 
   const busy = writePending || mining || uploading;
 

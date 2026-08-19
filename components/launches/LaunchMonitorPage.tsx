@@ -37,6 +37,7 @@ import { useTrades } from "./useTrades";
 import HoldersTable from "./HoldersTable";
 import TradesTable from "./TradesTable";
 import { prepareFees } from "@/lib/hamr/txfees";
+import { humanizeTxError } from "@/lib/hamr/errors";
 
 // Token page for a HAMR launchpad coin. Live curve state + a pump.fun
 // style trade box: buy with ETH along the curve, sell back any time,
@@ -487,9 +488,7 @@ function TradeBox({
       setAmount("");
       setQuote(null);
     } catch (err) {
-      setLocalError(
-        err instanceof Error ? err.message.split("\n")[0] : "Trade failed",
-      );
+      setLocalError(humanizeTxError(err));
     }
   }
 
