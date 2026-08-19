@@ -16,6 +16,19 @@ export interface PreparedFees {
   maxPriorityFeePerGas?: bigint;
 }
 
+/** Hard cap on any single prefetch call. The wallet prompt must NEVER
+ *  wait behind a slow estimate — a launch estimate (token deploy + pool
+ *  create + mint) is heavy, and with transport retries an unlucky call
+ *  could stall the flow for a minute while the UI looked idle. */
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("prefetch timeout")), ms),
+    ),
+  ]);
+}
+
 /** Best-effort — returns {} on any failure so the caller can fall back
  *  to the wallet's own estimation (old behavior). */
 export async function prepareFees(params: {
@@ -29,21 +42,24 @@ export async function prepareFees(params: {
   const client = getPublicClient();
   const out: PreparedFees = {};
   try {
-    const gas = await client.estimateContractGas({
-      account: params.account,
-      address: params.address,
-      abi: params.abi,
-      functionName: params.functionName,
-      args: params.args as unknown[],
-      value: params.value,
-    });
-    // 25% headroom — curve state can move between estimate and mine.
+    const gas = await withTimeout(
+      client.estimateContractGas({
+        account: params.account,
+        address: params.address,
+        abi: params.abi,
+        functionName: params.functionName,
+        args: params.args as unknown[],
+        value: params.value,
+      }),
+      6_000,
+    );
+    // 25% headroom — pool state can move between estimate and mine.
     out.gas = (gas * 125n) / 100n;
   } catch {
-    /* estimation revert or RPC hiccup — let the wallet try */
+    /* estimation revert, timeout, or RPC hiccup — let the wallet try */
   }
   try {
-    const fees = await client.estimateFeesPerGas();
+    const fees = await withTimeout(client.estimateFeesPerGas(), 4_000);
     if (fees.maxFeePerGas) {
       // 2x headroom on the base fee so the tx never stalls on a bump.
       out.maxFeePerGas = fees.maxFeePerGas * 2n;

@@ -33,11 +33,13 @@ interface Props {
 }
 
 export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Props) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, connector } = useAccount();
   const [localError, setLocalError] = useState<string | null>(null);
   const [handled, setHandled] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const finishing = useRef(false);
+  const isWalletConnect = connector?.id === "walletConnect";
 
   const {
     writeContractAsync,
@@ -239,18 +241,23 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       }
     }
 
+    setPreparing(true);
     try {
       // Snapshot BEFORE the signature request so the poller only ever
-      // matches tokens created after this moment.
+      // matches tokens created after this moment. Hard 5s cap — the
+      // wallet prompt must never wait behind a slow read.
       try {
-        const count = await getPublicClient().readContract({
-          address: HAMR_V2.launchpad,
-          abi: launchpadV2Abi,
-          functionName: "tokenCount",
-        });
+        const count = (await Promise.race([
+          getPublicClient().readContract({
+            address: HAMR_V2.launchpad,
+            abi: launchpadV2Abi,
+            functionName: "tokenCount",
+          }),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("t")), 5_000)),
+        ])) as bigint;
         setWatchFrom(count);
       } catch {
-        setWatchFrom(0n);
+        /* snapshot unavailable — skip the safety-net poller this run */
       }
       const launchArgs = [
         {
@@ -274,6 +281,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
         args: launchArgs,
         value: feeWei,
       });
+      setPreparing(false);
       await writeContractAsync({
         address: HAMR_V2.launchpad,
         abi: launchpadV2Abi,
@@ -284,6 +292,8 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       });
     } catch (err) {
       setLocalError(humanizeTxError(err));
+    } finally {
+      setPreparing(false);
     }
   }
 
@@ -292,7 +302,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     (writeError && !handled ? humanizeTxError(writeError) : null) ??
     (receiptError ? humanizeTxError(receiptError) : null);
 
-  const busy = writePending || mining || uploading || buying;
+  const busy = writePending || mining || uploading || buying || preparing;
 
   return (
     <div className="space-y-6">
@@ -353,15 +363,23 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           <Rocket className="h-4 w-4" />
           {uploading
             ? "Uploading logo…"
-            : buying
-              ? "First buy — confirm in wallet…"
-              : writePending
-                ? "Confirm in wallet…"
-                : mining
-                  ? "Launching on-chain…"
-                  : "Launch now"}
+            : preparing
+              ? "Preparing transaction…"
+              : buying
+                ? "First buy — confirm in wallet…"
+                : writePending
+                  ? "Confirm in wallet…"
+                  : mining
+                    ? "Launching on-chain…"
+                    : "Launch now"}
         </button>
       </div>
+
+      {(writePending || buying) && isWalletConnect && (
+        <p className="text-[12px] font-bold text-koki-300 text-center">
+          Signature request sent — open your wallet app to confirm.
+        </p>
+      )}
     </div>
   );
 }
