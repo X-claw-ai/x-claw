@@ -12,6 +12,7 @@ import {
   formatUsd,
   HAMR_CONTRACTS,
   HAMR_CURVE,
+  HIDDEN_TOKENS,
   type HamrCurveState,
 } from "@/lib/hamr";
 import { getPublicClient } from "@/lib/robinhood/client";
@@ -240,6 +241,11 @@ export default function BoardGrid() {
         } catch {
           /* RPC down — DB list still renders */
         }
+
+        // Test launches stay on-chain forever but never on the board.
+        launches = launches.filter(
+          (l) => !HIDDEN_TOKENS.has(l.token_address.toLowerCase()),
+        );
 
         if (cancelled) return;
         setItems(launches);

@@ -25,3 +25,13 @@ export const HAMR_CURVE = {
   creatorFeeBps: 7_500, // creator's share of every fee (75%)
   poolFeeBps: 10_000, // Uniswap V3 1% tier post-graduation
 } as const;
+
+/** Tokens hidden from the board/trending (test launches). They still
+ *  exist on-chain — direct /launches/<address> URLs keep working — but
+ *  the site's lists filter them out. */
+export const HIDDEN_TOKENS = new Set<string>([
+  "0xfeb0eeb54526372ed319e1119a2a16c48a57e60f", // HTEST
+  "0x82a75d3efcfd6c3b6686f24e461e611153a9d148", // HAM
+  "0xf7814af7add678ed288d8c66cdf0b7d046558272", // POTBOI
+  "0x737bad994bef78176b96b2ede7f7520099ea4618", // JAKET (4th test)
+]);
