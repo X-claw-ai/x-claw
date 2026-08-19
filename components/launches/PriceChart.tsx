@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatUsd } from "@/lib/hamr";
+import { V2_PARAMS } from "@/lib/hamr/v2";
 import type { TradesData } from "./useTrades";
 import type { IChartApi, ISeriesApi, UTCTimestamp } from "lightweight-charts";
 
@@ -231,6 +232,14 @@ export default function PriceChart({
               >
                 {header.changePct >= 0 ? "+" : ""}
                 {header.changePct.toFixed(1)}%
+              </span>
+            )}
+            {header && (
+              <span className="ml-2.5 text-[13px] font-extrabold text-ink-300/70 tabular-nums">
+                {fmtPrice(header.last * V2_PARAMS.totalSupply)}
+                <span className="ml-1 text-[10px] font-black text-ink-300/45 uppercase">
+                  MC
+                </span>
               </span>
             )}
           </div>
