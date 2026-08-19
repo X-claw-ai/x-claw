@@ -4,40 +4,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Rocket, Search, ArrowUpRight, Loader2, Crown, Flame } from "lucide-react";
+import { readTokenMeta, fetchEthUsd, formatUsd, HIDDEN_TOKENS } from "@/lib/hamr";
 import {
-  readCurve,
-  readTokenMeta,
-  listTokens,
-  fetchEthUsd,
-  formatUsd,
-  HAMR_CONTRACTS,
-  HAMR_CURVE,
-  HIDDEN_TOKENS,
-  type HamrCurveState,
-} from "@/lib/hamr";
+  HAMR_V2,
+  V2_PARAMS,
+  listV2Tokens,
+  readV2Snapshot,
+  tokenLaunchedV2Event,
+  poolSwapEvent,
+  tokenIsToken0,
+} from "@/lib/hamr/v2";
 import { getPublicClient } from "@/lib/robinhood/client";
+import { formatEther } from "viem";
 
-// Board-wide 24h volume: one unfiltered log scan over the launchpad,
-// grouped per token. Cheap while the chain is young; swap for an
-// indexer when the board grows.
-const boardBuyEvent = parseAbiItem(
-  "event CurveBuy(address indexed token, address indexed buyer, uint256 ethIn, uint256 tokensOut, uint256 newVirtualEth)",
-);
-const boardSellEvent = parseAbiItem(
-  "event CurveSell(address indexed token, address indexed seller, uint256 tokensIn, uint256 ethOut, uint256 newVirtualEth)",
-);
-const boardLaunchEvent = parseAbiItem(
-  "event TokenLaunched(address indexed token, address indexed creator, string name, string symbol, string logo)",
-);
-import { formatEther, parseAbiItem } from "viem";
-
-// Pump.fun-style token board. Dense horizontal cards with LIVE on-chain
-// numbers (market cap, graduation progress) pulled straight from the
-// bonding curve contract, three sort tabs, search, 20s refresh.
+// Pump.fun-style token board — v2: every coin IS a real Uniswap V3
+// pool. The list comes straight from the v2 factory, prices from each
+// pool's slot0, and 24h volume from the pools' own Swap events.
 //
-// Card data comes from /api/launches (name/logo/links); market data is
-// read client-side from the curve so the board always shows real state
-// even before any indexer exists.
+// DB rows from /api/launches only enrich cards (source-X link); the
+// chain is the sole source of truth for what exists.
 
 interface PublicLaunch {
   token_address: string;
@@ -72,28 +57,52 @@ export default function BoardGrid() {
   const [ethUsd, setEthUsd] = useState<number | null>(null);
   const [vol24h, setVol24h] = useState<Record<string, number>>({});
 
-  // 24h volume per token — single log scan every refresh cycle.
+  // 24h volume per token — one Swap-log scan per pool (v2: every coin
+  // has its own real Uniswap pool). Cheap while the chain is young.
   useEffect(() => {
     let cancelled = false;
     async function scan() {
       try {
         const client = getPublicClient();
-        const common = {
-          address: HAMR_CONTRACTS.launchpad,
+        // token → pool map straight from the factory's launch events.
+        const launches = await client.getLogs({
+          address: HAMR_V2.launchpad,
+          event: tokenLaunchedV2Event,
           fromBlock: 0n,
           toBlock: "latest",
-        } as const;
-        const [buys, sells] = await Promise.all([
-          client.getLogs({ ...common, event: boardBuyEvent }),
-          client.getLogs({ ...common, event: boardSellEvent }),
-        ]);
-        const all = [
-          ...buys.map((l) => ({ l, buy: true })),
-          ...sells.map((l) => ({ l, buy: false })),
-        ];
-        const uniq = [...new Set(all.map((e) => e.l.blockNumber))].slice(-150);
+        });
+        const pairs = launches
+          .map((l) => {
+            const a = l.args as { token?: string; pool?: string };
+            return a.token && a.pool
+              ? { token: a.token as `0x${string}`, pool: a.pool as `0x${string}` }
+              : null;
+          })
+          .filter((x): x is { token: `0x${string}`; pool: `0x${string}` } => x !== null)
+          .slice(-24); // newest pools only — bounded RPC load
+
+        const perPool = await Promise.all(
+          pairs.map(async ({ token, pool }) => {
+            try {
+              const swaps = await client.getLogs({
+                address: pool,
+                event: poolSwapEvent,
+                fromBlock: 0n,
+                toBlock: "latest",
+              });
+              return { token, swaps };
+            } catch {
+              return { token, swaps: [] };
+            }
+          }),
+        );
+        if (cancelled) return;
+
+        const allBlocks = [
+          ...new Set(perPool.flatMap((p) => p.swaps.map((s) => s.blockNumber))),
+        ].slice(-150);
         const tsEntries = await Promise.all(
-          uniq.map(async (bn) => {
+          allBlocks.map(async (bn) => {
             try {
               const b = await client.getBlock({ blockNumber: bn });
               return [bn.toString(), Number(b.timestamp)] as const;
@@ -105,21 +114,20 @@ export default function BoardGrid() {
         if (cancelled) return;
         const tsMap = new Map(tsEntries);
         const cutoff = Math.floor(Date.now() / 1000) - 86_400;
+
         const out: Record<string, number> = {};
-        for (const { l, buy } of all) {
-          const ts = tsMap.get(l.blockNumber.toString()) ?? 0;
-          if (ts < cutoff) continue;
-          const args = l.args as {
-            token?: string;
-            ethIn?: bigint;
-            ethOut?: bigint;
-          };
-          if (!args.token) continue;
-          const key = args.token.toLowerCase();
-          const amt = Number(
-            formatEther(buy ? (args.ethIn ?? 0n) : (args.ethOut ?? 0n)),
-          );
-          out[key] = (out[key] ?? 0) + amt;
+        for (const { token, swaps } of perPool) {
+          const is0 = tokenIsToken0(token);
+          let vol = 0;
+          for (const s of swaps) {
+            const ts = tsMap.get(s.blockNumber.toString()) ?? 0;
+            if (ts < cutoff) continue;
+            const a = s.args as { amount0?: bigint; amount1?: bigint };
+            const wethDelta = is0 ? a.amount1 : a.amount0;
+            if (typeof wethDelta !== "bigint") continue;
+            vol += Math.abs(Number(formatEther(wethDelta)));
+          }
+          if (vol > 0) out[token.toLowerCase()] = vol;
         }
         setVol24h(out);
       } catch {
@@ -152,127 +160,106 @@ export default function BoardGrid() {
     let cancelled = false;
     async function load() {
       try {
-        const r = await fetch("/api/launches", { cache: "no-store" });
-        const json = (await r.json()) as {
-          ok?: boolean;
-          launches?: PublicLaunch[];
-        };
-        if (cancelled) return;
-        if (!r.ok || !json.ok) {
-          setError(`Failed to load launches (${r.status})`);
-          return;
-        }
-        let launches = json.launches ?? [];
+        // Chain FIRST — the v2 factory is the sole source of truth for
+        // what exists. (v1 curve tokens are legacy and stay off-board.)
+        const onchain = await listV2Tokens(36);
+        const visible = onchain.filter(
+          (t) => !HIDDEN_TOKENS.has(t.toLowerCase()),
+        );
 
-        // DB only knows launches made through the site. The chain is the
-        // source of truth — pull any token the DB missed straight from
-        // the factory so the board never lies.
+        // DB enrichment only (source-X link, site URLs) — best-effort.
+        const dbMap = new Map<string, PublicLaunch>();
         try {
-          const onchain = await listTokens(24);
-          const known = new Set(launches.map((l) => l.token_address.toLowerCase()));
-          const missing = onchain.filter((t) => !known.has(t.toLowerCase()));
-
-          // Creation time straight from the chain: the TokenLaunched
-          // event's block timestamp. One scan covers every token.
-          const bornAt = new Map<string, string>();
-          if (missing.length > 0) {
-            try {
-              const client = getPublicClient();
-              const logs = await client.getLogs({
-                address: HAMR_CONTRACTS.launchpad,
-                event: boardLaunchEvent,
-                fromBlock: 0n,
-                toBlock: "latest",
-              });
-              const blockOf = new Map<string, bigint>();
-              for (const l of logs) {
-                const tok = (l.args as { token?: string }).token;
-                if (tok) blockOf.set(tok.toLowerCase(), l.blockNumber);
-              }
-              const wanted = missing
-                .map((t) => t.toLowerCase())
-                .filter((t) => blockOf.has(t));
-              const uniqBlocks = [...new Set(wanted.map((t) => blockOf.get(t)!))];
-              const tsEntries = await Promise.all(
-                uniqBlocks.map(async (bn) => {
-                  try {
-                    const b = await client.getBlock({ blockNumber: bn });
-                    return [bn.toString(), Number(b.timestamp)] as const;
-                  } catch {
-                    return [bn.toString(), 0] as const;
-                  }
-                }),
-              );
-              const tsOfBlock = new Map(tsEntries);
-              for (const t of wanted) {
-                const ts = tsOfBlock.get(blockOf.get(t)!.toString()) ?? 0;
-                if (ts > 0) bornAt.set(t, new Date(ts * 1000).toISOString());
-              }
-            } catch {
-              /* timestamps stay unknown — cards fall back gracefully */
+          const r = await fetch("/api/launches", { cache: "no-store" });
+          const json = (await r.json()) as {
+            ok?: boolean;
+            launches?: PublicLaunch[];
+          };
+          if (r.ok && json.ok) {
+            for (const l of json.launches ?? []) {
+              dbMap.set(l.token_address.toLowerCase(), l);
             }
           }
+        } catch {
+          /* DB down — chain data still renders everything that matters */
+        }
 
-          const extras = await Promise.all(
-            missing.map(async (t) => {
+        // Birth timestamps straight from the factory's TokenLaunched
+        // events. One scan covers every token.
+        const bornAt = new Map<string, string>();
+        try {
+          const client = getPublicClient();
+          const logs = await client.getLogs({
+            address: HAMR_V2.launchpad,
+            event: tokenLaunchedV2Event,
+            fromBlock: 0n,
+            toBlock: "latest",
+          });
+          const blockOf = new Map<string, bigint>();
+          for (const l of logs) {
+            const tok = (l.args as { token?: string }).token;
+            if (tok) blockOf.set(tok.toLowerCase(), l.blockNumber);
+          }
+          const uniqBlocks = [...new Set([...blockOf.values()])];
+          const tsEntries = await Promise.all(
+            uniqBlocks.map(async (bn) => {
               try {
-                const meta = await readTokenMeta(t);
-                return {
-                  token_address: t,
-                  pool_address: null,
-                  ticker: meta.symbol,
-                  token_name: meta.name,
-                  logo_url: meta.logo || null,
-                  wallet_address: meta.creator,
-                  pons_url: null,
-                  explorer_url: null,
-                  source_x_url: null,
-                  created_at: bornAt.get(t.toLowerCase()) ?? "",
-                } satisfies PublicLaunch;
+                const b = await client.getBlock({ blockNumber: bn });
+                return [bn.toString(), Number(b.timestamp)] as const;
               } catch {
-                return null;
+                return [bn.toString(), 0] as const;
               }
             }),
           );
-          launches = [
-            ...launches,
-            ...extras.filter((x): x is PublicLaunch => x !== null),
-          ];
+          const tsOfBlock = new Map(tsEntries);
+          for (const [t, bn] of blockOf) {
+            const ts = tsOfBlock.get(bn.toString()) ?? 0;
+            if (ts > 0) bornAt.set(t, new Date(ts * 1000).toISOString());
+          }
         } catch {
-          /* RPC down — DB list still renders */
+          /* timestamps stay unknown — cards fall back gracefully */
         }
 
-        // Test launches stay on-chain forever but never on the board.
-        launches = launches.filter(
-          (l) => !HIDDEN_TOKENS.has(l.token_address.toLowerCase()),
+        // One card per on-chain token; metadata lives ON the token.
+        const cards = await Promise.all(
+          visible.map(async (t) => {
+            const key = t.toLowerCase();
+            const db = dbMap.get(key);
+            try {
+              const meta = await readTokenMeta(t);
+              return {
+                token_address: t,
+                pool_address: db?.pool_address ?? null,
+                ticker: meta.symbol,
+                token_name: meta.name,
+                logo_url: meta.logo || db?.logo_url || null,
+                wallet_address: meta.creator,
+                pons_url: db?.pons_url ?? null,
+                explorer_url: db?.explorer_url ?? null,
+                source_x_url: db?.source_x_url ?? null,
+                created_at: bornAt.get(key) ?? db?.created_at ?? "",
+              } satisfies PublicLaunch;
+            } catch {
+              return db ?? null;
+            }
+          }),
         );
-
         if (cancelled) return;
+        const launches = cards.filter((x): x is PublicLaunch => x !== null);
         setItems(launches);
         setError(null);
 
-        // Live curve reads — fire-and-forget per token, merge as they land.
+        // Live pool reads — fire-and-forget per token, merge as they land.
         launches.slice(0, MARKET_LIMIT).forEach((l) => {
-          readCurve(l.token_address as `0x${string}`)
-            .then((c: HamrCurveState) => {
-              if (cancelled || !c.exists) return;
-              const vEth = Number(formatEther(c.virtualEth));
-              const vTok = Number(c.virtualToken) / 1e18;
-              const price = vTok > 0 ? vEth / vTok : 0;
-              const raised = Number(formatEther(c.realEth));
+          readV2Snapshot(l.token_address as `0x${string}`)
+            .then((s) => {
+              if (cancelled || !s) return;
               setMarkets((m) => ({
                 ...m,
                 [l.token_address.toLowerCase()]: {
-                  mcapEth: price * HAMR_CURVE.totalSupply,
-                  progressBps: c.graduated
-                    ? 10_000
-                    : Math.min(
-                        10_000,
-                        Math.round(
-                          (raised / HAMR_CURVE.graduationRaiseEth) * 10_000,
-                        ),
-                      ),
-                  graduated: c.graduated,
+                  mcapEth: s.priceEth * V2_PARAMS.totalSupply,
+                  progressBps: s.progressBps,
+                  graduated: s.graduated,
                 },
               }));
             })

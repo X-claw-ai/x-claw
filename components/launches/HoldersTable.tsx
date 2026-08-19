@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { parseAbiItem, type Address } from "viem";
 import { getPublicClient } from "@/lib/robinhood/client";
-import { HAMR_CONTRACTS, HAMR_CURVE } from "@/lib/hamr";
+import { HAMR_CURVE } from "@/lib/hamr";
+import { HAMR_V2 } from "@/lib/hamr/v2";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { ExternalLink } from "lucide-react";
 
@@ -25,15 +26,18 @@ const MAX_ROWS = 20;
 interface Holder {
   address: string;
   pctBps: number; // 0–10000, basis points of total supply
-  label?: "bonding-curve" | "locked-lp" | "creator";
+  label?: "pool" | "locked-lp" | "creator";
 }
 
 export default function HoldersTable({
   token,
   creator,
+  pool,
 }: {
   token: Address;
   creator?: string;
+  /** The token's Uniswap V3 pool — labeled, never hidden. */
+  pool?: string;
 }) {
   const [holders, setHolders] = useState<Holder[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -66,8 +70,8 @@ export default function HoldersTable({
           if (t !== ZERO) balances.set(t, (balances.get(t) ?? 0n) + value);
         }
 
-        const launchpad = HAMR_CONTRACTS.launchpad.toLowerCase();
-        const locker = HAMR_CONTRACTS.locker.toLowerCase();
+        const poolLc = pool?.toLowerCase();
+        const locker = HAMR_V2.locker.toLowerCase();
         const creatorLc = creator?.toLowerCase();
 
         const rows: Holder[] = [...balances.entries()]
@@ -77,8 +81,8 @@ export default function HoldersTable({
             // bps with wei-exact math: bal * 10000 / supply
             pctBps: Number((bal * 10_000n) / SUPPLY_WEI),
             label:
-              addr === launchpad
-                ? ("bonding-curve" as const)
+              addr === poolLc
+                ? ("pool" as const)
                 : addr === locker
                   ? ("locked-lp" as const)
                   : addr === creatorLc
@@ -101,7 +105,7 @@ export default function HoldersTable({
       cancelled = true;
       clearInterval(id);
     };
-  }, [token, creator]);
+  }, [token, creator, pool]);
 
   return (
     <div className="card !p-5">
@@ -158,9 +162,9 @@ export default function HoldersTable({
                     {h.address.slice(0, 6)}…{h.address.slice(-4)}
                     <ExternalLink className="h-2.5 w-2.5 opacity-50" />
                   </a>
-                  {h.label === "bonding-curve" && (
+                  {h.label === "pool" && (
                     <span className="shrink-0 rounded-full bg-koki-500/15 text-koki-300 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
-                      Bonding curve
+                      Uniswap pool
                     </span>
                   )}
                   {h.label === "locked-lp" && (

@@ -4,15 +4,15 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Docs — HAMR.fun",
   description:
-    "How the HAMR launchpad works: bonding curve, graduation, fees, and the Auto-pilot agent.",
+    "How the HAMR launchpad works: instant Uniswap V3 pools, locked liquidity, fees, and the Auto-pilot agent.",
 };
 
-// /docs — plain-language documentation for the HAMR launchpad.
-// Numbers here mirror lib/hamr/constants.ts and the deployed contracts;
+// /docs — plain-language documentation for the HAMR launchpad (v2).
+// Numbers here mirror lib/hamr/v2.ts and the deployed contracts;
 // if the economics change on-chain, update both.
 
-const LAUNCHPAD = "0xEac5CB9B5e7F32074Aa232EE54e62196cc236b8e";
-const LOCKER = "0x93dd19970Ca4CD2Bd405014c9247A0f33DA0f926";
+const LAUNCHPAD = "0x24ad1b88e2af2c6447dc56c182a857c8c3459e18";
+const LOCKER = "0x7ce67aa556fa6bf73e6670ccc605b0ab0a69c0b7";
 
 export default function DocsPage() {
   return (
@@ -23,9 +23,10 @@ export default function DocsPage() {
       </h1>
       <p className="mt-3 text-[14px] text-ink-300/75 font-medium leading-relaxed">
         HAMR.fun is a memecoin launchpad on Robinhood Chain with its own
-        factory contract and an agent that can launch coins for you. This
-        page covers everything: launching, the bonding curve, graduation,
-        and where the fees go.
+        factory contract and an agent that can launch coins for you. Every
+        coin launches as a <strong>real Uniswap V3 pool</strong> — no
+        virtual curve, no whitelist — so it&apos;s tradeable from any
+        wallet, Telegram bot, or aggregator from block one.
       </p>
 
       <Doc title="Launching a coin">
@@ -41,47 +42,50 @@ export default function DocsPage() {
           Either way, one wallet signature calls{" "}
           <code>launchToken()</code> on the HAMR factory. It deploys a fixed
           1B-supply ERC-20, stores the logo, description, and social links
-          on-chain, and opens the bonding curve — all in a single
-          transaction. The launch fee is <strong>0.0005 ETH</strong>. You
-          can bundle a first buy into the same transaction.
+          on-chain, creates + initializes a Uniswap V3 pool (1% tier,
+          paired with ETH), and locks the <strong>entire supply</strong> as
+          one-sided liquidity — all in a single transaction. The launch fee
+          is <strong>0.0005 ETH</strong>. An optional first buy runs as a
+          normal router swap right after.
         </p>
       </Doc>
 
-      <Doc title="The bonding curve">
+      <Doc title="The launch curve — a real pool">
         <p>
-          Every new coin trades on a constant-product virtual curve:
-          800M tokens are sold along the curve, starting from virtual
-          reserves of 1.5 ETH / 1.1B tokens. Price rises deterministically
-          as people buy; anyone can sell back to the curve at any time.
-          Every trade pays a <strong>1% fee</strong>.
+          The 1B supply is deposited across a fixed Uniswap V3 price range
+          (~1.36 nano-ETH to ~11.8 nano-ETH per token, an ~8.7×
+          span). That concentrated one-sided position behaves exactly like
+          a bonding curve — price climbs deterministically as buys absorb
+          the range — except it&apos;s a standard pool, so{" "}
+          <strong>every wallet and bot can quote and trade it
+          instantly</strong> through the canonical QuoterV2 and SwapRouter.
+          Every trade pays the pool&apos;s <strong>1% fee</strong>.
         </p>
         <p>
           There is no team allocation, no presale, and no way to mint more
           supply — the factory deploys every token with the same fixed
-          1B supply and the same curve parameters.
+          1B supply and the same range.
         </p>
       </Doc>
 
       <Doc title="Graduation">
         <p>
-          When a curve raises <strong>4 ETH</strong>, it graduates
-          automatically in the same transaction: the remaining 200M tokens
-          plus the raised ETH open a Uniswap V3 pool (1% tier, full range),
-          and the LP position is locked in the HAMR fee locker{" "}
-          <strong>forever</strong>. Nobody — including us — can pull that
-          liquidity.
+          Graduation is a milestone, not a migration: when buys have pushed
+          the price through the top of the launch range (~
+          <strong>4 ETH</strong> absorbed into the pool), the coin is
+          &quot;graduated&quot;. Nothing moves and trading never pauses —
+          liquidity was locked in the HAMR fee locker from the very first
+          block. Nobody — including us — can ever pull it.
         </p>
       </Doc>
 
       <Doc title="Fees — creators keep 75%">
         <p>
-          Every fee the protocol collects is split{" "}
-          <strong>75% to the token&apos;s creator / 25% to HAMR</strong>.
-          That covers the 1% curve trade fee before graduation and the
-          Uniswap LP fees harvested from the locked position after
-          graduation. Fees accrue in on-chain ledgers and are
-          pull-payment: creators claim whenever they want, independently
-          of anyone else.
+          The locked LP position earns the pool&apos;s 1% fee on every
+          single trade, forever. Anyone can trigger a harvest on the fee
+          locker, which ledgers <strong>75% to the token&apos;s creator /
+          25% to HAMR</strong>. Fees are pull-payment: creators claim
+          whenever they want, independently of anyone else.
         </p>
       </Doc>
 

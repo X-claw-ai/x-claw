@@ -78,7 +78,7 @@ export default function AutopilotPage() {
           icon={<Rocket className="h-4 w-4" />}
           n="04"
           title="You sign once"
-          body="One wallet signature deploys the token and opens the bonding curve on the HAMR launchpad. No forms, no waiting."
+          body="One wallet signature deploys the token and opens a real, locked Uniswap pool on the HAMR launchpad — tradeable everywhere instantly. No forms, no waiting."
         />
       </div>
 

@@ -1,31 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatEther, parseAbiItem, type Address } from "viem";
+import { formatEther, type Address } from "viem";
 import { getPublicClient } from "@/lib/robinhood/client";
-import { HAMR_CONTRACTS, HAMR_CURVE } from "@/lib/hamr";
+import {
+  poolSwapEvent,
+  priceEthFromSqrt,
+  readPoolOf,
+  tokenIsToken0,
+  V2_PARAMS,
+} from "@/lib/hamr/v2";
 
-// Shared on-chain trade history for a curve token. One log query feeds
-// the price chart AND the stat cards (24h volume, ATH) — no indexer.
+// Shared on-chain trade history for a HAMR v2 coin. Every launch IS a
+// real Uniswap V3 pool, so history is simply the pool's own Swap
+// events — the exact same data every bot/aggregator sees. One log
+// query feeds the price chart AND the stat cards (24h volume, ATH).
 //
-// Price reconstruction: constant-product curve, so after every trade
-// price = vEth² / k, and both CurveBuy and CurveSell events carry
-// `newVirtualEth`. Volume comes from ethIn/ethOut on the same events;
-// timestamps from the blocks the events landed in.
-
-const buyEvent = parseAbiItem(
-  "event CurveBuy(address indexed token, address indexed buyer, uint256 ethIn, uint256 tokensOut, uint256 newVirtualEth)",
-);
-const sellEvent = parseAbiItem(
-  "event CurveSell(address indexed token, address indexed seller, uint256 tokensIn, uint256 ethOut, uint256 newVirtualEth)",
-);
+// Direction: from the pool's perspective a BUY pays tokens out
+// (token delta negative) and takes WETH in; price after each trade
+// comes straight from the sqrtPriceX96 the event carries.
 
 export interface TradePoint {
   price: number; // ETH per token, after this trade
   ts: number; // unix seconds (0 when unknown)
   ethAmount: number; // trade size in ETH
   kind: "launch" | "buy" | "sell";
-  /** Wallet that made the trade (undefined for the launch point). */
+  /** Wallet that received the trade output (undefined for launch). */
   trader?: string;
   /** Token amount bought/sold, in whole tokens. */
   tokenAmount?: number;
@@ -37,12 +37,10 @@ export interface TradesData {
   tradeCount: number;
   /** Sum of ETH traded (buys + sells) in the trailing 24h. */
   volume24hEth: number;
-  /** Highest price ever seen on the curve (ETH per token). */
+  /** Highest price ever seen in the pool (ETH per token). */
   athPriceEth: number;
 }
 
-const K = HAMR_CURVE.virtualEthStart * HAMR_CURVE.virtualTokenStart;
-const LAUNCH_PRICE = HAMR_CURVE.virtualEthStart / HAMR_CURVE.virtualTokenStart;
 const MAX_EVENTS = 300;
 const MAX_BLOCK_LOOKUPS = 120;
 
@@ -53,36 +51,45 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
+    let pool: Address | null = null;
 
     async function load() {
       try {
         const client = getPublicClient();
-        const common = {
-          address: HAMR_CONTRACTS.launchpad,
-          args: { token },
+        if (!pool) pool = await readPoolOf(token!);
+        if (!pool) {
+          // Not a v2 token — nothing to chart.
+          if (!cancelled)
+            setData({
+              points: [],
+              tradeCount: 0,
+              volume24hEth: 0,
+              athPriceEth: 0,
+            });
+          return;
+        }
+
+        const logs = await client.getLogs({
+          address: pool,
+          event: poolSwapEvent,
           fromBlock: 0n,
           toBlock: "latest",
-        } as const;
-        const [buys, sells] = await Promise.all([
-          client.getLogs({ ...common, event: buyEvent }),
-          client.getLogs({ ...common, event: sellEvent }),
-        ]);
+        });
         if (cancelled) return;
 
-        const merged = [
-          ...buys.map((l) => ({ log: l, kind: "buy" as const })),
-          ...sells.map((l) => ({ log: l, kind: "sell" as const })),
-        ]
+        const tokenIs0 = tokenIsToken0(token!);
+        const sliced = logs
+          .slice()
           .sort((a, b) => {
-            const bn = Number(a.log.blockNumber - b.log.blockNumber);
+            const bn = Number(a.blockNumber - b.blockNumber);
             if (bn !== 0) return bn;
-            return (a.log.logIndex ?? 0) - (b.log.logIndex ?? 0);
+            return (a.logIndex ?? 0) - (b.logIndex ?? 0);
           })
           .slice(-MAX_EVENTS);
 
         // Block timestamps — one lookup per unique block, capped.
         const uniqueBlocks = [
-          ...new Set(merged.map((m) => m.log.blockNumber)),
+          ...new Set(sliced.map((l) => l.blockNumber)),
         ].slice(-MAX_BLOCK_LOOKUPS);
         const tsEntries = await Promise.all(
           uniqueBlocks.map(async (bn) => {
@@ -99,38 +106,35 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
 
         const points: TradePoint[] = [
           {
-            price: LAUNCH_PRICE,
-            ts: tsMap.get(merged[0]?.log.blockNumber.toString() ?? "") ?? 0,
+            price: V2_PARAMS.startPriceEth,
+            ts: tsMap.get(sliced[0]?.blockNumber.toString() ?? "") ?? 0,
             ethAmount: 0,
             kind: "launch",
           },
         ];
-        for (const { log, kind } of merged) {
-          const args = log.args as {
-            newVirtualEth?: bigint;
-            ethIn?: bigint;
-            ethOut?: bigint;
-            buyer?: string;
-            seller?: string;
-            tokensOut?: bigint;
-            tokensIn?: bigint;
+        for (const l of sliced) {
+          const a = l.args as {
+            recipient?: string;
+            amount0?: bigint;
+            amount1?: bigint;
+            sqrtPriceX96?: bigint;
           };
-          if (typeof args.newVirtualEth !== "bigint") continue;
-          const vEth = Number(formatEther(args.newVirtualEth));
+          if (
+            typeof a.amount0 !== "bigint" ||
+            typeof a.amount1 !== "bigint" ||
+            typeof a.sqrtPriceX96 !== "bigint"
+          )
+            continue;
+          const tokenDelta = tokenIs0 ? a.amount0 : a.amount1;
+          const wethDelta = tokenIs0 ? a.amount1 : a.amount0;
           points.push({
-            price: (vEth * vEth) / K,
-            ts: tsMap.get(log.blockNumber.toString()) ?? 0,
-            ethAmount: Number(
-              formatEther(kind === "buy" ? (args.ethIn ?? 0n) : (args.ethOut ?? 0n)),
-            ),
-            kind,
-            trader: kind === "buy" ? args.buyer : args.seller,
-            tokenAmount: Number(
-              formatEther(
-                kind === "buy" ? (args.tokensOut ?? 0n) : (args.tokensIn ?? 0n),
-              ),
-            ),
-            txHash: log.transactionHash ?? undefined,
+            price: priceEthFromSqrt(a.sqrtPriceX96, tokenIs0),
+            ts: tsMap.get(l.blockNumber.toString()) ?? 0,
+            ethAmount: Math.abs(Number(formatEther(wethDelta))),
+            kind: tokenDelta < 0n ? "buy" : "sell",
+            trader: a.recipient,
+            tokenAmount: Math.abs(Number(formatEther(tokenDelta))),
+            txHash: l.transactionHash ?? undefined,
           });
         }
 

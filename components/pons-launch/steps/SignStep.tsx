@@ -1,23 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseEther, decodeEventLog } from "viem";
+import { parseEther, decodeEventLog, type Address } from "viem";
 import { ArrowLeft, Rocket } from "lucide-react";
-import { HAMR_CONTRACTS, HAMR_CURVE, hamrLaunchpadAbi } from "@/lib/hamr";
+import {
+  HAMR_V2,
+  V2_PARAMS,
+  launchpadV2Abi,
+  swapRouterAbi,
+} from "@/lib/hamr/v2";
 import { prepareFees } from "@/lib/hamr/txfees";
 import { humanizeTxError } from "@/lib/hamr/errors";
-import { readCurve } from "@/lib/hamr/read";
 import { getPublicClient } from "@/lib/robinhood/client";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import type { LaunchKit, LaunchResult } from "../types";
 
-// Step 4: Sign & submit — DIRECT signing on HAMR's own launchpad.
+// Step 4: Sign & submit — DIRECT signing on HAMR's v2 launchpad.
 //
-// One wallet signature calls launchToken() on our factory: deploys the
-// ERC-20 (1B supply), opens the bonding curve, and (optionally) executes
-// the creator's first buy in the same transaction. No handoff, no
-// whitelist — this is our contract.
+// One wallet signature calls launchToken(): deploys the ERC-20 (1B
+// supply), creates + initializes a REAL Uniswap V3 pool, and locks the
+// entire supply as one-sided liquidity forever. The coin is tradeable
+// from every wallet/bot the moment the tx mines. If the creator set a
+// first buy, it runs as a normal router swap right after (2nd
+// signature) — the same trade anyone else would make.
 
 interface Props {
   kit: LaunchKit;
@@ -30,6 +36,8 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
   const { address, isConnected } = useAccount();
   const [localError, setLocalError] = useState<string | null>(null);
   const [handled, setHandled] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const finishing = useRef(false);
 
   const {
     writeContractAsync,
@@ -48,21 +56,79 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     query: { enabled: Boolean(submittedHash) },
   });
 
+  // ── Shared finisher: optional first buy, then hand off ────────────
+  // Both success paths (receipt decode + mobile poller) funnel here so
+  // the dev-buy runs exactly once and the redirect always happens.
+  async function finish(token: Address, txHash: `0x${string}`) {
+    if (finishing.current) return;
+    finishing.current = true;
+    setHandled(true);
+
+    const buyWei = initialBuyEth ? parseEther(initialBuyEth) : 0n;
+    if (buyWei > 0n && address) {
+      setBuying(true);
+      try {
+        const deadline = BigInt(Math.floor(Date.now() / 1000)) + 600n;
+        const params = {
+          tokenIn: HAMR_V2.weth,
+          tokenOut: token,
+          fee: V2_PARAMS.poolFee,
+          recipient: address,
+          deadline,
+          amountIn: buyWei,
+          amountOutMinimum: 0n, // creator's own launch — no slippage guard
+          sqrtPriceLimitX96: 0n,
+        } as const;
+        const fees = await prepareFees({
+          account: address,
+          address: HAMR_V2.swapRouter,
+          abi: swapRouterAbi,
+          functionName: "exactInputSingle",
+          args: [params],
+          value: buyWei,
+        });
+        // Race a timeout so a lost mobile callback can't strand the UI —
+        // the swap still lands on-chain either way.
+        await Promise.race([
+          writeContractAsync({
+            address: HAMR_V2.swapRouter,
+            abi: swapRouterAbi,
+            functionName: "exactInputSingle",
+            args: [params],
+            value: buyWei,
+            ...fees,
+          }),
+          new Promise((resolve) => setTimeout(resolve, 45_000)),
+        ]);
+      } catch {
+        /* launch already succeeded — the buy is best-effort */
+      } finally {
+        setBuying(false);
+      }
+    }
+
+    onSuccess({
+      token,
+      pool: "0x0000000000000000000000000000000000000000",
+      txHash,
+      ponsUrl: `/launches/${token}`,
+      explorerUrl: explorerUrl("token", token),
+    });
+  }
+
   // Receipt landed → decode TokenLaunched for the new token address.
-  // useEffect (not render-time) so onSuccess can safely update the parent.
   useEffect(() => {
     if (!receipt || !submittedHash || handled) return;
-    setHandled(true);
-    let token: `0x${string}` | null = null;
+    let token: Address | null = null;
     for (const log of receipt.logs) {
       try {
         const decoded = decodeEventLog({
-          abi: hamrLaunchpadAbi,
+          abi: launchpadV2Abi,
           data: log.data,
           topics: log.topics,
         });
         if (decoded.eventName === "TokenLaunched") {
-          token = (decoded.args as { token: `0x${string}` }).token;
+          token = (decoded.args as { token: Address }).token;
           break;
         }
       } catch {
@@ -70,30 +136,24 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       }
     }
     if (!token) {
+      setHandled(true);
       setLocalError(
         "Launch tx mined but the TokenLaunched event was missing. Check the tx on Blockscout.",
       );
     } else {
-      onSuccess({
-        token,
-        pool: "0x0000000000000000000000000000000000000000",
-        txHash: submittedHash,
-        ponsUrl: `/launches/${token}`,
-        explorerUrl: explorerUrl("token", token),
-      });
+      void finish(token, submittedHash);
     }
-  }, [receipt, submittedHash, handled, onSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [receipt, submittedHash, handled]);
 
   const [uploading, setUploading] = useState(false);
 
   // ── Mobile-wallet safety net ──────────────────────────────────────
   // On WalletConnect (mobile), the dapp regularly never receives the tx
-  // hash after the user confirms in their wallet app — the promise from
-  // writeContractAsync just hangs and the UI sticks on "Confirm in
-  // wallet…". So the moment we ask for a signature we also snapshot
-  // tokenCount() and poll the chain: if a NEW token appears whose curve
-  // creator is this wallet, the launch succeeded regardless of whether
-  // the RPC callback ever came home.
+  // hash after the user confirms — the promise just hangs. So we
+  // snapshot tokenCount() before asking for the signature and poll: if
+  // a NEW token appears whose creator is this wallet, the launch
+  // succeeded regardless of whether the callback ever came home.
   const [watchFrom, setWatchFrom] = useState<bigint | null>(null);
 
   useEffect(() => {
@@ -104,35 +164,32 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
     async function poll() {
       try {
         const count = await client.readContract({
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
+          address: HAMR_V2.launchpad,
+          abi: launchpadV2Abi,
           functionName: "tokenCount",
         });
         if (cancelled || count <= watchFrom!) return;
         // Scan only the tokens minted since we started watching.
         for (let i = Number(watchFrom); i < Number(count); i++) {
           const token = await client.readContract({
-            address: HAMR_CONTRACTS.launchpad,
-            abi: hamrLaunchpadAbi,
+            address: HAMR_V2.launchpad,
+            abi: launchpadV2Abi,
             functionName: "allTokens",
             args: [BigInt(i)],
           });
-          const curve = await readCurve(token);
-          if (
-            curve.exists &&
-            curve.creator.toLowerCase() === address!.toLowerCase()
-          ) {
+          const [creator, , , exists] = await client.readContract({
+            address: HAMR_V2.launchpad,
+            abi: launchpadV2Abi,
+            functionName: "launches",
+            args: [token],
+          });
+          if (exists && creator.toLowerCase() === address!.toLowerCase()) {
             if (cancelled) return;
-            setHandled(true);
-            onSuccess({
+            void finish(
               token,
-              pool: "0x0000000000000000000000000000000000000000",
-              txHash:
-                submittedHash ??
+              submittedHash ??
                 ("0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`),
-              ponsUrl: `/launches/${token}`,
-              explorerUrl: explorerUrl("token", token),
-            });
+            );
             return;
           }
         }
@@ -146,7 +203,8 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       cancelled = true;
       clearInterval(id);
     };
-  }, [watchFrom, handled, address, submittedHash, onSuccess]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchFrom, handled, address, submittedHash]);
 
   async function handleSign() {
     setLocalError(null);
@@ -156,8 +214,7 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       return;
     }
     const s = kit.socials ?? {};
-    const feeWei = parseEther(HAMR_CURVE.launchFeeEth);
-    const buyWei = initialBuyEth ? parseEther(initialBuyEth) : 0n;
+    const feeWei = parseEther(V2_PARAMS.launchFeeEth);
 
     // Logos are stored ON-CHAIN as a string. A base64 data URL would be
     // hundreds of KB of calldata — host it first and store the short URL.
@@ -188,8 +245,8 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
       // matches tokens created after this moment.
       try {
         const count = await getPublicClient().readContract({
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
+          address: HAMR_V2.launchpad,
+          abi: launchpadV2Abi,
           functionName: "tokenCount",
         });
         setWatchFrom(count);
@@ -206,26 +263,24 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           telegramUrl: s.telegram ?? "",
           websiteUrl: s.website ?? "",
         },
-        0n, // minFirstBuyTokens — creator sets their own slippage at 0
       ] as const;
       // Gas + fees via OUR rpc proxy — the user's wallet may have a
       // broken RPC configured for this chain, and viem would otherwise
-      // route these reads through it (the "eth_getBlockByNumber" launch
-      // failures some users hit).
+      // route these reads through it.
       const fees = await prepareFees({
         account: address,
-        address: HAMR_CONTRACTS.launchpad,
-        abi: hamrLaunchpadAbi,
+        address: HAMR_V2.launchpad,
+        abi: launchpadV2Abi,
         functionName: "launchToken",
         args: launchArgs,
-        value: feeWei + buyWei,
+        value: feeWei,
       });
       await writeContractAsync({
-        address: HAMR_CONTRACTS.launchpad,
-        abi: hamrLaunchpadAbi,
+        address: HAMR_V2.launchpad,
+        abi: launchpadV2Abi,
         functionName: "launchToken",
         args: launchArgs,
-        value: feeWei + buyWei,
+        value: feeWei,
         ...fees,
       });
     } catch (err) {
@@ -235,10 +290,10 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
 
   const errMsg =
     localError ??
-    (writeError ? humanizeTxError(writeError) : null) ??
+    (writeError && !handled ? humanizeTxError(writeError) : null) ??
     (receiptError ? humanizeTxError(receiptError) : null);
 
-  const busy = writePending || mining || uploading;
+  const busy = writePending || mining || uploading || buying;
 
   return (
     <div className="space-y-6">
@@ -256,14 +311,17 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           Your wallet will prompt to sign one transaction that:
         </p>
         <ol className="text-[12px] text-ink-300/85 font-semibold space-y-1.5 list-decimal list-inside">
-          <li>Pays the {HAMR_CURVE.launchFeeEth} ETH launch fee</li>
+          <li>Pays the {V2_PARAMS.launchFeeEth} ETH launch fee</li>
           <li>Deploys the ERC-20 with a fixed 1B supply</li>
           <li>
-            Opens the bonding curve — graduates to a locked Uniswap V3
-            pool at {HAMR_CURVE.graduationRaiseEth} ETH raised
+            Opens a REAL Uniswap V3 pool — the entire supply locked as
+            liquidity forever, tradeable from any wallet or bot instantly
           </li>
           {initialBuyEth && Number(initialBuyEth) > 0 && (
-            <li>Buys {initialBuyEth} ETH of the token as your first buy</li>
+            <li>
+              Then buys {initialBuyEth} ETH of the token via the router
+              (a second quick signature)
+            </li>
           )}
           <li>
             Routes 75% of every trade fee to you, forever (claim any time)
@@ -296,11 +354,13 @@ export default function SignStep({ kit, initialBuyEth, onBack, onSuccess }: Prop
           <Rocket className="h-4 w-4" />
           {uploading
             ? "Uploading logo…"
-            : writePending
-              ? "Confirm in wallet…"
-              : mining
-                ? "Launching on-chain…"
-                : "Launch now"}
+            : buying
+              ? "First buy — confirm in wallet…"
+              : writePending
+                ? "Confirm in wallet…"
+                : mining
+                  ? "Launching on-chain…"
+                  : "Launch now"}
         </button>
       </div>
     </div>

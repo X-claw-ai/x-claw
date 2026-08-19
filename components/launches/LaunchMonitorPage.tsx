@@ -13,23 +13,26 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { formatEther, parseEther, type Address } from "viem";
+import {
+  encodeFunctionData,
+  formatEther,
+  parseEther,
+  type Address,
+} from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { useHamrToken, useTokenBalance } from "@/lib/hamr/hooks";
-import { quoteBuy, quoteSell } from "@/lib/hamr/read";
+import { useHamrV2Token, useTokenBalance } from "@/lib/hamr/hooks";
+import { hamrTokenAbi, fetchEthUsd, formatUsd } from "@/lib/hamr";
 import {
-  HAMR_CONTRACTS,
-  HAMR_CURVE,
-  hamrLaunchpadAbi,
-  hamrTokenAbi,
-  fetchEthUsd,
-  formatUsd,
-} from "@/lib/hamr";
+  HAMR_V2,
+  V2_PARAMS,
+  quoteV2,
+  swapRouterAbi,
+} from "@/lib/hamr/v2";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { Badge } from "@/components/ui/Badge";
 import PriceChart from "./PriceChart";
@@ -39,9 +42,10 @@ import TradesTable from "./TradesTable";
 import { prepareFees } from "@/lib/hamr/txfees";
 import { humanizeTxError } from "@/lib/hamr/errors";
 
-// Token page for a HAMR launchpad coin. Live curve state + a pump.fun
-// style trade box: buy with ETH along the curve, sell back any time,
-// watch the graduation bar fill toward the locked Uniswap V3 pool.
+// Token page for a HAMR coin. Every launch is a REAL Uniswap V3 pool
+// from block one, so this page reads the pool directly (slot0 price,
+// Swap-event history) and trades through the canonical SwapRouter —
+// the exact same path Telegram bots and external wallets use.
 
 interface Props {
   token: string;
@@ -50,7 +54,7 @@ interface Props {
 export default function LaunchMonitorPage({ token }: Props) {
   const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
   const tokenAddr = isEvmAddr ? (token as Address) : undefined;
-  const { snap, loading, error, refresh } = useHamrToken(tokenAddr);
+  const { snap, loading, error, refresh } = useHamrV2Token(tokenAddr);
   const { data: trades, failed: tradesFailed } = useTrades(tokenAddr);
   const [ethUsd, setEthUsd] = useState<number | null>(null);
 
@@ -100,7 +104,7 @@ export default function LaunchMonitorPage({ token }: Props) {
       <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
         <div className="card !p-10 flex flex-col items-center gap-3 text-ink-300/70">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-[13px] font-semibold">Reading the curve…</p>
+          <p className="text-[13px] font-semibold">Reading the pool…</p>
         </div>
       </section>
     );
@@ -129,14 +133,13 @@ export default function LaunchMonitorPage({ token }: Props) {
     );
   }
 
-  const { meta, curve, progressBps } = snap;
-  const raisedEth = Number(formatEther(curve.realEth));
-  const marketCapEth = snap.priceEth * HAMR_CURVE.totalSupply;
+  const { meta, progressBps, graduated, wethInPoolEth } = snap;
+  const marketCapEth = snap.priceEth * V2_PARAMS.totalSupply;
 
   return (
     <section className="mx-auto max-w-5xl px-4 md:px-6 py-8 md:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 items-start">
-        {/* ── Left column: identity + curve state ─────────────────── */}
+        {/* ── Left column: identity + pool state ──────────────────── */}
         <div className="space-y-5 min-w-0">
           {/* Header */}
           <div className="card !p-5 md:!p-6">
@@ -165,8 +168,8 @@ export default function LaunchMonitorPage({ token }: Props) {
                   ${meta.symbol} · HAMR launchpad
                 </div>
               </div>
-              <Badge tone={curve.graduated ? "live" : "neutral"}>
-                {curve.graduated ? "Graduated" : "Bonding"}
+              <Badge tone={graduated ? "live" : "neutral"}>
+                {graduated ? "Graduated" : "Live pool"}
               </Badge>
             </div>
 
@@ -200,14 +203,14 @@ export default function LaunchMonitorPage({ token }: Props) {
             </div>
           </div>
 
-          {/* Price chart — reconstructed from on-chain trade events */}
+          {/* Price chart — straight from the pool's Swap events */}
           <PriceChart data={trades} failed={tradesFailed} ethUsd={ethUsd} />
 
-          {/* Graduation bar */}
+          {/* Launch-range progress */}
           <div className="card !p-5 space-y-3">
             <div className="flex items-baseline justify-between gap-3">
               <div>
-                <div className="eyebrow !text-[10px]">Bonding curve</div>
+                <div className="eyebrow !text-[10px]">Launch curve</div>
                 <div className="mt-1 text-[16px] font-black tracking-tight">
                   {(progressBps / 100).toFixed(1)}%{" "}
                   <span className="text-ink-300/50 font-bold">
@@ -217,10 +220,10 @@ export default function LaunchMonitorPage({ token }: Props) {
               </div>
               <div className="text-right">
                 <div className="text-[11px] font-bold text-ink-300/60 uppercase tracking-wider">
-                  Raised
+                  ETH in pool
                 </div>
                 <div className="text-[13px] font-extrabold tabular-nums">
-                  {raisedEth.toFixed(4)} / {HAMR_CURVE.graduationRaiseEth} ETH
+                  {wethInPoolEth.toFixed(4)} / {V2_PARAMS.targetRaiseEth} ETH
                 </div>
               </div>
             </div>
@@ -231,9 +234,11 @@ export default function LaunchMonitorPage({ token }: Props) {
               />
             </div>
             <p className="text-[11px] text-ink-300/55 font-medium leading-relaxed">
-              At {HAMR_CURVE.graduationRaiseEth} ETH the curve closes:
-              200M tokens + the raise open a Uniswap V3 pool and the LP is
-              locked forever. Creator keeps earning 75% of every trade fee.
+              This is a real Uniswap V3 pool from block one — tradeable
+              from any wallet, bot, or aggregator. All liquidity is locked
+              forever; graduation just marks the launch range filling
+              (~{V2_PARAMS.targetRaiseEth} ETH). Creator earns 75% of every
+              trade fee, always.
             </p>
           </div>
 
@@ -262,11 +267,9 @@ export default function LaunchMonitorPage({ token }: Props) {
             <StatCard
               label="Liquidity"
               value={
-                curve.graduated
-                  ? "Locked LP"
-                  : ethUsd
-                    ? formatUsd(raisedEth * ethUsd)
-                    : raisedEth.toFixed(4) + " ETH"
+                ethUsd
+                  ? formatUsd(wethInPoolEth * ethUsd)
+                  : wethInPoolEth.toFixed(4) + " ETH"
               }
             />
             <StatCard
@@ -297,60 +300,51 @@ export default function LaunchMonitorPage({ token }: Props) {
             />
             <StatCard
               label="Sold"
-              value={
-                (Number(curve.tokensSold) / 1e18 / 1e6).toFixed(1) + "M"
-              }
+              value={(snap.tokensSold / 1e6).toFixed(1) + "M"}
             />
             <StatCard label="Supply" value="1B fixed" />
           </div>
 
-          {/* Live trade feed — same on-chain events as the chart */}
+          {/* Live trade feed — same pool events as the chart */}
           <TradesTable data={trades} failed={tradesFailed} />
 
           {/* Holders — rebuilt live from Transfer events */}
           {tokenAddr && (
-            <HoldersTable token={tokenAddr} creator={meta.creator} />
+            <HoldersTable
+              token={tokenAddr}
+              creator={meta.creator}
+              pool={snap.pool}
+            />
           )}
         </div>
 
-        {/* ── Right column: trade box ─────────────────────────────── */}
-        <div className="lg:sticky lg:top-24">
-          {curve.graduated ? (
-            <div className="card !p-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <Flame className="h-4 w-4 text-koki-500" />
-                <div className="text-[14px] font-black tracking-tight">
-                  Graduated to Uniswap
-                </div>
-              </div>
-              <p className="text-[12px] text-ink-300/75 font-medium leading-relaxed">
-                The curve is complete. Liquidity is locked in Uniswap V3 —
-                trade there from any DEX interface.
+        {/* ── Right column: trade box (always live — it's a real pool) */}
+        <div className="lg:sticky lg:top-24 space-y-4">
+          {graduated && (
+            <div className="card !p-4 flex items-center gap-2.5">
+              <Flame className="h-4 w-4 text-koki-500 shrink-0" />
+              <p className="text-[12px] text-ink-300/80 font-semibold leading-snug">
+                Launch range filled — trading continues right here and on
+                every DEX.
               </p>
-              <a
-                href={tokenExplorer ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary w-full !py-2.5"
-              >
-                View pool on Blockscout
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
             </div>
-          ) : (
-            <TradeBox
-              token={tokenAddr!}
-              symbol={meta.symbol}
-              onTraded={refresh}
-            />
           )}
+          <TradeBox
+            token={tokenAddr!}
+            symbol={meta.symbol}
+            onTraded={refresh}
+          />
         </div>
       </div>
     </section>
   );
 }
 
-// ── Trade box ────────────────────────────────────────────────────────
+// ── Trade box — canonical Uniswap SwapRouter, same path as any bot ──
+
+const DEADLINE_S = 600n;
+const MAX_UINT = 2n ** 256n - 1n;
+const ZERO_ADDR = "0x0000000000000000000000000000000000000000" as Address;
 
 function TradeBox({
   token,
@@ -385,7 +379,7 @@ function TradeBox({
     address: token,
     abi: hamrTokenAbi,
     functionName: "allowance",
-    args: address ? [address, HAMR_CONTRACTS.launchpad] : undefined,
+    args: address ? [address, HAMR_V2.swapRouter] : undefined,
     query: { enabled: Boolean(address) && side === "sell" },
   });
 
@@ -405,10 +399,19 @@ function TradeBox({
     if (!next || Number.isNaN(n) || n <= 0) return;
     setQuoting(true);
     try {
-      const q =
+      const q = await quoteV2(
         s === "buy"
-          ? await quoteBuy(token, parseEther(next))
-          : await quoteSell(token, parseEther(next));
+          ? {
+              tokenIn: HAMR_V2.weth,
+              tokenOut: token,
+              amountIn: parseEther(next),
+            }
+          : {
+              tokenIn: token,
+              tokenOut: HAMR_V2.weth,
+              amountIn: parseEther(next),
+            },
+      );
       setQuote(q);
     } catch {
       setQuote(null);
@@ -429,23 +432,35 @@ function TradeBox({
       setLocalError("Enter an amount.");
       return;
     }
+    const deadline = BigInt(Math.floor(Date.now() / 1000)) + DEADLINE_S;
+    const minOut = quote ? (quote * 98n) / 100n : 0n; // 2% slippage
     try {
       if (side === "buy") {
-        const minOut = quote ? (quote * 98n) / 100n : 0n; // 2% slippage
+        // ETH in → router wraps to WETH internally (tokenIn = WETH9).
         const value = parseEther(amount);
+        const params = {
+          tokenIn: HAMR_V2.weth,
+          tokenOut: token,
+          fee: V2_PARAMS.poolFee,
+          recipient: address,
+          deadline,
+          amountIn: value,
+          amountOutMinimum: minOut,
+          sqrtPriceLimitX96: 0n,
+        } as const;
         const fees = await prepareFees({
           account: address,
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
-          functionName: "buy",
-          args: [token, minOut],
+          address: HAMR_V2.swapRouter,
+          abi: swapRouterAbi,
+          functionName: "exactInputSingle",
+          args: [params],
           value,
         });
         await writeContractAsync({
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
-          functionName: "buy",
-          args: [token, minOut],
+          address: HAMR_V2.swapRouter,
+          abi: swapRouterAbi,
+          functionName: "exactInputSingle",
+          args: [params],
           value,
           ...fees,
         });
@@ -453,7 +468,7 @@ function TradeBox({
         const tokenWei = parseEther(amount);
         if ((allowance ?? 0n) < tokenWei) {
           // One-time max approve, then the sell in a second signature.
-          const approveArgs = [HAMR_CONTRACTS.launchpad, 2n ** 256n - 1n] as const;
+          const approveArgs = [HAMR_V2.swapRouter, MAX_UINT] as const;
           const aFees = await prepareFees({
             account: address,
             address: token,
@@ -469,19 +484,42 @@ function TradeBox({
             ...aFees,
           });
         }
-        const minOut = quote ? (quote * 98n) / 100n : 0n;
+        // Token → WETH lands on the router (recipient 0 = router), then
+        // unwrapWETH9 sends native ETH home. Single multicall signature.
+        const swapData = encodeFunctionData({
+          abi: swapRouterAbi,
+          functionName: "exactInputSingle",
+          args: [
+            {
+              tokenIn: token,
+              tokenOut: HAMR_V2.weth,
+              fee: V2_PARAMS.poolFee,
+              recipient: ZERO_ADDR,
+              deadline,
+              amountIn: tokenWei,
+              amountOutMinimum: minOut,
+              sqrtPriceLimitX96: 0n,
+            },
+          ],
+        });
+        const unwrapData = encodeFunctionData({
+          abi: swapRouterAbi,
+          functionName: "unwrapWETH9",
+          args: [minOut, address],
+        });
+        const mcArgs = [[swapData, unwrapData]] as const;
         const sFees = await prepareFees({
           account: address,
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
-          functionName: "sell",
-          args: [token, tokenWei, minOut],
+          address: HAMR_V2.swapRouter,
+          abi: swapRouterAbi,
+          functionName: "multicall",
+          args: mcArgs,
         });
         await writeContractAsync({
-          address: HAMR_CONTRACTS.launchpad,
-          abi: hamrLaunchpadAbi,
-          functionName: "sell",
-          args: [token, tokenWei, minOut],
+          address: HAMR_V2.swapRouter,
+          abi: swapRouterAbi,
+          functionName: "multicall",
+          args: mcArgs,
           ...sFees,
         });
       }
@@ -566,7 +604,7 @@ function TradeBox({
         )}
       </div>
 
-      {/* Quote */}
+      {/* Quote — live from Uniswap QuoterV2 */}
       <div className="flex items-center justify-between rounded-lg bg-ink-1000/8 px-3 py-2.5">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-ink-300/60">
           <ArrowDownUp className="h-3 w-3" />
@@ -612,7 +650,7 @@ function TradeBox({
       </button>
 
       <p className="text-[10px] text-ink-300/45 font-medium text-center">
-        1% fee per trade — 75% goes to the creator · 2% max slippage
+        Real Uniswap V3 pool · 1% fee, 75% to the creator · 2% max slippage
       </p>
     </div>
   );

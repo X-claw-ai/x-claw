@@ -34,4 +34,5 @@ export const HIDDEN_TOKENS = new Set<string>([
   "0x82a75d3efcfd6c3b6686f24e461e611153a9d148", // HAM
   "0xf7814af7add678ed288d8c66cdf0b7d046558272", // POTBOI
   "0x737bad994bef78176b96b2ede7f7520099ea4618", // JAKET (4th test)
+  "0x75cc26bdcd8f0bc348e022a66bf84b715c3d423d", // Hamr V2 Test (v2 smoke)
 ]);

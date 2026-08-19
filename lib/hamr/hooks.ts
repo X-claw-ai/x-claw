@@ -6,6 +6,57 @@
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { readSnapshot, readTokenBalance, type HamrTokenSnapshot } from "./read";
+import { readV2FullSnapshot, type V2FullSnapshot } from "./v2";
+
+export interface UseHamrV2TokenResult {
+  snap: V2FullSnapshot | null;
+  loading: boolean;
+  error: string | null;
+  /** Bump to force an immediate refetch (e.g. after a trade confirms). */
+  refresh: () => void;
+}
+
+/** Polling snapshot for a v2 (real Uniswap pool) launch. */
+export function useHamrV2Token(
+  token: Address | undefined,
+  { refreshMs = 15_000 }: { refreshMs?: number } = {},
+): UseHamrV2TokenResult {
+  const [snap, setSnap] = useState<V2FullSnapshot | null>(null);
+  const [loading, setLoading] = useState<boolean>(Boolean(token));
+  const [error, setError] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    async function fetchOnce() {
+      try {
+        const s = await readV2FullSnapshot(token as Address);
+        if (!cancelled) {
+          setSnap(s);
+          setError(s ? null : "Not a HAMR launchpad token");
+          setLoading(false);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : String(e));
+          setLoading(false);
+        }
+      }
+    }
+    void fetchOnce();
+    const timer = refreshMs > 0 ? setInterval(fetchOnce, refreshMs) : null;
+    return () => {
+      cancelled = true;
+      if (timer) clearInterval(timer);
+    };
+  }, [token, refreshMs, nonce]);
+
+  return { snap, loading, error, refresh: () => setNonce((n) => n + 1) };
+}
 
 export interface UseHamrTokenResult {
   snap: HamrTokenSnapshot | null;
