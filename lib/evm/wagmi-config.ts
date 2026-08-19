@@ -28,7 +28,7 @@ const WC_PROJECT_ID =
 export const wagmiConfig = getDefaultConfig({
   appName: "HAMR.fun",
   appDescription:
-    "Autonomous Grok-native memecoin launch agent on Robinhood Chain.",
+    "Autonomous memecoin launch agent on Robinhood Chain.",
   appUrl: "https://hamr.fun",
   appIcon: "https://hamr.fun/hamr-logo.jpg",
   projectId: WC_PROJECT_ID,
