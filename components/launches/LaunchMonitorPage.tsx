@@ -41,6 +41,7 @@ import PriceChart from "./PriceChart";
 import { useTrades } from "./useTrades";
 import HoldersTable from "./HoldersTable";
 import TradesTable from "./TradesTable";
+import CreatorFeesCard from "./CreatorFeesCard";
 import { prepareFees } from "@/lib/hamr/txfees";
 import { humanizeTxError } from "@/lib/hamr/errors";
 
@@ -335,6 +336,12 @@ export default function LaunchMonitorPage({ token }: Props) {
             token={tokenAddr!}
             symbol={meta.symbol}
             onTraded={refresh}
+          />
+          {/* Creator-only: harvest + claim the 75% fee share */}
+          <CreatorFeesCard
+            token={tokenAddr!}
+            creator={meta.creator}
+            symbol={meta.symbol}
           />
         </div>
       </div>
