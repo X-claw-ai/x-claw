@@ -45,7 +45,7 @@ interface Market {
 
 type Sort = "new" | "oldest" | "mcap" | "volume" | "graduating";
 
-const REFRESH_MS = 30_000;
+const REFRESH_MS = 45_000;
 const MARKET_LIMIT = 36; // how many cards get live curve reads
 
 export default function BoardGrid() {
@@ -135,7 +135,7 @@ export default function BoardGrid() {
       }
     }
     void scan();
-    const id = setInterval(scan, 60_000);
+    const id = setInterval(scan, 120_000);
     return () => {
       cancelled = true;
       clearInterval(id);
