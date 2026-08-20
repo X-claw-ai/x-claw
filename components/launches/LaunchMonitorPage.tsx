@@ -374,6 +374,7 @@ export default function LaunchMonitorPage({ token }: Props) {
 // Reads the on-chain creator + symbol, then defers to CreatorFeesCard
 // (which renders nothing unless the connected wallet IS the creator).
 function HiddenCreatorClaim({ token }: { token: Address }) {
+  const { address } = useAccount();
   const [info, setInfo] = useState<{ creator: string; symbol: string } | null>(
     null,
   );
@@ -393,8 +394,27 @@ function HiddenCreatorClaim({ token }: { token: Address }) {
     };
   }, [token]);
   if (!info) return null;
+  const isCreator =
+    Boolean(address) && address!.toLowerCase() === info.creator.toLowerCase();
   return (
-    <CreatorFeesCard token={token} creator={info.creator} symbol={info.symbol} />
+    <>
+      {!isCreator && (
+        <div className="card !p-4 text-[12px] font-semibold text-ink-300/70 leading-relaxed">
+          Accrued trade fees remain claimable by the creator wallet{" "}
+          <span className="font-mono text-koki-300 break-all">{info.creator}</span>
+          {address ? (
+            <>
+              {" "}— you are connected as{" "}
+              <span className="font-mono break-all">{address}</span>. Switch to
+              the creator wallet to claim.
+            </>
+          ) : (
+            <> — connect that wallet to claim.</>
+          )}
+        </div>
+      )}
+      <CreatorFeesCard token={token} creator={info.creator} symbol={info.symbol} />
+    </>
   );
 }
 
