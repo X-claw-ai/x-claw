@@ -39,7 +39,7 @@ export const wagmiConfig = getDefaultConfig({
     // prefers transports over chain.rpcUrls), and WalletConnect throws
     // on relative paths — which silently broke every mobile connect.
     [robinhoodChain.id]: http(PUBLIC_RPC_ABSOLUTE, {
-      batch: { wait: 16 },
+      batch: { wait: 16, batchSize: 60 },
       retryCount: 5,
       retryDelay: 400,
       timeout: 15_000,

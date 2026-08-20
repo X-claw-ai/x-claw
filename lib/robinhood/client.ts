@@ -23,7 +23,11 @@ export function getPublicClient(): PublicClient {
   cached = createPublicClient({
     chain: robinhoodChain,
     transport: http(url, {
-      batch: { wait: 16 },
+      // batchSize MUST stay under the /api/rpc proxy's per-request cap —
+      // block-timestamp scans (chart + board) can queue 100+ calls in
+      // one flush, and an oversized batch used to 400 the WHOLE flush,
+      // taking innocent reads (token snapshot) down with it.
+      batch: { wait: 16, batchSize: 60 },
       retryCount: 5,
       retryDelay: 400,
       timeout: 15_000,

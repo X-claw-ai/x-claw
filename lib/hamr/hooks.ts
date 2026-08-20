@@ -32,6 +32,7 @@ export function useHamrV2Token(
       return;
     }
     let cancelled = false;
+    let retry: ReturnType<typeof setTimeout> | null = null;
     async function fetchOnce() {
       try {
         const s = await readV2FullSnapshot(token as Address);
@@ -40,10 +41,15 @@ export function useHamrV2Token(
           setError(s ? null : "Not a HAMR launchpad token");
           setLoading(false);
         }
-      } catch (e) {
+      } catch {
+        // Transient RPC failure (rate limit, oversized batch, hiccup):
+        // the token may be perfectly real. NEVER declare "unknown" off
+        // the back of a network error — keep the loading state and
+        // retry shortly. Only a successful read that returns null (the
+        // factory says it doesn't exist) may say unknown.
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : String(e));
-          setLoading(false);
+          setSnap((prev) => prev); // keep whatever we had
+          retry = setTimeout(fetchOnce, 2_500);
         }
       }
     }
@@ -52,6 +58,7 @@ export function useHamrV2Token(
     return () => {
       cancelled = true;
       if (timer) clearInterval(timer);
+      if (retry) clearTimeout(retry);
     };
   }, [token, refreshMs, nonce]);
 

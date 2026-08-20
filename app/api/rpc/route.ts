@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   const calls = Array.isArray(body) ? body : [body];
-  if (calls.length === 0 || calls.length > 100 || !calls.every(methodAllowed)) {
+  if (calls.length === 0 || calls.length > 300 || !calls.every(methodAllowed)) {
     return NextResponse.json(
       { jsonrpc: "2.0", id: null, error: { code: -32601, message: "Method not allowed" } },
       { status: 400 },
