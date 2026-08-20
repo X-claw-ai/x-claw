@@ -11,7 +11,6 @@ import {
   tokenIsToken0,
   V2_PARAMS,
 } from "@/lib/hamr/v2";
-import { TRADE_HISTORY_FROM } from "@/lib/hamr/constants";
 
 // Shared on-chain trade history for a HAMR v2 coin. Every launch IS a
 // real Uniswap V3 pool, so history is simply the pool's own Swap
@@ -81,8 +80,7 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
         const logs = await client.getLogs({
           address: pool,
           event: poolSwapEvent,
-          // Per-token stats reset: start history at the configured block.
-          fromBlock: TRADE_HISTORY_FROM[token!.toLowerCase()] ?? 0n,
+          fromBlock: 0n,
           toBlock: "latest",
         });
         if (cancelled) return;
@@ -114,19 +112,14 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
         if (cancelled) return;
         const tsMap = new Map(tsEntries);
 
-        // Reset tokens skip the synthetic launch-price point — their
-        // "day one" starts at the reset block's market price instead.
-        const isReset = Boolean(TRADE_HISTORY_FROM[token!.toLowerCase()]);
-        const points: TradePoint[] = isReset
-          ? []
-          : [
-              {
-                price: V2_PARAMS.startPriceEth,
-                ts: tsMap.get(sliced[0]?.blockNumber.toString() ?? "") ?? 0,
-                ethAmount: 0,
-                kind: "launch",
-              },
-            ];
+        const points: TradePoint[] = [
+          {
+            price: V2_PARAMS.startPriceEth,
+            ts: tsMap.get(sliced[0]?.blockNumber.toString() ?? "") ?? 0,
+            ethAmount: 0,
+            kind: "launch",
+          },
+        ];
         for (const l of sliced) {
           const a = l.args as {
             recipient?: string;
@@ -185,12 +178,11 @@ export function useTrades(token?: Address, refreshMs = 20_000) {
         const volume24hEth = points
           .filter((p) => p.kind !== "launch" && p.ts >= cutoff)
           .reduce((acc, p) => acc + p.ethAmount, 0);
-        const athPriceEth =
-          points.length > 0 ? Math.max(...points.map((p) => p.price)) : 0;
+        const athPriceEth = Math.max(...points.map((p) => p.price));
 
         setData({
           points,
-          tradeCount: points.filter((p) => p.kind !== "launch").length,
+          tradeCount: points.length - 1,
           volume24hEth,
           athPriceEth,
         });
