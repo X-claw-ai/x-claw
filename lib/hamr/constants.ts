@@ -38,3 +38,13 @@ export const HIDDEN_TOKENS = new Set<string>([
   "0xd50fee5e8b9d76ef686045cce68ea5bfd4703d10", // HAMRGUY (v2 test launch)
   "0xc4fa5dfc396e1839e4dc551ec1d5ffb9c12ef1d1", // EARUP (v2 test launch)
 ]);
+
+/** Per-token trade-history reset points. The chain remembers
+ *  everything, but the SITE starts the chart / trades feed / ATH /
+ *  volume from this block for these tokens — used when a token's
+ *  pre-launch test activity should not pollute its official stats.
+ *  (Holders stay computed from full history so balances stay exact.) */
+export const TRADE_HISTORY_FROM: Record<string, bigint> = {
+  // Official $HAMR — stats restart after the sniper test phase exited.
+  "0x784380080f8971436e50656fb03af128a0f5e4a3": 41_659_132n,
+};
