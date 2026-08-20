@@ -84,7 +84,7 @@ export default function LaunchMonitorPage({ token }: Props) {
 
   if (isHidden) {
     return (
-      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
+      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12 space-y-5">
         <div className="card !p-8">
           <div className="eyebrow">Token not available</div>
           <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
@@ -94,6 +94,9 @@ export default function LaunchMonitorPage({ token }: Props) {
             All launches
           </Link>
         </div>
+        {/* Fees keep accruing on-chain even for delisted launches — the
+            creator (and only the creator) can still claim from here. */}
+        <HiddenCreatorClaim token={token as Address} />
       </section>
     );
   }
@@ -364,6 +367,34 @@ export default function LaunchMonitorPage({ token }: Props) {
         </div>
       </div>
     </section>
+  );
+}
+
+// ── Hidden-token creator claim ──────────────────────────────────────
+// Reads the on-chain creator + symbol, then defers to CreatorFeesCard
+// (which renders nothing unless the connected wallet IS the creator).
+function HiddenCreatorClaim({ token }: { token: Address }) {
+  const [info, setInfo] = useState<{ creator: string; symbol: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    let cancelled = false;
+    const client = getPublicClient();
+    Promise.all([
+      client.readContract({ address: token, abi: hamrTokenAbi, functionName: "creator" }),
+      client.readContract({ address: token, abi: hamrTokenAbi, functionName: "symbol" }),
+    ])
+      .then(([creator, symbol]) => {
+        if (!cancelled) setInfo({ creator, symbol });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+  if (!info) return null;
+  return (
+    <CreatorFeesCard token={token} creator={info.creator} symbol={info.symbol} />
   );
 }
 
