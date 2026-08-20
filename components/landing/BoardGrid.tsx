@@ -7,7 +7,6 @@ import { Rocket, Search, ArrowUpRight, Loader2, Crown, Flame } from "lucide-reac
 import { readTokenMeta, fetchEthUsd, formatUsd, HIDDEN_TOKENS } from "@/lib/hamr";
 import {
   HAMR_V2,
-  V2_PARAMS,
   listV2Tokens,
   readV2Snapshot,
   tokenLaunchedV2Event,
@@ -257,7 +256,7 @@ export default function BoardGrid() {
               setMarkets((m) => ({
                 ...m,
                 [l.token_address.toLowerCase()]: {
-                  mcapEth: s.priceEth * V2_PARAMS.totalSupply,
+                  mcapEth: s.priceEth * s.circulating,
                   progressBps: s.progressBps,
                   graduated: s.graduated,
                 },

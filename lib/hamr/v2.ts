@@ -52,6 +52,11 @@ export const poolSwapEvent = parseAbiItem(
   "event Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)",
 );
 
+/** Standard burn sink — tokens sent here are gone forever. Trackers
+ *  (and our own market-cap math) treat this balance as burned. */
+export const DEAD_ADDRESS =
+  "0x000000000000000000000000000000000000dEaD" as Address;
+
 export const tokenLaunchedV2Event = parseAbiItem(
   "event TokenLaunched(address indexed token, address indexed creator, address pool, uint256 tokenId, string name, string symbol, string logo)",
 );
@@ -116,6 +121,10 @@ export interface V2Snapshot {
   priceEth: number;
   progressBps: number;
   graduated: boolean; // price crossed the top of the range
+  /** Tokens sent to the dead address (whole tokens). */
+  burned: number;
+  /** totalSupply − burned — what market cap is computed from. */
+  circulating: number;
 }
 
 export async function readPoolOf(token: Address): Promise<Address | null> {
@@ -138,19 +147,32 @@ export async function readV2Snapshot(token: Address): Promise<V2Snapshot | null>
     args: [token],
   });
   if (!exists) return null;
-  const [sqrtPriceX96] = await client.readContract({
-    address: pool,
-    abi: poolAbi,
-    functionName: "slot0",
-  });
+  const [[sqrtPriceX96], burnedWei] = await Promise.all([
+    client.readContract({
+      address: pool,
+      abi: poolAbi,
+      functionName: "slot0",
+    }),
+    client
+      .readContract({
+        address: token,
+        abi: erc20MiniAbi,
+        functionName: "balanceOf",
+        args: [DEAD_ADDRESS],
+      })
+      .catch(() => 0n),
+  ]);
   const priceEth = priceEthFromSqrt(sqrtPriceX96, tokenIsToken0(token));
   const progressBps = progressBpsFromPrice(priceEth);
+  const burned = Number(formatEther(burnedWei));
   return {
     pool,
     creator,
     priceEth,
     progressBps,
     graduated: progressBps >= 10_000,
+    burned,
+    circulating: Math.max(0, V2_PARAMS.totalSupply - burned),
   };
 }
 

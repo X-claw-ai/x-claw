@@ -158,7 +158,8 @@ export default function LaunchMonitorPage({ token }: Props) {
   }
 
   const { meta, progressBps, graduated, wethInPoolEth } = snap;
-  const marketCapEth = snap.priceEth * V2_PARAMS.totalSupply;
+  // Market cap is CIRCULATING: burned (dead-address) supply excluded.
+  const marketCapEth = snap.priceEth * snap.circulating;
 
   return (
     <section className="mx-auto max-w-5xl px-4 md:px-6 py-8 md:py-12">
@@ -228,7 +229,12 @@ export default function LaunchMonitorPage({ token }: Props) {
           </div>
 
           {/* Price chart — straight from the pool's Swap events */}
-          <PriceChart data={trades} failed={tradesFailed} ethUsd={ethUsd} />
+          <PriceChart
+            data={trades}
+            failed={tradesFailed}
+            ethUsd={ethUsd}
+            supply={snap.circulating}
+          />
 
           {/* Launch-range progress */}
           <div className="card !p-5 space-y-3">
@@ -326,7 +332,14 @@ export default function LaunchMonitorPage({ token }: Props) {
               label="Sold"
               value={(snap.tokensSold / 1e6).toFixed(1) + "M"}
             />
-            <StatCard label="Supply" value="1B fixed" />
+            <StatCard
+              label={snap.burned > 0 ? "Supply · burned" : "Supply"}
+              value={
+                snap.burned > 0
+                  ? `${(snap.circulating / 1e6).toFixed(0)}M · 🔥${(snap.burned / 1e6).toFixed(1)}M`
+                  : "1B fixed"
+              }
+            />
           </div>
 
           {/* Live trade feed — same pool events as the chart */}

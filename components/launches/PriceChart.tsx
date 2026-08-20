@@ -98,10 +98,13 @@ export default function PriceChart({
   data,
   failed,
   ethUsd,
+  supply,
 }: {
   data: TradesData | null;
   failed: boolean;
   ethUsd: number | null;
+  /** Circulating supply for the MC readout (defaults to 1B). */
+  supply?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -236,7 +239,7 @@ export default function PriceChart({
             )}
             {header && (
               <span className="ml-2.5 text-[13px] font-extrabold text-ink-300/70 tabular-nums">
-                {fmtPrice(header.last * V2_PARAMS.totalSupply)}
+                {fmtPrice(header.last * (supply ?? V2_PARAMS.totalSupply))}
                 <span className="ml-1 text-[10px] font-black text-ink-300/45 uppercase">
                   MC
                 </span>

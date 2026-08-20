@@ -5,7 +5,7 @@ import Image from "next/image";
 import { parseAbiItem, type Address } from "viem";
 import { getPublicClient } from "@/lib/robinhood/client";
 import { HAMR_CURVE } from "@/lib/hamr";
-import { HAMR_V2 } from "@/lib/hamr/v2";
+import { HAMR_V2, DEAD_ADDRESS } from "@/lib/hamr/v2";
 import { explorerUrl } from "@/lib/robinhood/chain";
 import { ExternalLink } from "lucide-react";
 
@@ -26,7 +26,7 @@ const MAX_ROWS = 20;
 interface Holder {
   address: string;
   pctBps: number; // 0–10000, basis points of total supply
-  label?: "pool" | "locked-lp" | "creator";
+  label?: "pool" | "locked-lp" | "creator" | "burned";
 }
 
 export default function HoldersTable({
@@ -71,6 +71,7 @@ export default function HoldersTable({
         }
 
         const poolLc = pool?.toLowerCase();
+        const deadLc = DEAD_ADDRESS.toLowerCase();
         const locker = HAMR_V2.locker.toLowerCase();
         const creatorLc = creator?.toLowerCase();
 
@@ -81,7 +82,9 @@ export default function HoldersTable({
             // bps with wei-exact math: bal * 10000 / supply
             pctBps: Number((bal * 10_000n) / SUPPLY_WEI),
             label:
-              addr === poolLc
+              addr === deadLc
+                ? ("burned" as const)
+                : addr === poolLc
                 ? ("pool" as const)
                 : addr === locker
                   ? ("locked-lp" as const)
@@ -162,6 +165,11 @@ export default function HoldersTable({
                     {h.address.slice(0, 6)}…{h.address.slice(-4)}
                     <ExternalLink className="h-2.5 w-2.5 opacity-50" />
                   </a>
+                  {h.label === "burned" && (
+                    <span className="shrink-0 rounded-full bg-orange-500/15 text-orange-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
+                      🔥 Burned
+                    </span>
+                  )}
                   {h.label === "pool" && (
                     <span className="shrink-0 rounded-full bg-koki-500/15 text-koki-300 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider">
                       Uniswap pool
