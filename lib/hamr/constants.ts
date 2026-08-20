@@ -37,4 +37,6 @@ export const HIDDEN_TOKENS = new Set<string>([
   "0x75cc26bdcd8f0bc348e022a66bf84b715c3d423d", // Hamr V2 Test (v2 smoke)
   "0xd50fee5e8b9d76ef686045cce68ea5bfd4703d10", // HAMRGUY (v2 test launch)
   "0xc4fa5dfc396e1839e4dc551ec1d5ffb9c12ef1d1", // EARUP (v2 test launch)
+  "0x784380080f8971436e50656fb03af128a0f5e4a3", // HAMR (test run 1)
+  "0x11af50065e39d1e1193422710ed66419e1759d8e", // HAMR (test run 2)
 ]);
