@@ -89,51 +89,73 @@ export default function CreatorFeesCard({
 
   if (!isCreator) return null;
 
-  async function harvestAndClaim() {
+  // Mobile-proof: two independent buttons, ONE signature each. We never
+  // chain awaits across an app switch — WalletConnect regularly loses
+  // the tx-hash callback when the user hops to their wallet app, which
+  // stranded the old combined flow at step 1/2 forever. Progress is
+  // confirmed by POLLING the on-chain ledger instead.
+  async function readLedger(): Promise<bigint> {
+    const [, amt0, , amt1] = await getPublicClient().readContract({
+      address: HAMR_V2.locker,
+      abi: hamrLockerAbi,
+      functionName: "pendingCreator",
+      args: [token],
+    });
+    return amt0 + amt1;
+  }
+
+  async function fire(
+    fn: "harvest" | "claimCreator",
+    label: "harvest" | "claim",
+    confirmed: (before: bigint, now: bigint) => boolean,
+  ) {
     setError(null);
     setDone(false);
+    setStep(label);
     try {
-      // 1) Pull fresh fees off the locked position into the ledger.
-      setStep("harvest");
-      const hFees = await prepareFees({
+      const before = await readLedger().catch(() => 0n);
+      const fees = await prepareFees({
         account: address!,
         address: HAMR_V2.locker,
         abi: hamrLockerAbi,
-        functionName: "harvest",
+        functionName: fn,
         args: [token],
       });
-      const hHash = await writeContractAsync({
+      // Fire the signature request but DON'T trust its callback — race
+      // it against on-chain confirmation via the ledger.
+      let rejected = false;
+      void writeContractAsync({
         address: HAMR_V2.locker,
         abi: hamrLockerAbi,
-        functionName: "harvest",
+        functionName: fn,
         args: [token],
-        ...hFees,
+        ...fees,
+      }).catch((err) => {
+        // Real user rejection should stop the wait below; a lost mobile
+        // callback should NOT — polling confirms those.
+        if (/user rejected|user denied/i.test(String(err))) rejected = true;
       });
-      await getPublicClient().waitForTransactionReceipt({ hash: hHash });
-
-      // 2) Pay the creator's 75% out.
-      setStep("claim");
-      const cFees = await prepareFees({
-        account: address!,
-        address: HAMR_V2.locker,
-        abi: hamrLockerAbi,
-        functionName: "claimCreator",
-        args: [token],
-      });
-      const cHash = await writeContractAsync({
-        address: HAMR_V2.locker,
-        abi: hamrLockerAbi,
-        functionName: "claimCreator",
-        args: [token],
-        ...cFees,
-      });
-      await getPublicClient().waitForTransactionReceipt({ hash: cHash });
-      setDone(true);
-      setNonce((n) => n + 1);
+      const deadline = Date.now() + 90_000;
+      let ok = false;
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 3_000));
+        if (rejected) throw new Error("User rejected the request");
+        const now = await readLedger().catch(() => before);
+        if (confirmed(before, now)) {
+          ok = true;
+          break;
+        }
+      }
+      if (ok) {
+        setDone(label === "claim");
+        setNonce((n) => n + 1);
+      } else {
+        setError(
+          "Still waiting for the transaction to land. If you approved it in your wallet, it may confirm shortly — the numbers above refresh automatically.",
+        );
+      }
     } catch (err) {
       const msg = humanizeTxError(err);
-      // claimCreator reverts with "nothing to claim" when the ledger is
-      // empty — translate instead of scaring the creator.
       setError(
         /nothing/i.test(String(err))
           ? "No fees to claim yet — they accrue with every trade."
@@ -143,6 +165,15 @@ export default function CreatorFeesCard({
       setStep("idle");
     }
   }
+
+  // Harvest confirmed when the ledger grows (or if it already held
+  // something and the tx simply added ~0 — treat unchanged-but-nonzero
+  // as done after the wallet resolves; the claim button is enabled
+  // whenever the ledger is nonzero anyway).
+  const doHarvest = () =>
+    fire("harvest", "harvest", (before, now) => now > before || now > 0n);
+  const doClaim = () =>
+    fire("claimCreator", "claim", (before, now) => before > 0n && now === 0n);
 
   const busy = step !== "idle";
 
@@ -202,23 +233,44 @@ export default function CreatorFeesCard({
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={harvestAndClaim}
-        disabled={busy}
-        className="btn btn-primary w-full !py-2.5 disabled:opacity-50"
-      >
-        {busy ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {step === "harvest"
-              ? "Harvesting fees… (1/2)"
-              : "Claiming… (2/2)"}
-          </>
-        ) : (
-          "Harvest & claim"
-        )}
-      </button>
+      <div className="grid grid-cols-2 gap-2.5">
+        <button
+          type="button"
+          onClick={doHarvest}
+          disabled={busy}
+          className="btn btn-secondary !py-2.5 disabled:opacity-50"
+        >
+          {step === "harvest" ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Harvesting…
+            </>
+          ) : (
+            "1 · Harvest"
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={doClaim}
+          disabled={busy || !pending || (pending.ethAmt === 0 && pending.tokAmt === 0)}
+          className="btn btn-primary !py-2.5 disabled:opacity-50"
+        >
+          {step === "claim" ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Claiming…
+            </>
+          ) : (
+            "2 · Claim all"
+          )}
+        </button>
+      </div>
+
+      {busy && (
+        <p className="text-[11px] font-bold text-koki-300 text-center">
+          Signature sent — open your wallet app to approve, then come back.
+        </p>
+      )}
     </div>
   );
 }
