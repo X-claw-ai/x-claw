@@ -26,7 +26,7 @@ import {
   useReadContract,
 } from "wagmi";
 import { useHamrV2Token, useTokenBalance } from "@/lib/hamr/hooks";
-import { hamrTokenAbi, fetchEthUsd, formatUsd } from "@/lib/hamr";
+import { hamrTokenAbi, fetchEthUsd, formatUsd, HIDDEN_TOKENS } from "@/lib/hamr";
 import {
   HAMR_V2,
   V2_PARAMS,
@@ -56,7 +56,9 @@ interface Props {
 
 export default function LaunchMonitorPage({ token }: Props) {
   const isEvmAddr = /^0x[0-9a-fA-F]{40}$/.test(token);
-  const tokenAddr = isEvmAddr ? (token as Address) : undefined;
+  // Delisted test launches: hidden from the board AND from direct URLs.
+  const isHidden = isEvmAddr && HIDDEN_TOKENS.has(token.toLowerCase());
+  const tokenAddr = isEvmAddr && !isHidden ? (token as Address) : undefined;
   const { snap, loading, error, refresh } = useHamrV2Token(tokenAddr);
   const { data: trades, failed: tradesFailed } = useTrades(tokenAddr);
   const [ethUsd, setEthUsd] = useState<number | null>(null);
@@ -79,6 +81,22 @@ export default function LaunchMonitorPage({ token }: Props) {
     () => (isEvmAddr ? explorerUrl("token", token) : null),
     [isEvmAddr, token],
   );
+
+  if (isHidden) {
+    return (
+      <section className="mx-auto max-w-4xl px-4 md:px-6 py-12">
+        <div className="card !p-8">
+          <div className="eyebrow">Token not available</div>
+          <p className="mt-3 text-[13px] font-medium text-ink-300/80 leading-relaxed">
+            This token has been delisted from HAMR.fun.
+          </p>
+          <Link href="/launches" className="mt-6 inline-flex btn btn-primary !py-2.5 !px-4">
+            All launches
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   if (!isEvmAddr) {
     return (
