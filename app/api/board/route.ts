@@ -100,68 +100,63 @@ async function build(): Promise<{ ok: true; items: BoardItem[] }> {
   }
 
   const cutoff = Math.floor(Date.now() / 1000) - 86_400;
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const items = await Promise.all(
-    launches.map(async ({ token, pool, block }) => {
-      const [meta, snap, swaps] = await Promise.all([
-        readTokenMeta(token).catch((e) => {
-          console.error("board meta fail", token, String(e).slice(0, 300));
-          (globalThis as { __boardErr?: string }).__boardErr = String(e).slice(0, 300);
-          return null;
-        }),
-        readV2Snapshot(token).catch(() => null),
-        client
-          .getLogs({
-            address: pool,
-            event: poolSwapEvent,
-            fromBlock: 0n,
-            toBlock: "latest",
-          })
-          .catch(() => []),
-      ]);
+  // SEQUENTIAL per token — the public RPC rate-limits bursts (HTTP 429
+  // when the whole board was fetched in parallel). One token at a time
+  // with a small breather keeps every rebuild comfortably under the
+  // limit; the 12s cache means this cost is paid once, not per visitor.
+  const items: BoardItem[] = [];
+  for (const { token, pool, block } of launches) {
+    const meta = await readTokenMeta(token).catch(() => null);
+    const snap = await readV2Snapshot(token).catch(() => null);
+    const swaps = await client
+      .getLogs({
+        address: pool,
+        event: poolSwapEvent,
+        fromBlock: 0n,
+        toBlock: "latest",
+      })
+      .catch(() => []);
 
-      // 24h ETH volume from the pool's own swaps. Timestamps only for
-      // the blocks we actually saw (bounded).
-      let vol = 0;
-      const is0 = tokenIsToken0(token);
-      const swapBlocks = [...new Set(swaps.map((s) => s.blockNumber))].slice(-120);
-      const sTs = new Map(
-        await Promise.all(
-          swapBlocks.map(async (bn) => {
-            try {
-              const b = await client.getBlock({ blockNumber: bn });
-              return [bn.toString(), Number(b.timestamp)] as const;
-            } catch {
-              return [bn.toString(), 0] as const;
-            }
-          }),
-        ),
-      );
-      for (const s of swaps) {
-        const ts = sTs.get(s.blockNumber.toString()) ?? 0;
-        if (ts < cutoff) continue;
-        const a = s.args as { amount0?: bigint; amount1?: bigint };
-        const w = is0 ? a.amount1 : a.amount0;
-        if (typeof w !== "bigint") continue;
-        vol += Math.abs(Number(formatEther(w)));
+    // 24h ETH volume; timestamps only for recent blocks (bounded).
+    let vol = 0;
+    const is0 = tokenIsToken0(token);
+    const swapBlocks = [...new Set(swaps.map((s) => s.blockNumber))].slice(-60);
+    const sTs = new Map<string, number>();
+    for (const bn of swapBlocks) {
+      try {
+        const b = await client.getBlock({ blockNumber: bn });
+        sTs.set(bn.toString(), Number(b.timestamp));
+      } catch {
+        sTs.set(bn.toString(), 0);
       }
+    }
+    for (const s of swaps) {
+      const ts = sTs.get(s.blockNumber.toString()) ?? 0;
+      if (ts < cutoff) continue;
+      const a = s.args as { amount0?: bigint; amount1?: bigint };
+      const w = is0 ? a.amount1 : a.amount0;
+      if (typeof w !== "bigint") continue;
+      vol += Math.abs(Number(formatEther(w)));
+    }
 
-      const born = tsOf.get(block.toString()) ?? 0;
-      return {
-        token_address: token,
-        ticker: meta?.symbol ?? "?",
-        token_name: meta?.name ?? token.slice(0, 8),
-        logo_url: meta?.logo || null,
-        wallet_address: meta?.creator ?? "",
-        source_x_url: sourceX.get(token.toLowerCase()) ?? null,
-        created_at: born ? new Date(born * 1000).toISOString() : "",
-        mcapEth: snap ? snap.priceEth * snap.circulating : null,
-        progressBps: snap ? snap.progressBps : null,
-        graduated: snap ? snap.graduated : false,
-        vol24hEth: vol,
-      } satisfies BoardItem;
-    }),
-  );
+    const born = tsOf.get(block.toString()) ?? 0;
+    items.push({
+      token_address: token,
+      ticker: meta?.symbol ?? "?",
+      token_name: meta?.name ?? token.slice(0, 8),
+      logo_url: meta?.logo || null,
+      wallet_address: meta?.creator ?? "",
+      source_x_url: sourceX.get(token.toLowerCase()) ?? null,
+      created_at: born ? new Date(born * 1000).toISOString() : "",
+      mcapEth: snap ? snap.priceEth * snap.circulating : null,
+      progressBps: snap ? snap.progressBps : null,
+      graduated: snap ? snap.graduated : false,
+      vol24hEth: vol,
+    });
+    await sleep(120);
+  }
 
   // Newest first.
   items.sort((a, b) => (b.created_at > a.created_at ? 1 : -1));
