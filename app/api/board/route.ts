@@ -104,7 +104,11 @@ async function build(): Promise<{ ok: true; items: BoardItem[] }> {
   const items = await Promise.all(
     launches.map(async ({ token, pool, block }) => {
       const [meta, snap, swaps] = await Promise.all([
-        readTokenMeta(token).catch(() => null),
+        readTokenMeta(token).catch((e) => {
+          console.error("board meta fail", token, String(e).slice(0, 300));
+          (globalThis as { __boardErr?: string }).__boardErr = String(e).slice(0, 300);
+          return null;
+        }),
         readV2Snapshot(token).catch(() => null),
         client
           .getLogs({
@@ -161,7 +165,11 @@ async function build(): Promise<{ ok: true; items: BoardItem[] }> {
 
   // Newest first.
   items.sort((a, b) => (b.created_at > a.created_at ? 1 : -1));
-  return { ok: true as const, items };
+  const dbg = (globalThis as { __boardErr?: string }).__boardErr;
+  return { ok: true as const, items, ...(dbg ? { debug: dbg } : {}) } as {
+    ok: true;
+    items: BoardItem[];
+  };
 }
 
 export async function GET() {
