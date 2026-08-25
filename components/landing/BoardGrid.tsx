@@ -4,24 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Rocket, Search, ArrowUpRight, Loader2, Crown, Flame } from "lucide-react";
-import { readTokenMeta, fetchEthUsd, formatUsd, HIDDEN_TOKENS } from "@/lib/hamr";
-import {
-  HAMR_V2,
-  listV2Tokens,
-  readV2Snapshot,
-  tokenLaunchedV2Event,
-  poolSwapEvent,
-  tokenIsToken0,
-} from "@/lib/hamr/v2";
-import { getPublicClient } from "@/lib/robinhood/client";
-import { formatEther } from "viem";
+import { fetchEthUsd, formatUsd } from "@/lib/hamr";
 
-// Pump.fun-style token board — v2: every coin IS a real Uniswap V3
-// pool. The list comes straight from the v2 factory, prices from each
-// pool's slot0, and 24h volume from the pools' own Swap events.
-//
-// DB rows from /api/launches only enrich cards (source-X link); the
-// chain is the sole source of truth for what exists.
+// Pump.fun-style token board. ALL data now comes from ONE cached
+// server call (/api/board) — the server assembles the factory list,
+// on-chain metadata, slot0 market data, and 24h volumes once and
+// every visitor shares that cache. First paint went from seconds of
+// client-side RPC crunching to a single small JSON fetch.
 
 interface PublicLaunch {
   token_address: string;
@@ -45,7 +34,6 @@ interface Market {
 type Sort = "new" | "oldest" | "mcap" | "volume" | "graduating";
 
 const REFRESH_MS = 45_000;
-const MARKET_LIMIT = 36; // how many cards get live curve reads
 
 export default function BoardGrid() {
   const [items, setItems] = useState<PublicLaunch[] | null>(null);
@@ -55,91 +43,6 @@ export default function BoardGrid() {
   const [q, setQ] = useState("");
   const [ethUsd, setEthUsd] = useState<number | null>(null);
   const [vol24h, setVol24h] = useState<Record<string, number>>({});
-
-  // 24h volume per token — one Swap-log scan per pool (v2: every coin
-  // has its own real Uniswap pool). Cheap while the chain is young.
-  useEffect(() => {
-    let cancelled = false;
-    async function scan() {
-      try {
-        const client = getPublicClient();
-        // token → pool map straight from the factory's launch events.
-        const launches = await client.getLogs({
-          address: HAMR_V2.launchpad,
-          event: tokenLaunchedV2Event,
-          fromBlock: 0n,
-          toBlock: "latest",
-        });
-        const pairs = launches
-          .map((l) => {
-            const a = l.args as { token?: string; pool?: string };
-            return a.token && a.pool
-              ? { token: a.token as `0x${string}`, pool: a.pool as `0x${string}` }
-              : null;
-          })
-          .filter((x): x is { token: `0x${string}`; pool: `0x${string}` } => x !== null)
-          .slice(-24); // newest pools only — bounded RPC load
-
-        const perPool = await Promise.all(
-          pairs.map(async ({ token, pool }) => {
-            try {
-              const swaps = await client.getLogs({
-                address: pool,
-                event: poolSwapEvent,
-                fromBlock: 0n,
-                toBlock: "latest",
-              });
-              return { token, swaps };
-            } catch {
-              return { token, swaps: [] };
-            }
-          }),
-        );
-        if (cancelled) return;
-
-        const allBlocks = [
-          ...new Set(perPool.flatMap((p) => p.swaps.map((s) => s.blockNumber))),
-        ].slice(-150);
-        const tsEntries = await Promise.all(
-          allBlocks.map(async (bn) => {
-            try {
-              const b = await client.getBlock({ blockNumber: bn });
-              return [bn.toString(), Number(b.timestamp)] as const;
-            } catch {
-              return [bn.toString(), 0] as const;
-            }
-          }),
-        );
-        if (cancelled) return;
-        const tsMap = new Map(tsEntries);
-        const cutoff = Math.floor(Date.now() / 1000) - 86_400;
-
-        const out: Record<string, number> = {};
-        for (const { token, swaps } of perPool) {
-          const is0 = tokenIsToken0(token);
-          let vol = 0;
-          for (const s of swaps) {
-            const ts = tsMap.get(s.blockNumber.toString()) ?? 0;
-            if (ts < cutoff) continue;
-            const a = s.args as { amount0?: bigint; amount1?: bigint };
-            const wethDelta = is0 ? a.amount1 : a.amount0;
-            if (typeof wethDelta !== "bigint") continue;
-            vol += Math.abs(Number(formatEther(wethDelta)));
-          }
-          if (vol > 0) out[token.toLowerCase()] = vol;
-        }
-        setVol24h(out);
-      } catch {
-        /* volume sort degrades gracefully */
-      }
-    }
-    void scan();
-    const id = setInterval(scan, 120_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -159,113 +62,58 @@ export default function BoardGrid() {
     let cancelled = false;
     async function load() {
       try {
-        // Chain FIRST — the v2 factory is the sole source of truth for
-        // what exists. (v1 curve tokens are legacy and stay off-board.)
-        const onchain = await listV2Tokens(36);
-        const visible = onchain.filter(
-          (t) => !HIDDEN_TOKENS.has(t.toLowerCase()),
-        );
-
-        // DB enrichment only (source-X link, site URLs) — best-effort.
-        const dbMap = new Map<string, PublicLaunch>();
-        try {
-          const r = await fetch("/api/launches", { cache: "no-store" });
-          const json = (await r.json()) as {
-            ok?: boolean;
-            launches?: PublicLaunch[];
-          };
-          if (r.ok && json.ok) {
-            for (const l of json.launches ?? []) {
-              dbMap.set(l.token_address.toLowerCase(), l);
-            }
-          }
-        } catch {
-          /* DB down — chain data still renders everything that matters */
-        }
-
-        // Birth timestamps straight from the factory's TokenLaunched
-        // events. One scan covers every token.
-        const bornAt = new Map<string, string>();
-        try {
-          const client = getPublicClient();
-          const logs = await client.getLogs({
-            address: HAMR_V2.launchpad,
-            event: tokenLaunchedV2Event,
-            fromBlock: 0n,
-            toBlock: "latest",
-          });
-          const blockOf = new Map<string, bigint>();
-          for (const l of logs) {
-            const tok = (l.args as { token?: string }).token;
-            if (tok) blockOf.set(tok.toLowerCase(), l.blockNumber);
-          }
-          const uniqBlocks = [...new Set([...blockOf.values()])];
-          const tsEntries = await Promise.all(
-            uniqBlocks.map(async (bn) => {
-              try {
-                const b = await client.getBlock({ blockNumber: bn });
-                return [bn.toString(), Number(b.timestamp)] as const;
-              } catch {
-                return [bn.toString(), 0] as const;
-              }
-            }),
-          );
-          const tsOfBlock = new Map(tsEntries);
-          for (const [t, bn] of blockOf) {
-            const ts = tsOfBlock.get(bn.toString()) ?? 0;
-            if (ts > 0) bornAt.set(t, new Date(ts * 1000).toISOString());
-          }
-        } catch {
-          /* timestamps stay unknown — cards fall back gracefully */
-        }
-
-        // One card per on-chain token; metadata lives ON the token.
-        const cards = await Promise.all(
-          visible.map(async (t) => {
-            const key = t.toLowerCase();
-            const db = dbMap.get(key);
-            try {
-              const meta = await readTokenMeta(t);
-              return {
-                token_address: t,
-                pool_address: db?.pool_address ?? null,
-                ticker: meta.symbol,
-                token_name: meta.name,
-                logo_url: meta.logo || db?.logo_url || null,
-                wallet_address: meta.creator,
-                pons_url: db?.pons_url ?? null,
-                explorer_url: db?.explorer_url ?? null,
-                source_x_url: db?.source_x_url ?? null,
-                created_at: bornAt.get(key) ?? db?.created_at ?? "",
-              } satisfies PublicLaunch;
-            } catch {
-              return db ?? null;
-            }
-          }),
-        );
+        const r = await fetch("/api/board", { cache: "no-store" });
+        const json = (await r.json()) as {
+          ok?: boolean;
+          items?: Array<{
+            token_address: string;
+            ticker: string;
+            token_name: string;
+            logo_url: string | null;
+            wallet_address: string;
+            source_x_url: string | null;
+            created_at: string;
+            mcapEth: number | null;
+            progressBps: number | null;
+            graduated: boolean;
+            vol24hEth: number;
+          }>;
+        };
         if (cancelled) return;
-        const launches = cards.filter((x): x is PublicLaunch => x !== null);
-        setItems(launches);
+        if (!r.ok || !json.ok || !json.items) {
+          setError(`Failed to load board (${r.status})`);
+          return;
+        }
+        setItems(
+          json.items.map((i) => ({
+            token_address: i.token_address,
+            pool_address: null,
+            ticker: i.ticker,
+            token_name: i.token_name,
+            logo_url: i.logo_url,
+            wallet_address: i.wallet_address,
+            pons_url: null,
+            explorer_url: null,
+            source_x_url: i.source_x_url,
+            created_at: i.created_at,
+          })),
+        );
+        const m: Record<string, Market> = {};
+        const v: Record<string, number> = {};
+        for (const i of json.items) {
+          const key = i.token_address.toLowerCase();
+          if (i.mcapEth !== null && i.progressBps !== null) {
+            m[key] = {
+              mcapEth: i.mcapEth,
+              progressBps: i.progressBps,
+              graduated: i.graduated,
+            };
+          }
+          if (i.vol24hEth > 0) v[key] = i.vol24hEth;
+        }
+        setMarkets(m);
+        setVol24h(v);
         setError(null);
-
-        // Live pool reads — fire-and-forget per token, merge as they land.
-        launches.slice(0, MARKET_LIMIT).forEach((l) => {
-          readV2Snapshot(l.token_address as `0x${string}`)
-            .then((s) => {
-              if (cancelled || !s) return;
-              setMarkets((m) => ({
-                ...m,
-                [l.token_address.toLowerCase()]: {
-                  mcapEth: s.priceEth * s.circulating,
-                  progressBps: s.progressBps,
-                  graduated: s.graduated,
-                },
-              }));
-            })
-            .catch(() => {
-              /* RPC hiccup — card just shows without numbers */
-            });
-        });
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : String(err));
